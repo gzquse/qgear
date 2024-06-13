@@ -1,0 +1,10 @@
+.bash_history
+.cache
+*~
+.DS_Store
+out/
+.bash_history
+.qiskit/
+.viminfo
+*.png
+__pycache__
