@@ -1,0 +1,38 @@
+FROM ubuntu:22.04
+ARG arch=x86_64
+
+RUN apt-get update && apt-get install -y --no-install-recommends wget ca-certificates libstdc++-12-dev
+RUN DISTRIBUTION=${DISTRIBUTION:-ubuntu2204} && \
+  CUDA_ARCH_FOLDER=$([ "$(uname -m)" == "aarch64" ] && echo sbsa || echo x86_64) && \
+  CUDA_DOWNLOAD_URL=https://developer.download.nvidia.com/compute/cuda/repos && \
+  wget "${CUDA_DOWNLOAD_URL}/${DISTRIBUTION}/${CUDA_ARCH_FOLDER}/cuda-keyring_1.1-1_all.deb" && \
+  dpkg -i cuda-keyring_1.1-1_all.deb && version_suffix=11-8 && \
+  apt-get update && apt-get install -y --no-install-recommends \
+    cuda-nvtx-${version_suffix} cuda-cudart-${version_suffix} \
+    libcusolver-${version_suffix} libcublas-${version_suffix}
+
+RUN apt-get install -y --no-install-recommends libmpich-dev
+ENV MPI_PATH=/usr/lib/${arch}-linux-gnu/mpich
+
+RUN apt-get install -y --no-install-recommends python3 python3-pip && \
+  python3 -m pip install cuda-quantum
+RUN cudaq_version=`python3 -c "import cudaq; print(cudaq.__version__)" | grep -o '[0-9]\+\(\.[0-9]\+\)\+'` && \
+  wget https://github.com/NVIDIA/cuda-quantum/releases/download/${cudaq_version}/install_cuda_quantum.$(uname -m) && \
+  chmod +x install_cuda_quantum.$(uname -m) && bash install_cuda_quantum.$(uname -m) --accept && \
+  mkdir -p ~/cuda_quantum/tutorials && cd ~/cuda_quantum && tmpdir="$(mktemp -d)" && \
+  wget https://github.com/nvidia/cuda-quantum/archive/refs/tags/${cudaq_version}.tar.gz && \
+  tar xf ${cudaq_version}.tar.gz --strip-components 1 -C "${tmpdir}" && cp -Lr "${tmpdir}/examples" ~/cuda_quantum && \
+  mv ~/cuda_quantum/examples/python/tutorials ~/cuda_quantum/tutorials && \
+  rm -rf ${cudaq_version}.tar.gz "${tmpdir}" /install_cuda_quantum.$(uname -m)
+RUN py_cudaq_dir="$(python3 -m pip show cuda-quantum | grep -e 'Location: .*$' | cut -d ' ' -f2)" && \
+  CXX=/opt/nvidia/cudaq/bin/nvq++ bash "$py_cudaq_dir/distributed_interfaces/activate_custom_mpi.sh"
+
+
+# Additional tools for development
+RUN apt-get install -y --no-install-recommends vim jq libpython3-dev
+RUN python3 -m pip install numpy matplotlib
+RUN OMPI_CC="/opt/nvidia/cudaq/bin/clang" OMPI_CXX="/opt/nvidia/cudaq/bin/clang++" \
+  python3 -m pip install mpi4py
+
+WORKDIR /root/cuda_quantum
+ENTRYPOINT ["bash", "-l"]
