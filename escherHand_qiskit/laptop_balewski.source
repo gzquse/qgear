@@ -2,10 +2,7 @@
 # setup IBMQ creds:     /dataVault/activate_IBMProvider.py
 # after start install QPIXL:  cd   /qpixl_wrk;   pip install -e .
 
-echo load my NERSC-AWS creds
-source /Users/balewski/.ssh/nersc_aws.credentials
-
-IMG=balewski/ubu22-qiskit1.0:p2h # + QML + IonQ +Braket + pytorch+PennyLane_0.35  
+IMG=balewski/ubu22-qiskit1.0:p2j # + QML + IonQ +Braket + pytorch+PennyLane_0.35  
 
 echo launch image $IMG
 echo you are launching Podman image ...  remeber to exit
