@@ -1,0 +1,38 @@
+#!/bin/bash
+# setup IBMQ creds:     /dataVault/activate_IBMProvider.py
+# after start install QPIXL:  cd   /qpixl_wrk;   pip install -e .
+
+#echo load my NERSC-AWS creds
+#source /Users/balewski/.ssh/nersc_aws.credentials
+
+IMG=balewski/ubu22-qiskit1.0:x3 # + QML + IonQ +Braket + pytorch+PennyLane_0.35  
+
+echo launch image $IMG
+echo you are launching Podman image ...  remeber to exit
+
+JNB_PORT=''
+WORK_DIR=/martinGradient
+DATA_VAULT=/docker_volumes/dataVault2024
+
+echo "The number of arguments is: $#"
+#  encoded variables:    jnb
+for var in "$@"; do
+  echo "The length of argument '$var' is: ${#var}"
+  if [[ "jnb" ==  $var ]];  then
+      JNB_PORT="    -p 8833:8833 "
+      echo added  $JNB_PORT
+      echo "  cd notebooks;  jupyter notebook --ip 0.0.0.0 --no-browser --allow-root --port  8833 "
+  fi
+  # ... more ...
+done
+    
+podman run -it \
+       --volume /docker_volumes/2024_martin_gradient:$WORK_DIR \
+       --volume /docker_volumes/daan_qcrank:/daan_qcrank \
+       --volume $DATA_VAULT:/dataVault2024 \
+       -e EHands_dataVault=/dataVault2024/dataEhands_tmp \
+       --workdir $WORK_DIR \
+       --user $(id -u):$(id -g)  $JNB_PORT \
+       $IMG /bin/bash
+
+#
