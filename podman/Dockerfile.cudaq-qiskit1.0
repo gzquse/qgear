@@ -42,7 +42,7 @@ ENV TZ=America/Los_Angeles
 
 RUN echo 1a-AAAAAAAAAAAAAAAAAAAAAAAAAAAAA  OS update   && \
     apt-get update && \
-    apt-get install -y  locales autoconf automake gcc g++ make vim wget  ssh  openssh-server sudo   git emacs aptitude build-essential xterm python3-pip   python3-tk python3-scipy python3-dev iputils-ping net-tools screen feh hdf5-tools python3-bitstring mlocate graphviz  tzdata x11-apps && \
+    apt-get install -y  locales autoconf automake gcc g++ make vim wget  ssh  openssh-server sudo   git emacs aptitude build-essential xterm python3-pip   python3-tk python3-scipy python3-dev iputils-ping net-tools screen feh hdf5-tools python3-bitstring  graphviz  tzdata x11-apps && \
     apt-get clean all
 
 # Forbid installing qiskit-terra  for qiskit 1.0 
