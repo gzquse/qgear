@@ -5,6 +5,7 @@ import numpy as np
 from pprint import pprint
 import os,hashlib
 from toolbox.Util_H5io4 import  write4_data_hdf5, read4_data_hdf5
+from qiskit import qpy  # only to IO circuits
 
 #...!...!.................... 
 def harvest_circ_transpMeta(qc,md,transBackN):
@@ -81,7 +82,36 @@ def qasm_save_all_circ(qcL,md,bigD,args):
     print('\nNO EXECUTION, save all circ to %s\n'%outF)
     exit(0)
 
+#...!...!..................
+def export_QPY_circs(qcL,md,args):
+    md['hash']=hashlib.md5(os.urandom(32)).hexdigest()[:6]
+    if args.expName==None:
+        md['short_name']='exp_'+md['hash']
+    else:
+        md['short_name']=args.expName
 
+    outF=md['short_name']+'_circ.qpy'
+    outFF=os.path.join(args.outPath,outF)
+
+    with open(outFF, 'wb') as fd:
+        qpy.dump(qcL, fd)
+
+    md['qpy_circ_fname']=outF
+    print('Saved QPY circuits:',outFF)
+   
+#...!...!..................
+def import_QPY_circs(md,args):
+    
+    outF=md['short_name']+'_circ.qpy'
+    outFF=os.path.join(args.outPath,outF)
+    print('Reading QPY circuits:',outFF)
+    with open(outFF, 'rb') as fd:
+        qcL=qpy.load(fd)
+
+    assert len(qcL)==md['payload']['num_sample']
+    return qcL
+    
+        
 #...!...!.................... 
 def pack_npquasis_to_counts(md,bigD): # historic??
     pmd=md['payload']

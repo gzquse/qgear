@@ -51,17 +51,20 @@ if [ ! -f "$dockerfileName" ]; then
   exit 1
 fi
 
+myProj=`sacctmgr show user $USER  withassoc format=DefaultAccount |tail -n1`
+
 # Display the arguments
 echo "Dockerfile: $dockerfileName"
 echo "Image name: $imageName"
 echo "Use -p: $use_p"
+echo "my NERSC project: $myProj"
 
 # Execute the podman build command
 time podman-hpc build -f "$dockerfileName" -t "$imageName"
 
 # Execute additional commands if -p is used
 if [ "$use_p" = true ]; then
-    CORE_PUB="/cfs/cdirs/nstaff/$USER/podman_common/"
+    CORE_PUB="/cfs/cdirs/$myProj/$USER/podman_common/"
     echo CORE_PUB=$CORE_PUB
     podman-hpc --squash-dir "/global/$CORE_PUB" migrate "$imageName"
     chmod -R a+rx  /global/$CORE_PUB

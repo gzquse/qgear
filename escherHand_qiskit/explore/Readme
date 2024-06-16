@@ -45,6 +45,7 @@ compute vector : averag or difference
 (optional) change relative weights
 
 "--mathOp", choices=['add','sub','none'],
+--exportQPY", help="export circuits in QPY format", .qpy file can be inspected using dump_QPY_circs.py
 
 Plot residua with       plot_EsherHands.py
 

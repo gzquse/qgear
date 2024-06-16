@@ -26,7 +26,7 @@ from qiskit.visualization import circuit_drawer
 from qiskit_aer import AerSimulator
 
 from toolbox.Util_H5io4 import  write4_data_hdf5
-from toolbox.Util_Qiskit import  circ_depth_aziz
+from toolbox.Util_Qiskit import  circ_depth_aziz, export_QPY_circs
 
 import argparse
 def get_parser():
@@ -46,8 +46,7 @@ def get_parser():
 
     parser.add_argument("--expName",  default=None,help='(optional)replaces IBMQ jobID assigned during submission by users choice')
     parser.add_argument('-b','--backend',default="aer", help="tasks")
-    parser.add_argument( "-F","--fakeSimu", action='store_true', default=False, help="will switch to backend-matched simulator")
-    parser.add_argument('--spam_corr',type=int, default=1, help="Mitigate error associated with readout errors, 0=off")    
+    parser.add_argument( "-e","--exportQPY", action='store_true', default=False, help="export circuits in QPY format")  
    
     parser.add_argument( "-B","--noBarrier", action='store_true', default=False, help="remove all bariers from the circuit ")
     parser.add_argument("--outPath",default='out/',help="all outputs from  experiment")
@@ -99,17 +98,18 @@ def harvest_ibmq_submitMeta(job,md,args):
     sd['provider']=args.provider
     md['submit']=sd
 
-    if args.expName==None:
+    if md['short_name']==None:
         # the  6 chars in job id , as handy job identiffier
         md['hash']=sd['job_id'].replace('-','')[3:9] # those are still visible on the IBMQ-web
         name='exp_'+md['hash']
-        #if md['backend']['ideal_simu']: name='isim_'+md['hash']
         md['short_name']=name
+
+    '''  OLD?
     else:
         myHN=hashlib.md5(os.urandom(32)).hexdigest()[:6]
         md['hash']=myHN
         md['short_name']=args.expName
-
+    '''
 #...!...!....................
 def construct_random_input(md):
     pmd=md['payload']
@@ -245,7 +245,11 @@ if __name__ == "__main__":
     #... auxil MD , filled partially
     MD['submit']={'backend': backend.name,'num_circ':nCirc}
     MD[ 'qiskit_transp']={'num_qubit': qcEL[0].num_qubits,'2q_depth':depthTC['2q'],'num_2q':opsTC['cx']}
-       
+
+    
+    if args.exportQPY:
+        export_QPY_circs(qcTL,MD,args)
+    
     print('job started, nCirc=%d  nq=%d  shots/circ=%d at %s ...'%(nCirc,qc1.num_qubits,args.numShots,backend))
     T0=time()
     job=backend.run(qcTL,shots=args.numShots)
@@ -256,9 +260,8 @@ if __name__ == "__main__":
     jobMD=result.metadata    
     
     harvest_ibmq_submitMeta(job,MD,args)
-    if args.fakeSimu: MD['submit'][ "noise_model"]=noisy_backend.name
-     
-    probsBL=result.get_counts()#result.quasi_dists
+        
+    probsBL=result.get_counts()
     if args.verb>1: print('M:qprobs:%s'%(probsBL[0]))
     
     u_true,u_reco,res_data=evaluate(probsBL,MD,qcrankObj,u_data)
@@ -270,3 +273,5 @@ if __name__ == "__main__":
     write4_data_hdf5(expD,outF,MD)
 
     print('\n   ./plot_EscherHands.py  --expName %s  -Y '%(MD['short_name']))
+    if args.exportQPY:
+        print('\n   ./dump_QPY_circs.py  --expName %s  '%(MD['short_name']))
