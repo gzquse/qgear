@@ -68,5 +68,5 @@ RUN echo 2e-AAAAAAAAAAAAAAAAAAAAAAAAAAAAA   python libs  && \
 
 
 
-WORKDIR /root/cuda_quantum
-ENTRYPOINT ["bash", "-l"]
+#WORKDIR /root/cuda_quantum
+#ENTRYPOINT ["bash", "-l"]
