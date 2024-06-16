@@ -19,7 +19,7 @@ def get_parser(backName=None):
 
    
     parser.add_argument('-n','--numShots', default=800, type=int, help='num of shots')
-    
+    parser.add_argument('-f','--filename', default="default", help='name of the output file')
   
     args = parser.parse_args()
     for arg in vars(args):
@@ -43,19 +43,20 @@ def rndCirc(nq=2):
     from qiskit.circuit.random import random_circuit
     qc = random_circuit(nq,nq, measure=True)
     return qc
+
 #=================================
 #=================================
 #  M A I N 
 #=================================
 #=================================
 if __name__ == "__main__":
-    args=get_parser(backName='aer')  #     assert len(args.padSymbols)==2
+    args=get_parser(backName='aer_simulator_statevector')  #     assert len(args.padSymbols)==2
 
-    #qc = ghzCirc(args.numQubits)
-    qc = rndCirc(args.numQubits)
+    qc = ghzCirc(args.numQubits)
+    #qc = rndCirc(args.numQubits)
 
     if args.numQubits<6:  print(qc)
-
+    
     backend = AerSimulator()
     shots=args.numShots
     
@@ -66,8 +67,15 @@ if __name__ == "__main__":
     results = backend.run(qcT, shots=shots).result()
     counts = results.get_counts(0)
     elaT=time()-T0
+    print(results)
     print('M: QCrank simu   shots=%d   ended elaT=%.1f sec'%(shots,elaT))
     if args.numQubits<4: 
         print('counts:',counts)
     else:
         print('counts size:',len(counts))
+        
+    # export the circuit
+    from qiskit import qpy
+ 
+    with open(args.filename+'.qpy', 'wb') as file:
+      qpy.dump(qc, file)
