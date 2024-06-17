@@ -1,6 +1,6 @@
 #!/bin/bash
 #  salloc -q interactive -C cpu -t 4:00:00 -A nstaff 
-
+# MARTIN
 # setup IBMQ creds:     /dataVault/activate_IBMProvider.py 
 
 #IMG=balewski/ubu22-qiskit-qml:p3e 
