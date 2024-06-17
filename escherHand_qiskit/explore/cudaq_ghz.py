@@ -34,6 +34,8 @@ def qiskit_to_cudaq(file_name, shots):
             kernel.cx(qubits[qubit_indices[0]], qubits[qubit_indices[1]])
         elif gate == 'measure':
             kernel.mz(qubits[qubit_indices[0]])
+        else:
+            print('ABORT; uknown gate',gate); exit(99)
 
 
     results = cudaq.sample(kernel, shots_count=shots)
@@ -45,4 +47,6 @@ def qiskit_to_cudaq(file_name, shots):
         
 if __name__ == "__main__":
     qiskit_to_cudaq("ghz.qpy", 1000)
+    #qiskit_to_cudaq("out/bell.qpy", 1000)
+    #qiskit_to_cudaq("out/horse.qpy", 1000)
     

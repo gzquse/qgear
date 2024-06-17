@@ -3,15 +3,18 @@
 # setup IBMQ creds:     /dataVault/activate_IBMProvider.py 
 
 #IMG=balewski/ubu22-qiskit-qml:p3e 
-IMG=balewski/ubu22-qiskit1.0:p2h
+#IMG=balewski/ubu22-qiskit1.0:p2h
+export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_common/                  
+IMG=gzquse/cudaq-qiskit1:p2                                                                         
+
 CFSH=/global/cfs/cdirs/mpccc/balewski/
 
 echo launch image $IMG
 echo you are launching Podman image ...  remeber to exit
 
 JNB_PORT=' '
-BASE_DIR=escherHandsMath  # here git has home
-WORK_DIR=$BASE_DIR/paper_Ehands_appl
+BASE_DIR=2024_martin_gradient  # here git has home
+WORK_DIR=$BASE_DIR/escherHand_qiskit
 DATA_VAULT=${CFSH}/quantDataVault2024
 DATA_DIR=/dataEhand_tmp
 
@@ -29,9 +32,8 @@ for var in "$@"; do
   # ... more ...
 done
 
-podman-hpc run -it \
+podman-hpc run --gpu  -it \
    --volume $CFSH/$BASE_DIR:/$BASE_DIR \
-   --volume $CFSH/$WORK_DIR:/wrk \
    --volume ${CFSH}/daan_qcrank:/daan_qcrank \
    --volume ${DATA_VAULT}:/dataVault \
    --volume ${DATA_VAULT}/$DATA_DIR:/data_tmp \
@@ -39,7 +41,7 @@ podman-hpc run -it \
    -e DISPLAY  -v $HOME:$HOME -e HOME  \
    -e HDF5_USE_FILE_LOCKING='FALSE' \
    --workdir /$BASE_DIR \
-   $IMG /bin/bash
+   $IMG 
 
 # fixes HDF5 : error message = 'Unknown error 524')
 
