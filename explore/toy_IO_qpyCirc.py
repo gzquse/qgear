@@ -5,7 +5,7 @@ import sys,os
 
 
 import numpy as np
-from qiskit import QuantumCircuit, transpile
+from qiskit import QuantumCircuit, transpile, QuantumRegister, ClassicalRegister
 from qiskit_aer import AerSimulator
 from time import time
 from qiskit import qpy
@@ -13,7 +13,7 @@ from qiskit.circuit import Parameter
 
 import argparse
 #...!...!..................
-def get_parser(backName=None):
+def get_parser(e):
     parser = argparse.ArgumentParser()
     parser.add_argument("-v","--verb",type=int, help="increase debug verbosity", default=1)
 
@@ -61,6 +61,20 @@ def paramCirc():
     qc.measure(range(nq), range(nq))
     return qc,angle,theta
 
+#...!...!....................
+def strangeCirc(nq=2):
+    qreg = QuantumRegister(nq, 'q')
+    creg = ClassicalRegister(nq, 'c')
+    qc = QuantumCircuit(qreg, creg,name='strange')
+    for i in range(nq): qc.h(qreg[i])
+    for i in range(nq): qc.measure(qreg[i], creg[i])
+    return qc
+
+#...!...!....................
+def serializeMe(qc):
+    for op in qc:
+        print('\nop',op)
+
 
 #=================================
 #=================================
@@ -68,12 +82,13 @@ def paramCirc():
 #=================================
 #=================================
 if __name__ == "__main__":
-    args=get_parser(backName='aer') 
+    args=get_parser() 
     backend = AerSimulator()
 
     #.... pick one 
-    #qc = ghzCirc(args.numQubits)
-    qc = rndCirc(args.numQubits)
+    qc = ghzCirc(args.numQubits)
+    #qc = strangeCirc(args.numQubits)
+    #qc = rndCirc(args.numQubits)
     #qc,angle,theta = paramCirc()
 
     print('meta:',qc.metadata)
@@ -81,27 +96,29 @@ if __name__ == "__main__":
     qcT=transpile(qc,backend, basis_gates=['p','sx','cx','ry'])
     if args.numQubits<6:  print(qcT)
     print('M1: parameters:',qc.parameters)
-    
+
     # . . . . . . . . . . . . . . . . . . .
 
     circF='out/%s.qpy'%qc.name
     with open(circF, 'wb') as fd:
         qpy.dump(qcT, fd)
-    print('\nSaved circ:',circF)
+    print('\nSaved circ1:',circF)
         
     with open(circF, 'rb') as fd:
-        qc1 = qpy.load(fd)[0]
-    
+        qc1 = qpy.load(fd)[0]    
     # . . . . . . . . . . . . . . . . . . .
-    if args.numQubits<6:  print(qc1)
+    if args.numQubits<6:
+        print(qc1)
+        serializeMe(qc1)
+        
     print('meta:',qc1.metadata)
     qc1Par=qc1.parameters  # <class 'qiskit.circuit.parametertable.ParameterView'>
-    print('M2: parameters:',qc1Par,type(qc1Par),'len=',len(qc1Par))
+    print('M2: parameters:',qc1Par,'len=',len(qc1Par))
        
     if len(qc1.parameters)>0:
         qc1=qc1.assign_parameters({ angle: 1.23,theta:44.55 })  # works for many paramaters
         #1qc1=qc1.assign_parameters([11.22])  # wokrs for 1 parameter
-    if args.numQubits<6:  print(qc1)
+        if args.numQubits<6:  print(qc1)
     shots=args.numShots
 
     # run the simulation for all images
@@ -116,3 +133,5 @@ if __name__ == "__main__":
         print('counts:',counts)
     else:
         print('counts size:',len(counts))
+
+    print('\nSaved circ2:',circF)

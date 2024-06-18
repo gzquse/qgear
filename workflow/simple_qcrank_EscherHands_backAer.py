@@ -200,7 +200,7 @@ def evaluate(probsBL,md,qcrankObj,udata_inp):
     for i in range(seq_len):
         print('%2d    %6.2f    %6.2f      %6.2f      %6.2f      %6.2f         %6.2f      %6.2f      %6.2f'%\
               (i,udata_inp[i,0,ic],udata_inp[i,1,ic],udata_true[i,0,ic],udata_rec[i,0,ic],res_data[i,0,ic],udata_true[i,1,ic],udata_rec[i,1,ic],res_data[i,1,ic]))
-
+        if args.verb<=1 and i>10 : break
     return udata_true,udata_rec,res_data
   
 #=================================
@@ -252,7 +252,7 @@ if __name__ == "__main__":
     harvest_ibmq_submitMeta(job,MD,args)
         
     probsBL=result.get_counts()
-    if args.verb>1: wyprint('M:qprobs:%s'%(probsBL[0]))
+    if args.verb>1: pprint('M:qprobs:%s'%(probsBL[0]))
     
     u_true,u_reco,res_data=evaluate(probsBL,MD,qcrankObj,u_data)
 
@@ -265,3 +265,4 @@ if __name__ == "__main__":
     print('\n   ./plot_EscherHands.py  --expName %s  -Y '%(MD['short_name']))
     if args.exportQPY:
         print('\n   ./dump_QPY_circs.py  --expName %s  '%(MD['short_name']))
+        print('   ./run_cudaq_qpyCircs.py   --expName %s  '%(MD['short_name']))

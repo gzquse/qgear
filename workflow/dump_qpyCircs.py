@@ -4,10 +4,10 @@ __email__ = "janstar1122@gmail.com"
 
 import numpy as np
 from toolbox.Util_H5io4 import  read4_data_hdf5
-from toolbox.Util_Qiskit import   import_QPY_circs, qiskit_to_cudaq
+from toolbox.Util_Qiskit import   import_QPY_circs
 import os
 from pprint import pprint
-import cudaq
+from qiskit.visualization import circuit_drawer
 
 import argparse
 def get_parser():
@@ -42,16 +42,8 @@ if __name__ == "__main__":
     qcL=import_QPY_circs(expMD,args)
 
     print('M:got %d circuits'%len(qcL))
-    
-    # converter
-    shots = expMD['submit']['num_shots']
-    # single circuit
-    qc1 = qcL[0]
-    # FAILED (Cannot get Qubit Object details correctly)
-    elaT, gpu_counts = qiskit_to_cudaq(qcL, shots)
-
-    print("Running time: %s, GPU counts: %d"%elaT, gpu_counts)
-
+    qc1=qcL[0]
+    if args.verb>0: print(circuit_drawer(qc1.decompose(), output='text',cregbundle=False))
     print('M:done')
 
   
