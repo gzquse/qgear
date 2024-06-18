@@ -72,7 +72,8 @@ if __name__ == "__main__":
     resL=[0 for i in range(nCirc)] # prime the list
     cudaq.set_target("nvidia")
     T0=time()
-    for i in range(nCirc): 
+    for i in range(nCirc):
+        if args.verb>=2: print('start circ',i)
         resL[i] = cudaq.sample(qKerL[i], shots_count=shots)
 
     elaT=time()-T0
@@ -94,6 +95,12 @@ if __name__ == "__main__":
     imported form simple_qcrank_EscherHands_backAer
 
     3) verify the bitstrings are mapped the same way
+
+    3.1) fix  Segmentation fault for  514 CX-circuit: ./simple_qcrank_EscherHands_backAer.py --nqAddr 8 -e -i 2
+
+    4) add run time to MD
+
+    5) save hd5 with new results under different name
     '''
         
     print('M:done')
