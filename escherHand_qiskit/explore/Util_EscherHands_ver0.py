@@ -64,9 +64,10 @@ def circ_qcrank(data_org, md,barrier=True, measure=True):
         measure=measure, statevec=False, 
         reverse_bits=True  # to match Qiskit littleEndian 
     )
-    
-    print('.... PARAMETRIZED IDEAL CIRCUIT .............. num_addr=%d'%(1<<nq_addr))
-    print(qcrankObj.circuit.draw())
+
+    if 0:
+        print('.... PARAMETRIZED IDEAL CIRCUIT .............. num_addr=%d'%(1<<nq_addr))
+        print(qcrankObj.circuit.draw())
   
     # bind the data
     #print('dorg:',data_org.shape)

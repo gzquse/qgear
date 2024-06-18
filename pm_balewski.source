@@ -40,7 +40,7 @@ podman-hpc run --gpu  -it \
    -e EHands_dataVault=/data_tmp \
    -e DISPLAY  -v $HOME:$HOME -e HOME  \
    -e HDF5_USE_FILE_LOCKING='FALSE' \
-   --workdir /$BASE_DIR \
+   --workdir /$WORK_DIR \
    $IMG 
 
 # fixes HDF5 : error message = 'Unknown error 524')

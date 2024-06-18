@@ -104,19 +104,13 @@ def harvest_ibmq_submitMeta(job,md,args):
         name='exp_'+md['hash']
         md['short_name']=name
 
-    '''  OLD?
-    else:
-        myHN=hashlib.md5(os.urandom(32)).hexdigest()[:6]
-        md['hash']=myHN
-        md['short_name']=args.expName
-    '''
 #...!...!....................
-def construct_random_input(md):
+def construct_random_input(md,verb):
     pmd=md['payload']
     n_addr=pmd['seq_len']
     nq_data=pmd['nq_fdata'] ; assert nq_data==2
-    n_img=pmd['num_sample']
-    pprint(md)
+    n_img=pmd['num_sample']    
+    if args.verb>1: pprint(md)
     
     # generate user data , float random
     eps=1e-4 # just in case
@@ -131,7 +125,8 @@ def construct_random_input(md):
         print(xdata,udata.shape)
 
     fdata=np.arccos(udata) # encode user data for qcrank
-    print('input udata=',udata.shape,'\n',repr(udata[...,:3].T))
+    if args.verb>1: 
+        print('input udata=',udata.shape,'\n',repr(udata[...,:3].T))
     return udata,fdata
 
 #...!...!....................
@@ -150,8 +145,9 @@ def evaluate(probsBL,md,qcrankObj,udata_inp):
     addrBitsL = [nq_data+i  for i in range(nq_addr)]
 
     assert nq_data==2 # needed by EscherHands
-    print('udata',udata_true.shape)
-    print('raw inp: '); pprint(udata_inp[...,:3].T)
+    print('udata shape:',udata_true.shape)
+    if args.verb>1:
+        print('raw inp: '); pprint(udata_inp[...,:3].T)
       
     if mathOp=='none':
         udata_true=udata_inp.copy()
@@ -180,9 +176,10 @@ def evaluate(probsBL,md,qcrankObj,udata_inp):
     if mathOp=='sub':
         udata_true[:,0]= W* udata_inp[:,1] - (1-W)*udata_inp[:,0] 
  
-    #.... common    
-    print('\nmath=%s rec: '%mathOp); pprint(udata_rec[...,:3].T)        
-    print('\nmath=%s true: '%mathOp); pprint(udata_true[...,:3].T)
+    #.... common
+    if args.verb>1:
+        print('\nmath=%s rec: '%mathOp); pprint(udata_rec[...,:3].T)        
+        print('\nmath=%s true: '%mathOp); pprint(udata_true[...,:3].T)
     res_data=udata_true - udata_rec
 
     L2=np.linalg.norm(res_data)
@@ -215,31 +212,24 @@ if __name__ == "__main__":
     args=get_parser()
     MD=buildPayloadMeta(args)
     args.numShots=args.numShotPerAddr*MD['payload']['seq_len']
-
-    # pprint(MD)
-
-    u_data,f_data= construct_random_input(MD)
     
-    if 0:  # test only QCrank
-        run_qcrank_only(f_data,MD,sampler)
-        exit(0)
+    u_data,f_data= construct_random_input(MD,args.verb)
 
     #....  circuit generation .....
     qcrankObj,qcEL=circ_qcrank_and_EscherHands_one(f_data, MD,barrier=not args.noBarrier)
     qc1=qcEL[0]
     print('M: circuit has %d qubits'%(qc1.num_qubits))
     circ_depth_aziz(qc1,text='circ_orig')
-    if args.verb>0: print(circuit_drawer(qc1.decompose(), output='text',cregbundle=True))
+    prCirc=args.verb>0 and qc1.num_qubits<5
+    if prCirc : print(circuit_drawer(qc1.decompose(), output='text',cregbundle=True))
 
     #....  excution using backRun(.) .....
-    print('M: acquire backend:',args.backend)
-       
     print('M: acquire backend:',args.backend)
     backend = AerSimulator()
     qcTL =qcEL
     
     qc1=qcTL[0];  nCirc=len(qcTL)
-    print(qc1.draw(output='text',idle_wires=False))  # skip ancilla
+    if prCirc :  print(qc1.draw(output='text',idle_wires=False))  # skip ancilla
     depthTC,opsTC=circ_depth_aziz(qc1,'transpiled')
         
     #... auxil MD , filled partially
@@ -262,7 +252,7 @@ if __name__ == "__main__":
     harvest_ibmq_submitMeta(job,MD,args)
         
     probsBL=result.get_counts()
-    if args.verb>1: print('M:qprobs:%s'%(probsBL[0]))
+    if args.verb>1: wyprint('M:qprobs:%s'%(probsBL[0]))
     
     u_true,u_reco,res_data=evaluate(probsBL,MD,qcrankObj,u_data)
 
