@@ -59,7 +59,7 @@ RUN echo 2c-AAAAAAAAAAAAAAAAAAAAAAAAAAAAA   ML+QML  libs  && \
 
 RUN echo 2d-AAAAAAAAAAAAAAAAAAAAAAAAAAAAA   python libs  && \
     pip3 install --upgrade pip && \
-    pip3 install matplotlib h5py   scipy    jupyter notebook  bitstring
+    pip3 install matplotlib h5py   scipy    jupyter notebook  bitstring coloredlogs
 
 # notes: python3-tk instals TK for matplotlib to display graphic
 RUN echo 2e-AAAAAAAAAAAAAAAAAAAAAAAAAAAAA   python libs  && \

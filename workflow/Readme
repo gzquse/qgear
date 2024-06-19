@@ -44,10 +44,10 @@ python3 -m pdb run_cudaq_qpyCircs.py  --expName exp_84adce
  INPUT: pair of hd5 + qpy
  Action:
  - opens hd5, reads qpy
- - converts qcL to qKerL (Qiskit -->CudaQ
- - run on single gpu node
- - compares results from CPU
- - saves updated HD5
+ - converts qcL to qKerL (Qiskit -->CudaQ)
+ - run on single gpu node, one circuit at a time
+ - compares results from CPU vs. GPU
+ - saves updated new HD5
 
 *=================     ./ehands_grad_smooth_func1d_backAer.py
  backend: aer
