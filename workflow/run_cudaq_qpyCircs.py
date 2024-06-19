@@ -19,8 +19,9 @@ from toolbox.Util_Qiskit import  import_QPY_circs
 import os
 from time import time
 from pprint import pprint
-from toolbox.Util_CudaQ import qiskit_to_cudaq
+from toolbox.Util_CudaQ import qiskit_to_cudaq, string_to_dict
 import cudaq
+import traceback
 
 import argparse
 def get_parser():
@@ -71,6 +72,7 @@ if __name__ == "__main__":
     print('M: run %d cudaq-circuit  on GPU'%nCirc)
     resL=[0 for i in range(nCirc)] # prime the list
     cudaq.set_target("nvidia")
+
     T0=time()
     for i in range(nCirc):
         if args.verb>=2: print('start circ',i)
@@ -78,18 +80,20 @@ if __name__ == "__main__":
 
     elaT=time()-T0
     print('M:  ended elaT=%.1f sec'%(elaT))
-    res0=resL[0]
+    # format cudaq counts to qiskit version
+    # Apply the function to each dictionary in the list
+    #print("resL:", resL)
+    for i,res in enumerate(resL):
+        res = res.__str__()
+        resL[i] = string_to_dict(res)
+    res0 = resL[0]
     if nq<6:
         print('counts:',res0)
     else:
         print("counts size", len(res0))
-
+        
+    #u_true,u_reco,res_data=evaluate(probsBL,MD,qcrankObj,u_data)
     '''  TO DO
-    1) convert resL[] to format: 
-{'0000': 523, '1011': 1983, '1010': 2005, '0100': 3307, '1101': "
- "1387, '0001': 1551, '1111': 2274, '1100': 1988, '0110': 2055, '1000': 4127, "
- "'0010': 2864, '0111': 2093, '0011': 2985, '1001': 16, '0101': 581, '1110': "
- '2261}'
  
     2) call  u_true,u_reco,res_data=evaluate(probsBL,MD,qcrankObj,u_data)
     imported form simple_qcrank_EscherHands_backAer
