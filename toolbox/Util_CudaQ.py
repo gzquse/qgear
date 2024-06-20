@@ -18,7 +18,6 @@ def string_to_dict(raw_string):
     raw_string = ''.join(filter(lambda x: x.isdigit() or x == ':' or x.isspace(), raw_string))
     #print("raw_string", raw_string)
     raw_list = raw_string.split()
-    raw_list =1 
     #print("raw_list:", raw_list)
     mapped_dict = {}
     for item in raw_list:

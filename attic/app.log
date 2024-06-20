@@ -1,0 +1,14 @@
+2024-06-18 22:22:11,900 - __main__ - INFO - Starting the application
+2024-06-18 22:22:11,901 - __main__ - DEBUG - This is a debug message
+2024-06-18 22:22:11,902 - __main__ - INFO - This is an info message
+2024-06-18 22:22:11,902 - __main__ - WARNING - This is a warning message
+2024-06-18 22:22:11,902 - __main__ - ERROR - An error occurred: division by zero
+Traceback (most recent call last):
+  File "/tmp/ipykernel_1375791/2667594509.py", line 20, in some_function
+    result = 10 / 0  # This will raise a ZeroDivisionError
+             ~~~^~~
+ZeroDivisionError: division by zero
+2024-06-18 22:22:11,903 - __main__ - INFO - Finished the application
+2024-06-18 22:54:10,405 - ipykernel.comm - ERROR - No such comm target registered: jupyter.widget.control
+2024-06-18 22:54:10,406 - Comm - WARNING - No such comm: f5b5956f-f751-42e1-a068-3ad0fa171c3d
+2024-06-18 22:54:10,407 - Comm - DEBUG - Current comms: []

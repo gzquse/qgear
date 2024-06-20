@@ -66,8 +66,7 @@ RUN echo 2e-AAAAAAAAAAAAAAAAAAAAAAAAAAAAA   python libs  && \
     pip3 install  --upgrade Pillow
 # notes: Pillow is needed by matplotlib backend 'TkAgg'
 
-# notes: cupy for gpu operations
-RUN echo 2f-AAAAAAAAAAAAAAAAAAAAAAAAAAAAA   python libs  && \   
-    pip3 install cupy-cuda12x fitz
+
+
 #WORKDIR /root/cuda_quantum
-#hENTRYPOINT ["bash", "-l"]
+#ENTRYPOINT ["bash", "-l"]

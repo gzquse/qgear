@@ -1,0 +1,69 @@
+INFO       2024-06-19 07:46:37,464 1131554974:50 <module> Starting the application
+DEBUG      2024-06-19 07:46:37,465 1131554974:27 some_function This is a debug message
+INFO       2024-06-19 07:46:37,465 1131554974:28 some_function This is an info message
+WARNING    2024-06-19 07:46:37,465 1131554974:29 some_function This is a warning message
+ERROR      2024-06-19 07:46:37,466 1131554974:23 log_exception An error occurred: division by zero
+Traceback:
+Traceback (most recent call last):
+  File "/tmp/ipykernel_2077756/1131554974.py", line 30, in some_function
+    result = 10 / 0  # This will raise a ZeroDivisionError
+             ~~~^~~
+ZeroDivisionError: division by zero
+
+DEBUG      2024-06-19 07:46:37,466 1131554974:36 another_function Attempting to read a non-existent file
+ERROR      2024-06-19 07:46:37,471 1131554974:23 log_exception An error occurred: [Errno 2] No such file or directory: 'non_existent_file.txt'
+Traceback:
+Traceback (most recent call last):
+  File "/tmp/ipykernel_2077756/1131554974.py", line 37, in another_function
+    with open('non_existent_file.txt', 'r') as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/global/common/software/nersc/pe/conda-envs/24.1.0/python-3.11/nersc-python/lib/python3.11/site-packages/IPython/core/interactiveshell.py", line 310, in _modified_open
+    return io_open(file, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'non_existent_file.txt'
+
+DEBUG      2024-06-19 07:46:37,471 1131554974:44 internal_error Generating an internal error
+ERROR      2024-06-19 07:46:37,472 1131554974:23 log_exception An error occurred: This is an internal error for testing purposes
+Traceback:
+Traceback (most recent call last):
+  File "/tmp/ipykernel_2077756/1131554974.py", line 45, in internal_error
+    raise ValueError("This is an internal error for testing purposes")
+ValueError: This is an internal error for testing purposes
+
+INFO       2024-06-19 07:46:37,472 1131554974:54 <module> Finished the application
+ERROR      2024-06-19 07:59:43,345 manager:46 comm_open No such comm target registered: jupyter.widget.control
+WARNING    2024-06-19 07:59:43,346 base_comm:246 get_comm No such comm: dbe9119a-6e09-4001-a768-a8abba7539f3
+DEBUG      2024-06-19 07:59:43,347 base_comm:249 get_comm Current comms: []
+ERROR      2024-06-19 08:10:50,731 manager:46 comm_open No such comm target registered: jupyter.widget.control
+WARNING    2024-06-19 08:10:50,750 base_comm:246 get_comm No such comm: 50081857-c13a-4509-9823-98c37d93aaaa
+DEBUG      2024-06-19 08:10:50,750 base_comm:249 get_comm Current comms: []
+ERROR      2024-06-19 08:18:40,258 manager:46 comm_open No such comm target registered: jupyter.widget.control
+WARNING    2024-06-19 08:18:40,259 base_comm:246 get_comm No such comm: bb9b1403-f9a7-41b5-a564-b2bc063d477d
+DEBUG      2024-06-19 08:18:40,260 base_comm:249 get_comm Current comms: []
+ERROR      2024-06-19 08:40:47,903 manager:46 comm_open No such comm target registered: jupyter.widget.control
+WARNING    2024-06-19 08:40:47,904 base_comm:246 get_comm No such comm: 9c63537d-670c-475d-a2f8-c86178c01733
+DEBUG      2024-06-19 08:40:47,904 base_comm:249 get_comm Current comms: []
+ERROR      2024-06-19 08:56:40,079 manager:46 comm_open No such comm target registered: jupyter.widget.control
+WARNING    2024-06-19 08:56:40,082 base_comm:246 get_comm No such comm: 29bdef86-b7d6-4fb6-a738-b503d5d764bb
+DEBUG      2024-06-19 08:56:40,082 base_comm:249 get_comm Current comms: []
+ERROR      2024-06-19 09:03:24,863 manager:46 comm_open No such comm target registered: jupyter.widget.control
+WARNING    2024-06-19 09:03:24,865 base_comm:246 get_comm No such comm: 810a3bda-1553-4cb8-9ac7-240c06650f69
+DEBUG      2024-06-19 09:03:24,865 base_comm:249 get_comm Current comms: []
+ERROR      2024-06-19 09:22:45,855 manager:46 comm_open No such comm target registered: jupyter.widget.control
+WARNING    2024-06-19 09:22:45,856 base_comm:246 get_comm No such comm: d2ccc3d5-83d9-4efb-be6f-e3d5abe1d1a1
+DEBUG      2024-06-19 09:22:45,857 base_comm:249 get_comm Current comms: []
+ERROR      2024-06-19 09:43:57,395 manager:46 comm_open No such comm target registered: jupyter.widget.control
+WARNING    2024-06-19 09:43:57,396 base_comm:246 get_comm No such comm: b3918358-6583-4c1d-8669-fe56d3e3bec3
+DEBUG      2024-06-19 09:43:57,397 base_comm:249 get_comm Current comms: []
+ERROR      2024-06-19 10:10:03,174 manager:46 comm_open No such comm target registered: jupyter.widget.control
+WARNING    2024-06-19 10:10:03,175 base_comm:246 get_comm No such comm: 6ce672e2-dbb0-428d-bf65-a0279716ed94
+DEBUG      2024-06-19 10:10:03,175 base_comm:249 get_comm Current comms: []
+ERROR      2024-06-19 12:00:49,405 manager:46 comm_open No such comm target registered: jupyter.widget.control
+WARNING    2024-06-19 12:00:49,407 base_comm:246 get_comm No such comm: fa45b2c7-e992-41c2-b847-0250475151e8
+DEBUG      2024-06-19 12:00:49,407 base_comm:249 get_comm Current comms: []
+ERROR      2024-06-19 12:15:06,664 manager:46 comm_open No such comm target registered: jupyter.widget.control
+WARNING    2024-06-19 12:15:06,666 base_comm:246 get_comm No such comm: 09ab807f-be70-4d48-893a-ce0f1605b8bd
+DEBUG      2024-06-19 12:15:06,666 base_comm:249 get_comm Current comms: []
+ERROR      2024-06-19 12:18:07,158 manager:46 comm_open No such comm target registered: jupyter.widget.control
+WARNING    2024-06-19 12:18:07,159 base_comm:246 get_comm No such comm: 4a590a6c-3b12-4eb5-9760-b5f572f9d506
+DEBUG      2024-06-19 12:18:07,160 base_comm:249 get_comm Current comms: []
