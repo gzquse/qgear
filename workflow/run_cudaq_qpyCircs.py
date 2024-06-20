@@ -103,7 +103,6 @@ if __name__ == "__main__":
     MD['run_gpu']={'num_gpu':cp.cuda.runtime.getDeviceCount(),'elapsed_time':elaT}
     #u_data,f_data= construct_random_input(MD,args.verb)
     u_data=expD['u_data']
-    f_data=
     # try:
     #     u_true,u_reco,res_data=evaluate(probsBL,expMD,qcrankObj,u_data)
     # except Exception as e:
