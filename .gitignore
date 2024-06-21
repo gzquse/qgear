@@ -8,3 +8,4 @@ out/
 .viminfo
 *.png
 __pycache__
+*-checkpoint.ipynb
