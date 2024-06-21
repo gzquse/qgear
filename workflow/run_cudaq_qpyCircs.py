@@ -10,7 +10,7 @@ __email__ = "janstar1122@gmail.com"
  - compares results from CPU
  - saves updated HD5
 '''
-#import pdb
+import pdb
 # python3 -m pdb run_cudaq_qpyCircs.py  --expName exp_84adce
 
 import numpy as np
@@ -32,13 +32,15 @@ def get_parser():
     parser.add_argument("-v","--verbosity",type=int,choices=[0, 1, 2, 3],  help="increase output verbosity", default=1, dest='verb')
 
     parser.add_argument("-e","--expName",  default='exp_i14brq',help='(optional)replaces IBMQ jobID assigned during submission by users choice')
+    parser.add_argument('-n','--numShots',type=int,default=None, help="(optional) shots per circuit")
+
     parser.add_argument("--inpPath",default='out/',help="input circuits location")
     parser.add_argument("--outPath",default='out/',help="all outputs from  experiment")
     
     args = parser.parse_args()
     # make arguments  more flexible
    
-    for arg in vars(args):  print( 'myArg:');print(arg, getattr(args, arg))
+    for arg in vars(args):  print( 'myArg:',arg, getattr(args, arg))
     assert os.path.exists(args.inpPath)
     assert os.path.exists(args.outPath)
     return args
@@ -55,8 +57,11 @@ if __name__ == "__main__":
     expD,expMD=read4_data_hdf5(os.path.join(args.outPath,inpF))
     if args.verb>=2:
         print('M:expMD:');  pprint(expMD)
-        
-    shots = expMD['submit']['num_shots']
+
+    if args.numShots==None:
+        shots = expMD['submit']['num_shots']
+    else:
+        shots=args.numShots
     assert shots <1024*1024  ,' empirical limit on A100'
     nq=expMD['qiskit_transp']['num_qubit']
 
@@ -72,14 +77,15 @@ if __name__ == "__main__":
     if nq<6:
         print(cudaq.draw(qKerL[0]))
 
-    log.info('M: run %d cudaq-circuit on GPU'%nCirc)
     
     # preset
     cudaq.set_target("nvidia-mqpu")
     target = cudaq.get_target()
     gpu_count = target.num_qpus()
-    log.info('Chosen gpus: d%'%gpu_count)
     
+    log.info('M: run %d cudaq-circuit on %d GPUs, %d shots/circ'%(nCirc,gpu_count,shots))
+
+    resL=[0]*nCirc  # prime the list
     try:
         T0=time()
         for i in range(nCirc):
@@ -91,7 +97,7 @@ if __name__ == "__main__":
     print('M:  ended elaT=%.1f sec'%(elaT))
     
     #... format cudaq counts to qiskit version
-    probsBL=[0 for i in range(nCirc)] # prime the list
+    probsBL=[0]*nCirc # prime the list
     for i,res in enumerate(resL):
         res = res.__str__()
         probsBL[i] = string_to_dict(res)
@@ -109,8 +115,8 @@ if __name__ == "__main__":
 
     #.... append GPU results
     expMD['short_name']='gpu_'+expMD['short_name']
-    expMD['run_gpu']={'num_gpu':nGpu,'elapsed_time':elaT}
-    expD['u_reco_cpu']=expD['u_reco']  # rename CPU results, just for comparioson
+    expMD['run_gpu']={'num_gpu':gpu_count,'elapsed_time':elaT}
+    if 'run_cpu' in expMD:  expD['u_reco_cpu']=expD['u_reco']  # rename CPU results, just for comparioson
     expD['u_reco']=u_reco_gpu
 
      #...... WRITE  OUTPUT .........

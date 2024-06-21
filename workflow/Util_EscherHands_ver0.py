@@ -150,7 +150,7 @@ def marginalize_EscherHands_EV(  addrBitsL, probsB,dataBit):
         mbit0=mbit+'0'; mbit1=mbit+'1'
         m1=probs[mbit1] if mbit1 in probs else 0
         m0=probs[mbit0] if mbit0 in probs else 0
-        p=m1/(m1+m0)
+        p=m1/(m1+m0) if m0+m1>0  else 0
         #print(j,mbit1,m1,m0,p,1-2*p)
         mdata[j]=p
     return 1-2*mdata

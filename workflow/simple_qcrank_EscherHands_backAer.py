@@ -14,9 +14,12 @@ compute vector : averag or difference
 uses backRun
 
 '''
+import pdb
+# python3 -m pdb ./simple_qcrank_EscherHands_backAer.py -M
+
 import numpy as np
 from pprint import pprint
-import os
+import os,hashlib
 from time import time, localtime
 from toolbox.Util_IOfunc import dateT2Str
 from qiskit import  transpile
@@ -51,7 +54,8 @@ def get_parser():
    
     parser.add_argument( "-B","--noBarrier", action='store_true', default=False, help="remove all bariers from the circuit ")
     parser.add_argument("--outPath",default='out/',help="all outputs from  experiment")
-    
+    parser.add_argument( "-M","--mockExecution", action='store_true', default=False, help="will NOT run Aer simulator but saves complete HD5")
+
     args = parser.parse_args()
     # make arguments  more flexible
     parser.add_argument('--readMit',type=int, default=0, help="Mitigate readout errors, 0=off")
@@ -89,7 +93,7 @@ def buildPayloadMeta(args):
 #...!...!....................
 def harvest_ibmq_submitMeta(job,md,args):
     sd={}
-    sd['job_id']=job.job_id()
+    sd['job_id']=job.job_id() if job!=None else hashlib.md5(os.urandom(32)).hexdigest()
     sd['backend']=args.backend #job.backend().name
     sd['num_shots']=args.numShots
     sd['read_err_mit']=args.readMit
@@ -153,31 +157,31 @@ def evaluate(probsBL,md,qcrankObj,udata_inp,verb=1):
       
     if mathOp=='none':
         udata_true=udata_inp.copy()
-        if 1: # the convoluted way, using qcrank decoder
+        if 1: # the convoluted way, using qcrank decoder: CLEAN it up
             # ....  since QCrank maxVal=pi, we get the reco angles already 
             fdata_rec =  qcrankObj.decoder.angles_from_yields(probsBL)
             udata_rec=np.cos(fdata_rec)
             print('raw1 rec: '); pprint(udata_rec.T)
         else: # quicker way,  output is just in probabilities
+            not_working_correctly
             for ic in range( nSamp):  # EscherHands did its job
                 udata_rec[:,0,ic]= marginalize_EscherHands_EV( addrBitsL, probsBL[ic], dataBit=0)    
                 udata_rec[:,1,ic]= marginalize_EscherHands_EV( addrBitsL, probsBL[ic], dataBit=1)
             print('raw2 rec: '); pprint(udata_rec.T)
-             
-    if mathOp=='add' or mathOp=='sub':
-        
+           
+    if mathOp=='add' or mathOp=='sub':        
         for ic in range( nSamp):  # EscherHands did its job
             udata_rec[:,0,ic]= marginalize_EscherHands_EV( addrBitsL, probsBL[ic], dataBit=0)    
             udata_rec[:,1,ic]= marginalize_EscherHands_EV( addrBitsL, probsBL[ic], dataBit=1)                
         udata_true[:,1]=udata_inp[:,0] *  udata_inp[:,1]
-        
+      
     # QCrank is reversing order of data qubits somewhere, so here I un-do it by flippin 0/1 in udata_inp
     if mathOp=='add':
         udata_true[:,0]= W*udata_inp[:,1] + (1-W)* udata_inp[:,0] 
  
     if mathOp=='sub':
         udata_true[:,0]= W* udata_inp[:,1] - (1-W)*udata_inp[:,0] 
- 
+    
     #.... common
     if verb>1:
         print('\nmath=%s rec: '%mathOp); pprint(udata_rec[...,:3].T)        
@@ -220,7 +224,7 @@ if __name__ == "__main__":
     #....  circuit generation .....
     qcrankObj,qcEL=circ_qcrank_and_EscherHands_one(f_data, MD,barrier=not args.noBarrier)
     qc1=qcEL[0]
-    print('M: circuit has %d qubits', qc1.num_qubits)
+    print('M: circuit has %d qubits'% qc1.num_qubits)
     circ_depth_aziz(qc1,text='circ_orig')
     prCirc=args.verb>0 and qc1.num_qubits<5
     if prCirc : print(circuit_drawer(qc1.decompose(), output='text',cregbundle=True))
@@ -241,26 +245,31 @@ if __name__ == "__main__":
     
     if args.exportQPY:
         export_QPY_circs(qcTL,MD,args)
+
     
-    print('job started, nCirc=%d  nq=%d  shots/circ=%d at %s ...'%(nCirc,qc1.num_qubits,args.numShots,backend))
-    T0=time()
-    job=backend.run(qcTL,shots=args.numShots)
-    print('   job id:');print(job.job_id())
-    result=job.result()
-    elaT=time()-T0
+    if not args.mockExecution:
+        print('job started, nCirc=%d  nq=%d  shots/circ=%d at %s ...'%(nCirc,qc1.num_qubits,args.numShots,backend))
+        T0=time()
+        job=backend.run(qcTL,shots=args.numShots)
+        print('   job id:');print(job.job_id())
+        result=job.result()
+       
+        probsBL=result.get_counts()
+        elaT=time()-T0
+        MD['run_cpu']={'num_cpu':os.cpu_count(),'elapsed_time':elaT}
+    else:
+        print('MD keys:',sorted(MD)) #; print('expD keys:', sorted(expD))
+        #pprint(expMD)
+        print('NO execution of circuit, use -E to execute the job')
+        bits0='1'*qc1.num_qubits
+        probsBL=[{bits0:args.numShots}]*nCirc
+        elaT=-1
+        job=None
+        
     print('M:  ended elaT=%.1f sec'%(elaT))
-    jobMD=result.metadata    
-    
     harvest_ibmq_submitMeta(job,MD,args)
-
-    #... add selected info about runtime
-    MD['run_cpu']={'num_cpu':os.cpu_count(),'elapsed_time':elaT}
-    
-    probsBL=result.get_counts()
-
     if args.verb>1: pprint('M:qprobs:%s'%(probsBL[0]))
     
-   
     u_true,u_reco,res_data=evaluate(probsBL,MD,qcrankObj,u_data,args.verb)
     pprint(MD)
     expD={'u_input': u_data,'u_true':u_true,'u_reco':u_reco}
@@ -271,4 +280,4 @@ if __name__ == "__main__":
     print('\n   ./plot_EscherHands.py  --expName %s  -Y '%(MD['short_name']))
     if args.exportQPY:
         print('\n   ./dump_QPY_circs.py  --expName %s  '%(MD['short_name']))
-        print('   ./run_cudaq_qpyCircs.py   --expName %s  \n'%(MD['short_name']))
+        print('   ./run_cudaq_qpyCircs.py   --expName %s     -n 1001000\n'%(MD['short_name']))
