@@ -46,8 +46,27 @@ def circ_qcrank_and_EscherHands_one(fdata,md, barrier=True):
         qc.measure_all()
     return qcrankObj,qcL
 
+
+
+#...!...!....................
+def make_qcrankObj( md,barrier, measure):
+    pmd=md['payload']
+    nq_addr=pmd['nq_addr']
+    nq_data=pmd['nq_fdata']
+    # create parameterized circ
+    qcrankObj = qcrank.ParametrizedQCRANK(
+        nq_addr, nq_data,
+        qcrank.QKAtan2DecoderQCRANK,
+        keep_last_cx=True, barrier=barrier,
+        measure=measure, statevec=False, 
+        reverse_bits=True  # to match Qiskit littleEndian 
+    )
+    return qcrankObj
+
 #...!...!....................
 def circ_qcrank(data_org, md,barrier=True, measure=True):
+
+    qcrankObj=make_qcrankObj( md,barrier, measure)
     pmd=md['payload']
     nq_addr=pmd['nq_addr']
     nq_data=pmd['nq_fdata']
@@ -56,14 +75,7 @@ def circ_qcrank(data_org, md,barrier=True, measure=True):
     assert np.min(data_org)>=0
     assert np.max(data_org)<=max_fval
     
-    # create parameterized circ
-    qcrankObj = qcrank.ParametrizedQCRANK(
-        nq_addr, nq_data,
-        qcrank.QKAtan2DecoderQCRANK,
-            keep_last_cx=True, barrier=barrier,
-        measure=measure, statevec=False, 
-        reverse_bits=True  # to match Qiskit littleEndian 
-    )
+ 
 
     if 0:
         print('.... PARAMETRIZED IDEAL CIRCUIT .............. num_addr=%d'%(1<<nq_addr))

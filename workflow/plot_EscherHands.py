@@ -123,7 +123,7 @@ def plot_EhesrHand(axL,md, rdataV, tdataV):
     for iobs in range(nobs):
         rdata=rdataV[:,iobs,:].flatten()
         tdata=tdataV[:,iobs,:].flatten()
-        print('tt',tdata.shape)
+        #print('tt',tdata.shape)
 
         ax=axL[iobs,0]
         ax.scatter(tdata,rdata,)

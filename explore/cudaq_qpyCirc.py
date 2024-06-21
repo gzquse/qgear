@@ -9,6 +9,7 @@ import sys,os
 import cudaq
 from qiskit import qpy
 import numpy as np
+from time import time
 
 import argparse
 #...!...!..................
@@ -74,9 +75,12 @@ if __name__ == "__main__":
         print(qc)
         print(cudaq.draw(qKer))
 
-    print('M: run cudaq-circuit  on GPU')
+    print('M: run cudaq-circuit  on GPU, shots=%d'%args.numShots)
     cudaq.set_target("nvidia")
+    T0=time()
     results = cudaq.sample(qKer, shots_count=args.numShots)
+    elaT=time()-T0
+    print('M:  ended elaT=%.1f sec'%(elaT))
     if nq < 6:
         print(results)
     else:

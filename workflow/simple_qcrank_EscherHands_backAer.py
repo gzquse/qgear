@@ -131,14 +131,15 @@ def construct_random_input(md,verb):
     return udata,fdata
 
 #...!...!....................
-def evaluate(probsBL,md,qcrankObj,udata_inp):
+def evaluate(probsBL,md,qcrankObj,udata_inp,verb=1):
     pmd=md['payload']
     smd=md['submit']
     nq_addr=pmd['nq_addr']
     nq_data=pmd['nq_fdata']
     seq_len=pmd['seq_len']
     nSamp=pmd['num_sample']
-    
+    nCirc=pmd['num_sample']
+     
     mathOp=pmd['ehand_math_op']
     W=pmd['ehand_weight']
     udata_true=np.zeros_like(udata_inp)
@@ -146,9 +147,9 @@ def evaluate(probsBL,md,qcrankObj,udata_inp):
     addrBitsL = [nq_data+i  for i in range(nq_addr)]
 
     assert nq_data==2 # needed by EscherHands
-    log.info('udata shape:');print(udata_true.shape)
-    if args.verb>1:
-        log.info('raw inp: '); pprint(udata_inp[...,:3].T)
+    print('udata shape:');print(udata_true.shape)
+    if verb>1:
+        print('raw inp: '); pprint(udata_inp[...,:3].T)
       
     if mathOp=='none':
         udata_true=udata_inp.copy()
@@ -156,12 +157,12 @@ def evaluate(probsBL,md,qcrankObj,udata_inp):
             # ....  since QCrank maxVal=pi, we get the reco angles already 
             fdata_rec =  qcrankObj.decoder.angles_from_yields(probsBL)
             udata_rec=np.cos(fdata_rec)
-            #log.info('raw1 rec: '); pprint(udata_rec.T)
+            print('raw1 rec: '); pprint(udata_rec.T)
         else: # quicker way,  output is just in probabilities
             for ic in range( nSamp):  # EscherHands did its job
                 udata_rec[:,0,ic]= marginalize_EscherHands_EV( addrBitsL, probsBL[ic], dataBit=0)    
                 udata_rec[:,1,ic]= marginalize_EscherHands_EV( addrBitsL, probsBL[ic], dataBit=1)
-            #log.info('raw2 rec: '); pprint(udata_rec.T)
+            print('raw2 rec: '); pprint(udata_rec.T)
              
     if mathOp=='add' or mathOp=='sub':
         
@@ -178,30 +179,30 @@ def evaluate(probsBL,md,qcrankObj,udata_inp):
         udata_true[:,0]= W* udata_inp[:,1] - (1-W)*udata_inp[:,0] 
  
     #.... common
-    if args.verb>1:
-        log.info('\nmath=%s rec: '%mathOp); pprint(udata_rec[...,:3].T)        
-        log.info('\nmath=%s true: '%mathOp); pprint(udata_true[...,:3].T)
+    if verb>1:
+        print('\nmath=%s rec: '%mathOp); pprint(udata_rec[...,:3].T)        
+        print('\nmath=%s true: '%mathOp); pprint(udata_true[...,:3].T)
     res_data=udata_true - udata_rec
 
     L2=np.linalg.norm(res_data)
-    log.info('mathOp=%s  nCirc=%d L2=%.2g\n'%(mathOp, nCirc,L2))
+    print('mathOp=%s  nCirc=%d L2=%.2g\n'%(mathOp, nCirc,L2))
 
     c1=L2<0.06
     c2=np.max(np.abs(res_data)) <0.07
     mOK=c2 and c1
-    if mOK: log.info('---- PASS ----  ')
+    if mOK: print('---- PASS ----  ')
     else:
-        log.info('  *** FAILED **** L2=%r  res=%r'%(c1,c2))
-        if nCirc>10: log.info('for large nCirc it may be just 1 outlier')
+        print('  *** FAILED **** L2=%r  res=%r'%(c1,c2))
+        if nCirc>10: print('for large nCirc it may be just 1 outlier')
         
-    log.info('\ndump 1st circ'); ic=0
+    print('\ndump 1st circ'); ic=0
     mathOp2='mult'
     if mathOp=='none': mathOp=' x1 '; mathOp2=' x2 '
-    log.info('summary mathOp=%s  W=%.2f  L2=%.2f shots=%d backend=%s\n i  input: x1      x2      true(%s)   meas(%s)   res(%s)     true(%s)  meas(%s)   res(%s)'%(pmd['ehand_math_op'],W,L2,smd['num_shots'],smd['backend'],mathOp,mathOp,mathOp,mathOp2,mathOp2,mathOp2))
+    print('summary mathOp=%s  W=%.2f  L2=%.2f shots=%d backend=%s\n i  input: x1      x2      true(%s)   meas(%s)   res(%s)     true(%s)  meas(%s)   res(%s)'%(pmd['ehand_math_op'],W,L2,smd['num_shots'],smd['backend'],mathOp,mathOp,mathOp,mathOp2,mathOp2,mathOp2))
     for i in range(seq_len):
-        log.info('%2d    %6.2f    %6.2f      %6.2f      %6.2f      %6.2f         %6.2f      %6.2f      %6.2f'%\
+        print('%2d    %6.2f    %6.2f      %6.2f      %6.2f      %6.2f         %6.2f      %6.2f      %6.2f'%\
               (i,udata_inp[i,0,ic],udata_inp[i,1,ic],udata_true[i,0,ic],udata_rec[i,0,ic],res_data[i,0,ic],udata_true[i,1,ic],udata_rec[i,1,ic],res_data[i,1,ic]))
-        if args.verb<=1 and i>10 : break
+        if verb<=1 and i>10 : break
     return udata_true,udata_rec,res_data
   
 #=================================
@@ -219,13 +220,13 @@ if __name__ == "__main__":
     #....  circuit generation .....
     qcrankObj,qcEL=circ_qcrank_and_EscherHands_one(f_data, MD,barrier=not args.noBarrier)
     qc1=qcEL[0]
-    log.info('M: circuit has %d qubits', qc1.num_qubits)
+    print('M: circuit has %d qubits', qc1.num_qubits)
     circ_depth_aziz(qc1,text='circ_orig')
     prCirc=args.verb>0 and qc1.num_qubits<5
     if prCirc : print(circuit_drawer(qc1.decompose(), output='text',cregbundle=True))
 
     #....  excution using backRun(.) .....
-    log.info('M: acquire backend:');print(args.backend)
+    print('M: acquire backend:');print(args.backend)
     backend = AerSimulator()
     qcTL =qcEL
     
@@ -241,13 +242,13 @@ if __name__ == "__main__":
     if args.exportQPY:
         export_QPY_circs(qcTL,MD,args)
     
-    log.info('job started, nCirc=%d  nq=%d  shots/circ=%d at %s ...'%(nCirc,qc1.num_qubits,args.numShots,backend))
+    print('job started, nCirc=%d  nq=%d  shots/circ=%d at %s ...'%(nCirc,qc1.num_qubits,args.numShots,backend))
     T0=time()
     job=backend.run(qcTL,shots=args.numShots)
-    log.info('   job id:');print(job.job_id())
+    print('   job id:');print(job.job_id())
     result=job.result()
     elaT=time()-T0
-    log.info('M:  ended elaT=%.1f sec'%(elaT))
+    print('M:  ended elaT=%.1f sec'%(elaT))
     jobMD=result.metadata    
     
     harvest_ibmq_submitMeta(job,MD,args)
@@ -259,17 +260,15 @@ if __name__ == "__main__":
 
     if args.verb>1: pprint('M:qprobs:%s'%(probsBL[0]))
     
-    try:
-        u_true,u_reco,res_data=evaluate(probsBL,MD,qcrankObj,u_data)
-    except Exception as e:
-        logger.error("An error occurred during evaluate: %s", e, exc_info=True)
+   
+    u_true,u_reco,res_data=evaluate(probsBL,MD,qcrankObj,u_data,args.verb)
     pprint(MD)
     expD={'u_input': u_data,'u_true':u_true,'u_reco':u_reco}
     #...... WRITE  OUTPUT .........
     outF=os.path.join(args.outPath,MD['short_name']+'.h5')
     write4_data_hdf5(expD,outF,MD)
 
-    log.info('\n   ./plot_EscherHands.py  --expName %s  -Y '%(MD['short_name']))
+    print('\n   ./plot_EscherHands.py  --expName %s  -Y '%(MD['short_name']))
     if args.exportQPY:
-        log.info('\n   ./dump_QPY_circs.py  --expName %s  '%(MD['short_name']))
-        log.info('   ./run_cudaq_qpyCircs.py   --expName %s  \n'%(MD['short_name']))
+        print('\n   ./dump_QPY_circs.py  --expName %s  '%(MD['short_name']))
+        print('   ./run_cudaq_qpyCircs.py   --expName %s  \n'%(MD['short_name']))
