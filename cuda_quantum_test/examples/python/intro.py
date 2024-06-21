@@ -9,7 +9,7 @@ def kernel():
     This is our first CUDA-Q kernel.
     '''
     # Next, we can allocate a single qubit to the kernel via `qubit()`.
-    qubit = cudaq.qubit()
+    qubit = cudaq.qvector(32)
 
     # Now we can begin adding instructions to apply to this qubit!
     # Here we'll just add every non-parameterized
@@ -30,7 +30,7 @@ def kernel():
 # by calling `cudaq.sample`. This will execute the provided kernel
 # `shots_count` number of times and return the sampled distribution
 # as a `cudaq.SampleResult` dictionary.
-result = cudaq.sample(kernel)
+result = cudaq.sample(kernel, shots_count=100000)
 
 # Now let's take a look at the `SampleResult` we've gotten back!
 print(result)

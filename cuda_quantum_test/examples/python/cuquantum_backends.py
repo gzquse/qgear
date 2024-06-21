@@ -7,9 +7,9 @@
 
 import cudaq
 
-qubit_count = 5
+# qubit_count = 5
 # We can set a larger `qubit_count` if running on a GPU backend.
-# qubit_count = 28
+qubit_count = 32
 
 
 @cudaq.kernel
@@ -21,7 +21,7 @@ def kernel(qubit_count: int):
     mz(qvector)
 
 
-result = cudaq.sample(kernel, qubit_count, shots_count=100)
+result = cudaq.sample(kernel, qubit_count, shots_count=2000000)
 
-if (not cudaq.mpi.is_initialized()) or (cudaq.mpi.rank() == 0):
-    print(result)
+
+print(result)
