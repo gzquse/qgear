@@ -74,10 +74,6 @@ def qiskit_to_cudaq(qc):
 def cudaq_run(qKerL, resL, shots, gpu_count):
     count_futures = {kernel: [] for kernel in qKerL} 
     resL = []
-    # for qpu in range(gpu_count):
-    # for i, kernel in enumerate(qKerL):
-    #     #resL[i] = cudaq.sample_async(kernel, shots_count=shots, qpu_id=qpu)
-    #     resL[i] = cudaq.sample(kernel, shots_count=shots)
     # Distribute kernels across available GPUs
     for qpu in range(gpu_count):
         for kernel in qKerL:
@@ -88,5 +84,4 @@ def cudaq_run(qKerL, resL, shots, gpu_count):
        # print(f"Results for {kernel.__ne__}:")
         for counts in futures:
             resL.append(counts.get())
-    print(resL)
     return resL

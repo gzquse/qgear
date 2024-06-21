@@ -72,12 +72,13 @@ if __name__ == "__main__":
     if nq<6:
         print(cudaq.draw(qKerL[0]))
 
-    print('M: run %d cudaq-circuit  on GPU'%nCirc)
-    resL=[0 for i in range(nCirc)] # prime the list
-
-    # ....  initialize GPUs
-    nGpu=1  # temporary solution
-    cudaq.set_target("nvidia")
+    log.info('M: run %d cudaq-circuit on GPU'%nCirc)
+    
+    # preset
+    cudaq.set_target("nvidia-mqpu")
+    target = cudaq.get_target()
+    gpu_count = target.num_qpus()
+    log.info('Chosen gpus: d%'%gpu_count)
     
     try:
         T0=time()
