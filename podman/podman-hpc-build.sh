@@ -51,7 +51,8 @@ if [ ! -f "$dockerfileName" ]; then
   exit 1
 fi
 
-myProj=`sacctmgr show user $USER  withassoc format=DefaultAccount |tail -n1`
+#myProj=`sacctmgr show user $USER  withassoc format=DefaultAccount |tail -n1`
+myProj=$(sacctmgr show user $USER withassoc format=DefaultAccount | tail -n1 | xargs)
 
 # Display the arguments
 echo "Dockerfile: $dockerfileName"
@@ -60,7 +61,7 @@ echo "Use -p: $use_p"
 echo "my NERSC project: $myProj"
 
 # Execute the podman build command
-time podman-hpc build -f "$dockerfileName" -t "$imageName"
+# time podman-hpc build -f "$dockerfileName" -t "$imageName"
 
 # Execute additional commands if -p is used
 if [ "$use_p" = true ]; then

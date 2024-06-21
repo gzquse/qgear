@@ -36,9 +36,8 @@ def counts_cudaq_to_qiskit(resL):
     return resL
 
 #...!...!....................
-def qiskit_to_cudaq(qc):
+def qiskit_to_cudaq(qc, nq):
     qregs=qc.qregs[0]
-    nq=qc.num_qubits
     #print(qregs)
     # Construct a dictionary with address:index of the qregs objects
     qregAddrD = {hex(id(obj)): idx for idx, obj in enumerate(qregs)}
