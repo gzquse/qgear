@@ -33,6 +33,7 @@ def get_parser():
 
     parser.add_argument("-e","--expName",  default='exp_i14brq',help='(optional)replaces IBMQ jobID assigned during submission by users choice')
     parser.add_argument('-n','--numShots',type=int,default=None, help="(optional) shots per circuit")
+    parser.add_argument('-i','--numSample', default=None, type=int, help='(optional) num of images to be processed')
 
     parser.add_argument("--inpPath",default='out/',help="input circuits location")
     parser.add_argument("--outPath",default='out/',help="all outputs from  experiment")
@@ -62,22 +63,31 @@ if __name__ == "__main__":
         shots = expMD['submit']['num_shots']
     else:
         shots=args.numShots
+        
     assert shots <1024*1024  ,' empirical limit on A100'
     nq=expMD['qiskit_transp']['num_qubit']
 
     qcL=import_QPY_circs(expMD,args)
     nCirc=len(qcL)
+
+    # optional, clip num samples
+    if args.numSample!=None:
+        nCirc=min(nCirc,args.numSample)
+        qcL=qcL[:nCirc]
+        expMD['payload']['num_sample']=nCirc
+        expD['u_input']=expD['u_input'][...,:nCirc]
+        expD['u_true']=expD['u_true'][...,:nCirc]
     
     # converter list of circ
-    qKerL=[0 for i in range(nCirc)] # prime the list
+    qKerL=[0]* nCirc # prime the list
+    T0=time()
     for i in range(nCirc):        
         qKerL[i]=qiskit_to_cudaq(qcL[i])
 
-    print('M: converted %d circ'%nCirc)
+    print('M: converted %d circ, elaT=%.1f sec'%(nCirc,time()-T0))
     if nq<6:
         print(cudaq.draw(qKerL[0]))
 
-    
     # preset
     cudaq.set_target("nvidia-mqpu")
     target = cudaq.get_target()
@@ -94,7 +104,7 @@ if __name__ == "__main__":
         elaT=time()-T0
     except Exception as e:
         log.error("Cuda sampling error: %s", e, exc_info=True)
-    print('M:  ended elaT=%.1f sec'%(elaT))
+    print('M:  run ended elaT= %.1f sec'%(elaT))
     
     #... format cudaq counts to qiskit version
     probsBL=[0]*nCirc # prime the list
@@ -108,7 +118,7 @@ if __name__ == "__main__":
         print("counts size: %d"%len(pp0))
 
     #... recover qcrankObj
-    qcrankObj=make_qcrankObj( expMD,False,False)
+    qcrankObj=make_qcrankObj( expMD)
     if args.verb>=2: print(qcrankObj.circuit)            
     u_data=expD['u_input']
     _,u_reco_gpu,res_data_gpu=evaluate(probsBL,expMD,qcrankObj,u_data,args.verb)

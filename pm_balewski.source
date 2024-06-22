@@ -1,5 +1,6 @@
 #!/bin/bash
-#  salloc -q interactive -C gpu -t 4:00:00 -A nstaff 
+#  salloc -q interactive -C gpu -t 4:00:00 -A nstaff     # 4 GPUs
+#  salloc -q shared_interactive -C gpu -t 4:00:00 -A nstaff  # 1 GPU
 
 #IMG=balewski/ubu22-qiskit-qml:p3e 
 #IMG=balewski/ubu22-qiskit1.0:p2h

@@ -46,7 +46,7 @@ def get_parser():
     parser.add_argument("-m", "--mathOp",  default='add',choices=['add','sub','none'], help=" operation on data lines ")
 
     # .... job running
-    parser.add_argument('-n','--numShotPerAddr',type=int,default=8000, help="shots per address of QCrank")
+    parser.add_argument('-n','--numShotPerAddr',type=int,default=8000, help="shots per address of QCrank, if negative it is shots/circuit")
 
     parser.add_argument("--expName",  default=None,help='(optional)replaces IBMQ jobID assigned during submission by users choice')
     parser.add_argument('-b','--backend',default="aer", help="tasks")
@@ -151,7 +151,7 @@ def evaluate(probsBL,md,qcrankObj,udata_inp,verb=1):
     addrBitsL = [nq_data+i  for i in range(nq_addr)]
 
     assert nq_data==2 # needed by EscherHands
-    print('udata shape:');print(udata_true.shape)
+    #print('udata shape:');print(udata_true.shape)
     if verb>1:
         print('raw inp: '); pprint(udata_inp[...,:3].T)
       
@@ -217,8 +217,11 @@ def evaluate(probsBL,md,qcrankObj,udata_inp,verb=1):
 if __name__ == "__main__":
     args=get_parser()
     MD=buildPayloadMeta(args)
-    args.numShots=args.numShotPerAddr*MD['payload']['seq_len']
-    
+    if args.numShotPerAddr>0:
+        args.numShots=args.numShotPerAddr*MD['payload']['seq_len']
+    else:
+        args.numShots=-args.numShotPerAddr
+        
     u_data,f_data= construct_random_input(MD,args.verb)
 
     #....  circuit generation .....

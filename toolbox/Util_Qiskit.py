@@ -111,9 +111,11 @@ def import_QPY_circs(md,args):
     outF=md['short_name']+'_circ.qpy'
     outFF=os.path.join(args.outPath,outF)
     print('Reading QPY circuits:',outFF)
+    T0=time()
     with open(outFF, 'rb') as fd:
         qcL=qpy.load(fd)
-
+    elaT=time()-T0
+    print('   qpy.load elaT=%.1f sec'%(elaT))
     assert len(qcL)==md['payload']['num_sample']
     return qcL
     

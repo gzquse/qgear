@@ -49,7 +49,7 @@ def circ_qcrank_and_EscherHands_one(fdata,md, barrier=True):
 
 
 #...!...!....................
-def make_qcrankObj( md,barrier, measure):
+def make_qcrankObj( md,barrier=False, measure=False):
     pmd=md['payload']
     nq_addr=pmd['nq_addr']
     nq_data=pmd['nq_fdata']
@@ -75,8 +75,6 @@ def circ_qcrank(data_org, md,barrier=True, measure=True):
     assert np.min(data_org)>=0
     assert np.max(data_org)<=max_fval
     
- 
-
     if 0:
         print('.... PARAMETRIZED IDEAL CIRCUIT .............. num_addr=%d'%(1<<nq_addr))
         print(qcrankObj.circuit.draw())
