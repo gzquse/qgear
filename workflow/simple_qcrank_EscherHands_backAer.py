@@ -46,7 +46,7 @@ def get_parser():
     parser.add_argument("-m", "--mathOp",  default='add',choices=['add','sub','none'], help=" operation on data lines ")
 
     # .... job running
-    parser.add_argument('-n','--numShotPerAddr',type=int,default=8000, help="shots per address of QCrank, if negative it is shots/circuit")
+    parser.add_argument('-n','--numShotPerAddr',type=int,default=-1001000, help="shots per address of QCrank, if negative it is shots/circuit")
 
     parser.add_argument("--expName",  default=None,help='(optional)replaces IBMQ jobID assigned during submission by users choice')
     parser.add_argument('-b','--backend',default="aer", help="tasks")
