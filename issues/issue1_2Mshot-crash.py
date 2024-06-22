@@ -2,7 +2,7 @@
 
 # demonstration a 2M shot simu of bell state crashes on A100
 import cudaq
-print(cudaq.__version__)
+#print(cudaq.__version__)
 qubit_count = 2
 
 @cudaq.kernel

@@ -7,7 +7,7 @@ usage() {
     echo "Usage: $0 -f <Dockerfile_path> -t <image_tag> [-p]"
     echo "     -p: (optional) publish image for all NERSC users"
     echo example
-    echo "   ./podman-hpc-build.sh  -f Dockerfile.ubu24-xeyes -t balewski/ubu24-xeyes:p1a  -p   "
+    echo "   ./podman-hpc-build.sh  -f Dockerfile.ubu24-xeyes -t ubu24-xeyes:p1c   -p   "
 
   exit 1
 }
@@ -51,8 +51,22 @@ if [ ! -f "$dockerfileName" ]; then
   exit 1
 fi
 
-#myProj=`sacctmgr show user $USER  withassoc format=DefaultAccount |tail -n1`
-myProj=$(sacctmgr show user $USER withassoc format=DefaultAccount | tail -n1 | xargs)
+if [[ "$imageName" == */* ]]; then
+    echo "Error: imageName=$imageName     contains '/'"
+    exit 2
+fi
+
+# check if image exist in repo already
+if podman-hpc images --format "{{.Repository}}:{{.Tag}}" |grep -q $imageName ; then
+    echo "Image $imageName exists, change the name"
+    exit 3
+fi
+
+#  prefix image name with user name
+imageName=$USER/$imageName
+echo building image: $imageName ....
+
+myProj=`sacctmgr show user $USER  withassoc format=DefaultAccount |tail -n1 | xargs`
 
 # Display the arguments
 echo "Dockerfile: $dockerfileName"
@@ -61,7 +75,10 @@ echo "Use -p: $use_p"
 echo "my NERSC project: $myProj"
 
 # Execute the podman build command
-# time podman-hpc build -f "$dockerfileName" -t "$imageName"
+time podman-hpc build -f "$dockerfileName" -t "$imageName"
+
+
+echo 'podman-hpc images          # check image is visible'
 
 # Execute additional commands if -p is used
 if [ "$use_p" = true ]; then
@@ -79,9 +96,7 @@ else
 fi
 
 #... common
-
 echo IMG=$imageName 
-echo 'podman-hpc images          # check image is visible'
 echo 'podman-hpc run -it  -e DISPLAY  -v $HOME:$HOME -e HOME  $IMG  bash     # start the image'
 echo
 

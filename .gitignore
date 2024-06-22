@@ -10,3 +10,4 @@ out/
 __pycache__
 *-checkpoint.ipynb
 .ipynb_checkpoints/
+old/
