@@ -21,7 +21,7 @@ def kernel(qubit_count: int):
     mz(qvector)
 
 
-result = cudaq.sample(kernel, qubit_count, shots_count=2000000)
+result = cudaq.sample(kernel, qubit_count, shots_count=1000000)
 
 
 print(result)
