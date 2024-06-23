@@ -38,7 +38,7 @@ def generate_random_pairs(k, nq):
     return np.array(pairs)
 
 #...!...!....................
-def circ_extend(N, flat_qpair):
+def circ_extend(N, flat_qpair,angles):
     kernel = cudaq.make_kernel()
     q = kernel.qalloc(N)
     kernel.h(q[0])
@@ -46,28 +46,33 @@ def circ_extend(N, flat_qpair):
       kernel.cx(q[i], q[i + 1])
 
     # Applying operations based on qpair
-    ng=len(flat_qpair)      
-    for i in range(0, ng, 2):
-        #print('rrr',i,flat_qpair[i], flat_qpair[i+1])
-        kernel.cx(q[flat_qpair[i]], q[flat_qpair[i+1]])
-
+    ng=len(angles)      
+    for i in range(ng):
+        j=2*i
+        kernel.ry(angles[i],q[flat_qpair[j]] )
+        kernel.rz(-angles[i],q[flat_qpair[j+1]] )
+        kernel.cx(q[flat_qpair[j]], q[flat_qpair[j+1]])
+        
     kernel.mz(q)
     return kernel
 
 
 #...!...!....................
 @cudaq.kernel
-def circ_instance(N: int, flat_qpair: list[int]):
+def circ_instance(N: int, flat_qpair: list[int], angles: list[float]):
     qvector = cudaq.qvector(N)
     h(qvector[0])
-    for i in range(1, N):
-        x.ctrl(qvector[0], qvector[i])
+    for i in range(N - 1):
+        x.ctrl(qvector[i], qvector[i+1])
         
     # Applying operations based on qpair
-    ng=len(flat_qpair)      
-    for i in range(0, ng, 2):
-        x.ctrl(qvector[flat_qpair[i]], qvector[flat_qpair[i+1]])
-    
+    ng=len(angles)      
+    for i in range(ng):
+        j=2*i
+        ry(angles[i],qvector[flat_qpair[j]] )
+        rz(-angles[i],qvector[flat_qpair[j+1]] )
+        x.ctrl(qvector[flat_qpair[j]], qvector[flat_qpair[j+1]])
+        
     mz(qvector)
 
 
@@ -84,29 +89,35 @@ if __name__ == "__main__":
     shots=args.numShots
     print('got GPU, run %d shots'%shots)
     qpairs = generate_random_pairs(args.numCX, nq)
+    yangles = np.random.uniform(0, np.pi, args.numCX)
     #qpairs = [[0, 1], [2, 1], [1, 0]]
     if args.numCX<5: print(qpairs)
    
     # Flatten qpair list 
     fpairs = [int(qubit) for pair in qpairs for qubit in pair]
-
+    fangles = [float(x) for x in yangles ]
     
-    print('\nM:run instance...')
-    if nq<6: print(cudaq.draw(circ_instance, nq,fpairs))
-   
-    T0=time()
-    result = cudaq.sample(circ_instance, nq,fpairs, shots_count=shots)
-    print('  run done elaT=%.1f sec'%(time()-T0))
-    print(result)
+    print('\nM:case: circ_instance()...')
+    if nq<6: print(cudaq.draw(circ_instance, nq,fpairs, fangles))
     
-
-    print('\nM:run extend...')
     T0=time()
-    qKer=circ_extend(nq,fpairs)
-    print('  assemble done elaT=%.1f sec'%(time()-T0))
+    counts = cudaq.sample(circ_instance, nq,fpairs, fangles, shots_count=shots)
+    print('  assembled & run  elaT=%.1f sec'%(time()-T0))
+    if nq<6:  counts.dump()
+    str0=counts.most_probable()
+    print('numSol:%d  MPV %s: %d'%(len(counts),str0,counts[str0]))
+
+    print('\nM:case: circ_extend()...')
+    T0=time()
+    qKer=circ_extend(nq,fpairs,fangles)
+    print('  assembled  elaT=%.1f sec, run ...'%(time()-T0))
     if nq<6:  print(cudaq.draw(qKer))
+    T0=time()
     counts = cudaq.sample(qKer, shots_count=shots)
-    print('  run done elaT=%.1f sec'%(time()-T0))
-    counts.dump()
-   
+    print('  run  elaT=%.1f sec'%(time()-T0))
+    if nq<6:  counts.dump()
+    # <class 'cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult'>
+    str0=counts.most_probable()
+    print('numSol:%d  MPV %s: %d'%(len(counts),str0,counts[str0]))
+
 
