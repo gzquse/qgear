@@ -19,7 +19,7 @@ from toolbox.Util_Qiskit import  import_QPY_circs
 import os
 from time import time
 from pprint import pprint
-from toolbox.Util_CudaQ import qiskit_to_cudaq, string_to_dict
+from toolbox.Util_CudaQ import qiskit_to_cudaq, counts_cudaq_to_qiskit
 from toolbox.logger import log
 import cudaq
 import traceback
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     else:
         shots=args.numShots
         
-    assert shots <1024*1024  ,' empirical limit on A100'
+    assert shots <1024*1024  ,' empirical limit of GPU shots using CudaQ'
     nq=expMD['qiskit_transp']['num_qubit']
 
     qcL=import_QPY_circs(expMD,args)
@@ -105,12 +105,10 @@ if __name__ == "__main__":
     except Exception as e:
         log.error("Cuda sampling error: %s", e, exc_info=True)
     print('M:  run ended elaT= %.1f sec'%(elaT))
-    
+
     #... format cudaq counts to qiskit version
-    probsBL=[0]*nCirc # prime the list
-    for i,res in enumerate(resL):
-        res = res.__str__()
-        probsBL[i] = string_to_dict(res)
+    probsBL=counts_cudaq_to_qiskit(resL)
+   
     pp0 = probsBL[0]
     if nq<6:
         print('counts: %s'%pp0)

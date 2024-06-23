@@ -254,7 +254,7 @@ if __name__ == "__main__":
         print('job started, nCirc=%d  nq=%d  shots/circ=%d at %s ...'%(nCirc,qc1.num_qubits,args.numShots,backend))
         T0=time()
         job=backend.run(qcTL,shots=args.numShots)
-        print('   job id:');print(job.job_id())
+        print('   job id:%s , running ...'%job.job_id())
         result=job.result()
        
         probsBL=result.get_counts()
@@ -283,4 +283,4 @@ if __name__ == "__main__":
     print('\n   ./plot_EscherHands.py  --expName %s  -Y '%(MD['short_name']))
     if args.exportQPY:
         print('\n   ./dump_QPY_circs.py  --expName %s  '%(MD['short_name']))
-        print('   ./run_cudaq_qpyCircs.py   --expName %s     -n 1001000\n'%(MD['short_name']))
+        print('   ./run_cudaq_qpyCircs.py   --expName %s   \n'%(MD['short_name']))

@@ -28,12 +28,13 @@ def string_to_dict(raw_string):
     rev = {reverse_key(k): v for k, v in mapped_dict.items()}
     return rev
 
-def counts_cudaq_to_qiskit(resL):
+def counts_cudaq_to_qiskit(resL): # input cudaq results
+    #... format cudaq counts to qiskit version
+    probsBL=[0]*len(resL) # prime the list
     for i,res in enumerate(resL):
         res = res.__str__()
-        resL[i] = string_to_dict(res)
-    res0 = resL[0]
-    return resL
+        probsBL[i] = string_to_dict(res)
+    return probsBL
 
 #...!...!....................
 def qiskit_to_cudaq(qc):
