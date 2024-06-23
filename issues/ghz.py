@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # To run this with the mgpu target follow these instructions:
 # https://github.com/poojarao8/nersc-quantum-day/blob/master/PerlmutterInstructions.md
 
@@ -15,10 +17,11 @@ def ghz_state(N):
 
 n = 2 
 print("Preparing GHZ state for", n, "qubits.")
-kernel = ghz_state(n)
+qKer = ghz_state(n)
+print(cudaq.draw(qKer))
 cudaq.set_target("nvidia")
 shots=1024*1000
 print('got GPU, run %d shots'%shots)
 
-counts = cudaq.sample(kernel, shots_count=shots)
+counts = cudaq.sample(qKer, shots_count=shots)
 counts.dump()
