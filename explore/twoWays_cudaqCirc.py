@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-''' compare time to assembly long cudaq circuit '''
+''' compare 2 methods of assembly cudaq circuit '''
 
 import sys,os
 import numpy as np
@@ -9,7 +9,7 @@ import cudaq
 
 import argparse
 #...!...!..................
-def get_parser(backName=None):
+def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("-v","--verb",type=int, help="increase debug verbosity", default=1)
 
@@ -53,7 +53,7 @@ def ghz_instance(N: int):
 #=================================
 #=================================
 if __name__ == "__main__":
-    args=get_parser(backName='aer_simulator_statevector')  #     assert len(args.padSymbols)==2
+    args=get_parser()
     nq=args.numQubits
     cudaq.set_target("nvidia")
     shots=args.numShots
