@@ -15,7 +15,7 @@ def get_parser(backName=None):
 
     parser.add_argument('-q','--numQubits', default=3, type=int, help='pair: nq_addr nq_data, space separated ')
    
-    parser.add_argument('-n','--numShots', default=1000, type=int, help='num of shots')
+    parser.add_argument('-n','--numShots', default=10000, type=int, help='num of shots')
     parser.add_argument('-k','--numCX', default=4, type=int, help='num of CX gates')
     
   
@@ -97,15 +97,16 @@ if __name__ == "__main__":
     T0=time()
     result = cudaq.sample(circ_instance, nq,fpairs, shots_count=shots)
     print('  run done elaT=%.1f sec'%(time()-T0))
-    if nq<6: print(result)
+    print(result)
     
 
     print('\nM:run extend...')
     T0=time()
-    qKer=circ_extend(nq,fpairs)   
+    qKer=circ_extend(nq,fpairs)
+    print('  assemble done elaT=%.1f sec'%(time()-T0))
     if nq<6:  print(cudaq.draw(qKer))
     counts = cudaq.sample(qKer, shots_count=shots)
     print('  run done elaT=%.1f sec'%(time()-T0))
-    if nq<6: counts.dump()
+    counts.dump()
    
 
