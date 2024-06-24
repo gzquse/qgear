@@ -13,7 +13,7 @@ from qiskit.circuit import Parameter
 
 import argparse
 #...!...!..................
-def get_parser(e):
+def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("-v","--verb",type=int, help="increase debug verbosity", default=1)
 
