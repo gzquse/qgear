@@ -5,7 +5,7 @@ __email__ = "janstar1122@gmail.com"
  INPUT: pair of hd5 + qpy
  Action:
  - opens hd5, reads .gate_list.h5
- - circ-decor constructed from  getList
+ - circ-kernel constructed from  getList
  - run on single gpu node
  - compares results from CPU
  - saves updated HD5
@@ -19,7 +19,7 @@ from toolbox.Util_Qiskit import  import_QPY_circs
 import os
 from time import time
 from pprint import pprint
-from toolbox.Util_CudaQ import  circ_decor
+from toolbox.Util_CudaQ import  circ_kernel
 
 from toolbox.logger import log
 import cudaq
@@ -85,7 +85,7 @@ if __name__ == "__main__":
         fpairs = [int(qubit) for pair in gate_qid for qubit in pair]
         fangles = [float(x) for x in gate_angle ]
    
-        counts = cudaq.sample(circ_decor, nq,fpairs, fangles, shots_count=shots)
+        counts = cudaq.sample(circ_kernel, nq,fpairs, fangles, shots_count=shots)
         print('  assembled & run  elaT= %.1f sec'%(time()-T0))
         if nq<6:  counts.dump()          
         countsL[i]=counts

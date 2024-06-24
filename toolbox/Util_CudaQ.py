@@ -91,7 +91,7 @@ def cudaq_run(qKerL, shots):
 
 #...!...!....................
 @cudaq.kernel
-def circ_decor(N: int, flat_qpair: list[int], angles: list[float]):
+def circ_kernel(N: int, flat_qpair: list[int], angles: list[float]):
     qvector = cudaq.qvector(N)
     h(qvector[0])
     for i in range(N - 1):
