@@ -32,8 +32,9 @@ def counts_cudaq_to_qiskit(resL): # input cudaq results
     #... format cudaq counts to qiskit version
     probsBL=[0]*len(resL) # prime the list
     for i,res in enumerate(resL):
-        res = res.__str__()
-        probsBL[i] = string_to_dict(res)
+        buf = ""
+        buf = res.__str__()
+        probsBL[i] = string_to_dict(buf)
     return probsBL
 
 #...!...!....................

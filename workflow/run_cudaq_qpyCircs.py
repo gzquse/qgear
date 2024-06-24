@@ -105,8 +105,6 @@ if __name__ == "__main__":
     except Exception as e:
         log.error("Cuda sampling error: %s", e, exc_info=True)
 
-    print('M:  run ended elaT= %.1f sec'%(elaT))
-
     #... format cudaq counts to qiskit version
     probsBL=counts_cudaq_to_qiskit(resL)
    
