@@ -38,7 +38,7 @@ def generate_random_pairs(k, nq):
     return np.array(pairs)
 
 #...!...!....................
-def circ_extend(N, flat_qpair,angles):
+def circ_func(N, flat_qpair,angles):
     kernel = cudaq.make_kernel()
     q = kernel.qalloc(N)
     kernel.h(q[0])
@@ -59,7 +59,7 @@ def circ_extend(N, flat_qpair,angles):
 
 #...!...!....................
 @cudaq.kernel
-def circ_instance(N: int, flat_qpair: list[int], angles: list[float]):
+def circ_decor(N: int, flat_qpair: list[int], angles: list[float]):
     qvector = cudaq.qvector(N)
     h(qvector[0])
     for i in range(N - 1):
@@ -97,25 +97,25 @@ if __name__ == "__main__":
     fpairs = [int(qubit) for pair in qpairs for qubit in pair]
     fangles = [float(x) for x in yangles ]
     
-    print('\nM:case: circ_instance()...')
-    if nq<6: print(cudaq.draw(circ_instance, nq,fpairs, fangles))
+    print('\nM:case: circ_decor()...')
+    if nq<6: print(cudaq.draw(circ_decor, nq,fpairs, fangles))
     
     T0=time()
-    counts = cudaq.sample(circ_instance, nq,fpairs, fangles, shots_count=shots)
-    print('  assembled & run  elaT=%.1f sec'%(time()-T0))
+    counts = cudaq.sample(circ_decor, nq,fpairs, fangles, shots_count=shots)
+    print('  assembled & run  elaT= %.1f sec'%(time()-T0))
     if nq<6:  counts.dump()
     str0=counts.most_probable()
     print('numSol:%d  MPV %s: %d\n'%(len(counts),str0,counts[str0]))
 
     #exit(0)  # skip slower version
-    print('\nM:case: circ_extend()...')
+    print('\nM:case: circ_func()...')
     T0=time()
-    qKer=circ_extend(nq,fpairs,fangles)
-    print('  assembled  elaT=%.1f sec, run ...'%(time()-T0))
+    qKer=circ_func(nq,fpairs,fangles)
+    print('  assembled  elaT= %.1f sec, run ...'%(time()-T0))
     if nq<6:  print(cudaq.draw(qKer))
     T0=time()
     counts = cudaq.sample(qKer, shots_count=shots)
-    print('  run  elaT=%.1f sec'%(time()-T0))
+    print('  run  elaT= %.1f sec'%(time()-T0))
     if nq<6:  counts.dump()
     # <class 'cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult'>
     str0=counts.most_probable()
