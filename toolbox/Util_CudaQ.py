@@ -88,19 +88,9 @@ def cudaq_run_parallel_qpu(qKerL, shots, qpu_count):
 def cudaq_run(qKerL, shots):
     return [cudaq.sample(kernel, shots_count=shots) for kernel in qKerL]
 
-
-
 #...!...!....................
 @cudaq.kernel
-<<<<<<< HEAD
-def circ_kernel(N: int, flat_qpair: list[int], angles: list[float]):
-    qvector = cudaq.qvector(N)
-    h(qvector[0])
-    for i in range(N - 1):
-        x.ctrl(qvector[i], qvector[i+1])
-        
-=======
-def circ_decor(qubit_count: int, gate_len: int, gate_type: list[int], flat_qpair: list[int], angles: list[float]):
+def circ_kernel(qubit_count: int, gate_len: int, gate_type: list[int], flat_qpair: list[int], angles: list[float]):
     qvector = cudaq.qvector(qubit_count)
     """
         h: 0
@@ -108,7 +98,6 @@ def circ_decor(qubit_count: int, gate_len: int, gate_type: list[int], flat_qpair
         rz: 2
         cx: 3
     """
->>>>>>> bc2a63e (the new way!)
     # Applying operations based on qpair
     for i in range(gate_len):
         j=2*i
@@ -132,7 +121,6 @@ def qiskit_to_gateList(qcL):
     print('nGate',nGate)
 
     # pre-alocate memory
-    nqL=np.zeros(shape=(nCirc),dtype=int)
     nqL = [qc.num_qubits for qc in qcL]
     gate_len=np.zeros(shape=(nCirc),dtype=int)
     gate_type=np.zeros(shape=(nCirc,nGate),dtype=int)
