@@ -19,7 +19,8 @@ from toolbox.Util_Qiskit import  import_QPY_circs
 import os
 from time import time
 from pprint import pprint
-from toolbox.Util_CudaQ import qiskit_to_cudaq, counts_cudaq_to_qiskit
+from toolbox.Util_CudaQ import qiskit_to_cudaq, counts_cudaq_to_qiskit, cudaq_run_parallel_qpu, cudaq_run
+
 from toolbox.logger import log
 import cudaq
 import traceback
@@ -34,6 +35,7 @@ def get_parser():
     parser.add_argument("-e","--expName",  default='exp_i14brq',help='(optional)replaces IBMQ jobID assigned during submission by users choice')
     parser.add_argument('-n','--numShots',type=int,default=None, help="(optional) shots per circuit")
     parser.add_argument('-i','--numSample', default=None, type=int, help='(optional) num of images to be processed')
+    parser.add_argument("-m", "--target", default="nvidia-mqpu", help="GPU settings")
 
     parser.add_argument("--inpPath",default='out/',help="input circuits location")
     parser.add_argument("--outPath",default='out/',help="all outputs from  experiment")
@@ -89,21 +91,20 @@ if __name__ == "__main__":
         print(cudaq.draw(qKerL[0]))
 
     # preset
-    cudaq.set_target("nvidia-mqpu")
-    target = cudaq.get_target()
-    gpu_count = target.num_qpus()
+    gpu_count = cudaq.num_available_gpus()
+    cudaq.set_target(args.target)
     
     log.info('M: run %d cudaq-circuit on %d GPUs, %d shots/circ'%(nCirc,gpu_count,shots))
 
     resL=[0]*nCirc  # prime the list
     try:
         T0=time()
-        for i in range(nCirc):
-            if args.verb>=2: print('start circ %d'%i)
-            resL[i] = cudaq.sample(qKerL[i], shots_count=shots)
+        resL = cudaq_run_parallel_qpu(qKerL, shots, gpu_count)
         elaT=time()-T0
+        print('M:  run ended elaT= %.1f sec'%(elaT))
     except Exception as e:
         log.error("Cuda sampling error: %s", e, exc_info=True)
+
     print('M:  run ended elaT= %.1f sec'%(elaT))
 
     #... format cudaq counts to qiskit version

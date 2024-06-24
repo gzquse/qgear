@@ -11,3 +11,4 @@ __pycache__
 *-checkpoint.ipynb
 .ipynb_checkpoints/
 old/
+*.btr

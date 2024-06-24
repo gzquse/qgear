@@ -283,4 +283,6 @@ if __name__ == "__main__":
     print('\n   ./plot_EscherHands.py  --expName %s  -Y '%(MD['short_name']))
     if args.exportQPY:
         print('\n   ./dump_QPY_circs.py  --expName %s  '%(MD['short_name']))
-        print('   ./run_cudaq_qpyCircs.py   --expName %s   \n'%(MD['short_name']))
+        # one node
+        print('\n mpiexec -np 1 ./run_cudaq_qpyCircs.py --expName %s -n 1001000\n'%(MD['short_name']))
+
