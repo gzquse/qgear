@@ -20,7 +20,11 @@ def ghz_state(qubit_count, target):
     return result
 
 if __name__ == '__main__':
-    cpu_result = ghz_state(qubit_count=22, target="qpp-cpu")
+    #cpu_result = ghz_state(qubit_count=32, target="qpp-cpu")
     
-    # cpu_result = ghz_state(qubit_count=10, target="nvidia")
+    #cpu_result = ghz_state(qubit_count=32, target="nvidia")
+    
+    #cpu_result = ghz_state(qubit_count=32, target="nvidia-mgpu")
+
+    cpu_result = ghz_state(qubit_count=30, target="tensornet")
     cpu_result.dump()

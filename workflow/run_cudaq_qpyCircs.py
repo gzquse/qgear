@@ -35,7 +35,7 @@ def get_parser():
     parser.add_argument("-e","--expName",  default='exp_i14brq',help='(optional)replaces IBMQ jobID assigned during submission by users choice')
     parser.add_argument('-n','--numShots',type=int,default=None, help="(optional) shots per circuit")
     parser.add_argument('-i','--numSample', default=None, type=int, help='(optional) num of images to be processed')
-    parser.add_argument("-m", "--target", default="nvidia-mqpu", help="GPU settings")
+    parser.add_argument("-t", "--target", default="nvidia-mqpu", choices=['tensornet','nvidia-mgpu','nvidia-mqpu'], help="cudaQ target settings")
 
     parser.add_argument("--inpPath",default='out/',help="input circuits location")
     parser.add_argument("--outPath",default='out/',help="all outputs from  experiment")
@@ -91,15 +91,19 @@ if __name__ == "__main__":
         print(cudaq.draw(qKerL[0]))
 
     # preset
+    target = args.target
     gpu_count = cudaq.num_available_gpus()
-    cudaq.set_target(args.target)
+    cudaq.set_target(target)
     
     log.info('M: run %d cudaq-circuit on %d GPUs, %d shots/circ'%(nCirc,gpu_count,shots))
 
     resL=[0]*nCirc  # prime the list
     try:
         T0=time()
-        resL = cudaq_run_parallel_qpu(qKerL, shots, gpu_count)
+        if target == "nvidia-mqpu":
+            resL = cudaq_run_parallel_qpu(qKerL, shots, gpu_count)
+        elif target == "nvidia-mgpu":
+            resL = cudaq_run(qKerL, shots)
         elaT=time()-T0
         print('M:  run ended elaT= %.1f sec'%(elaT))
     except Exception as e:
