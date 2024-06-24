@@ -13,7 +13,8 @@ import pdb
 
 import numpy as np
 from toolbox.Util_H5io4 import  read4_data_hdf5, write4_data_hdf5
-from toolbox.Util_Qiskit import  import_QPY_circs,qiskit_to_gateList
+from toolbox.Util_Qiskit import  import_QPY_circs
+from toolbox.Util_CudaQ import qiskit_to_gateList
 import os
 from time import time
 from pprint import pprint
