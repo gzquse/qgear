@@ -16,6 +16,7 @@ def get_parser():
     parser.add_argument('-q','--numQubits', default=3, type=int, help='pair: nq_addr nq_data, space separated ')
    
     parser.add_argument('-n','--numShots', default=1000, type=int, help='num of shots')
+    parser.add_argument('-t','--cudaqTarget',default="nvidia", choices=['qpp-cpu','nvidia','nvidia-mgpu','nvidia-mqpu'], help="CudaQ target backend")
     
     args = parser.parse_args()
     for arg in vars(args):
@@ -55,9 +56,9 @@ def ghz_instance(N: int):
 if __name__ == "__main__":
     args=get_parser()
     nq=args.numQubits
-    cudaq.set_target("nvidia")
+    cudaq.set_target(args.cudaqTarget)
     shots=args.numShots
-    print('got GPU, run %d shots'%shots)
+    print('got %s, run %d shots'%(cudaq.get_target(),shots))
 
     print('\nM:run instance...')
     if nq<6: print(cudaq.draw(ghz_instance, nq))

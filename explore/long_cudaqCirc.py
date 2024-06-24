@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-''' compare time for 2 methods of assembly & execute a long cudaq circuit '''
+''' compare time for 2 methods of assembly & execute a long random cudaq circuit '''
 
 import sys,os
 import numpy as np
@@ -17,7 +17,7 @@ def get_parser():
    
     parser.add_argument('-n','--numShots', default=1001000, type=int, help='num of shots')
     parser.add_argument('-k','--numCX', default=4, type=int, help='num of CX gates')
-    
+    parser.add_argument('-t','--cudaqTarget',default="nvidia", choices=['qpp-cpu','nvidia','nvidia-mgpu','nvidia-mqpu'], help="CudaQ target backend")
   
     args = parser.parse_args()
     for arg in vars(args):
@@ -85,9 +85,9 @@ def circ_instance(N: int, flat_qpair: list[int], angles: list[float]):
 if __name__ == "__main__":
     args=get_parser()
     nq=args.numQubits
-    cudaq.set_target("nvidia")
+    cudaq.set_target(args.cudaqTarget)
     shots=args.numShots
-    print('got GPU, run %d shots'%shots)
+    print('use target=%s, run %d shots'%(args.cudaqTarget,shots))
     qpairs = generate_random_pairs(args.numCX, nq)
     yangles = np.random.uniform(0, np.pi, args.numCX)
     #qpairs = [[0, 1], [2, 1], [1, 0]]
@@ -105,8 +105,9 @@ if __name__ == "__main__":
     print('  assembled & run  elaT=%.1f sec'%(time()-T0))
     if nq<6:  counts.dump()
     str0=counts.most_probable()
-    print('numSol:%d  MPV %s: %d'%(len(counts),str0,counts[str0]))
+    print('numSol:%d  MPV %s: %d\n'%(len(counts),str0,counts[str0]))
 
+    #exit(0)  # skip slower version
     print('\nM:case: circ_extend()...')
     T0=time()
     qKer=circ_extend(nq,fpairs,fangles)
