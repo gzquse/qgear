@@ -261,6 +261,7 @@ def qiskit_to_gateList(qcL):
     gate_angle=np.zeros(shape=(nCirc,nGate),dtype=float)
 
     for j,qc in enumerate(qcL):
+        assert nGate>=len(qc) 
         k=0 # gate counter per circuit
         for op in qc:
             gate = op.operation.name

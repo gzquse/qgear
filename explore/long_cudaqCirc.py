@@ -59,7 +59,7 @@ def circ_func(N, flat_qpair,angles):
 
 #...!...!....................
 @cudaq.kernel
-def circ_decor(N: int, flat_qpair: list[int], angles: list[float]):
+def circ_kernel(N: int, flat_qpair: list[int], angles: list[float]):
     qvector = cudaq.qvector(N)
     h(qvector[0])
     for i in range(N - 1):
@@ -97,11 +97,11 @@ if __name__ == "__main__":
     fpairs = [int(qubit) for pair in qpairs for qubit in pair]
     fangles = [float(x) for x in yangles ]
     
-    print('\nM:case: circ_decor()...')
-    if nq<6: print(cudaq.draw(circ_decor, nq,fpairs, fangles))
+    print('\nM:case: circ_kernel()...')
+    if nq<6: print(cudaq.draw(circ_kernel, nq,fpairs, fangles))
     
     T0=time()
-    counts = cudaq.sample(circ_decor, nq,fpairs, fangles, shots_count=shots)
+    counts = cudaq.sample(circ_kernel, nq,fpairs, fangles, shots_count=shots)
     print('  assembled & run  elaT= %.1f sec'%(time()-T0))
     if nq<6:  counts.dump()
     str0=counts.most_probable()

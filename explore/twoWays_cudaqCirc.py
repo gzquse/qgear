@@ -39,7 +39,7 @@ def ghz_func(N):
 
 #...!...!....................
 @cudaq.kernel
-def ghz_decor(N: int):
+def ghz_kernel(N: int):
     qvector = cudaq.qvector(N)
     h(qvector[0])
     for i in range(1, N):
@@ -60,17 +60,17 @@ if __name__ == "__main__":
     shots=args.numShots
     print('got %s, run %d shots'%(cudaq.get_target(),shots))
 
-    print('\nM:run circ-decorator...')
-    if nq<6: print(cudaq.draw(ghz_decor, nq))
+    print('\nM:run circ-kernelator...')
+    if nq<6: print(cudaq.draw(ghz_kernel, nq))
     T0=time()
-    result = cudaq.sample(ghz_decor, nq, shots_count=shots)
+    result = cudaq.sample(ghz_kernel, nq, shots_count=shots)
     print('  run done elaT=%.1f sec'%(time()-T0))
     if nq<6: print(result)
 
 
     print('\nM:run circ-func...')
     T0=time()
-    qKer=ghz_extend(nq)   
+    qKer=ghz_func(nq)   
     if nq<6:  print(cudaq.draw(qKer))
     counts = cudaq.sample(qKer, shots_count=shots)
     print('  run done elaT=%.1f sec'%(time()-T0))
