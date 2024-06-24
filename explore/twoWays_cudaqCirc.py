@@ -26,7 +26,7 @@ def get_parser():
     return args
 
 #...!...!....................
-def ghz_extend(N):
+def ghz_func(N):
     kernel = cudaq.make_kernel()
     q = kernel.qalloc(N)
     kernel.h(q[0])
@@ -39,7 +39,7 @@ def ghz_extend(N):
 
 #...!...!....................
 @cudaq.kernel
-def ghz_instance(N: int):
+def ghz_decor(N: int):
     qvector = cudaq.qvector(N)
     h(qvector[0])
     for i in range(1, N):
@@ -60,15 +60,15 @@ if __name__ == "__main__":
     shots=args.numShots
     print('got %s, run %d shots'%(cudaq.get_target(),shots))
 
-    print('\nM:run instance...')
-    if nq<6: print(cudaq.draw(ghz_instance, nq))
+    print('\nM:run circ-decorator...')
+    if nq<6: print(cudaq.draw(ghz_decor, nq))
     T0=time()
-    result = cudaq.sample(ghz_instance, nq, shots_count=shots)
+    result = cudaq.sample(ghz_decor, nq, shots_count=shots)
     print('  run done elaT=%.1f sec'%(time()-T0))
     if nq<6: print(result)
 
 
-    print('\nM:run extend...')
+    print('\nM:run circ-func...')
     T0=time()
     qKer=ghz_extend(nq)   
     if nq<6:  print(cudaq.draw(qKer))

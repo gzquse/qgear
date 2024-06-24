@@ -6,7 +6,6 @@ from pprint import pprint
 import os,hashlib
 from toolbox.Util_H5io4 import  write4_data_hdf5, read4_data_hdf5
 from qiskit import qpy  # only to IO circuits
-import cudaq 
 from time import time
 from qiskit import QuantumRegister
 from qiskit import QuantumCircuit, transpile
@@ -242,3 +241,48 @@ def measL_int2bits(probsIL,nclbit): # converts int(mbits) back to bitstring
         probsBL[ic]=probs
     return probsBL
 
+#...!...!....................
+def qiskit_to_gateList(qcL):
+    nCirc=len(qcL)
+    qc=qcL[0]
+    qregs = qc.qregs[0]
+    nq = qc.num_qubits
+
+    # Construct a dictionary with address:index of the qregs objects
+    qregAddrD = {hex(id(obj)): idx for idx, obj in enumerate(qregs)}
+
+    nGate=len(qc)  # this is overestimate, includes barriers & measurements
+    print('nGate',nGate)
+
+    # pre-alocate memory
+    gate_len=np.zeros(shape=(nCirc),dtype=int)
+    gate_type=np.zeros(shape=(nCirc,nGate),dtype=int)
+    gate_qid=np.zeros(shape=(nCirc,nGate,2),dtype=int)
+    gate_angle=np.zeros(shape=(nCirc,nGate),dtype=float)
+
+    for j,qc in enumerate(qcL):
+        k=0 # gate counter per circuit
+        for op in qc:
+            gate = op.operation.name
+            params = op.operation.params
+
+            '''
+
+            fill values of 
+
+            gate_type[j,k]=...   # enumarte type of gates
+            gate_qid[j,k]= [qid0,qid2]  # always pair of values
+            gate_angle[j,k]=... # 
+            k+=1
+            '''
+        gate_len[j]=k  # remember number of gates per circuit
+    outD={}
+    outD['gate_len']=gate_len
+    outD['gate_type']=gate_type
+    outD['gate_qid']=gate_qid
+    outD['gate_angle']=gate_angle
+    return outD
+
+    # clip arrays to match number of gates
+    #return gate_type[:k], gate_qid[:k], gate_angle[:k]
+        

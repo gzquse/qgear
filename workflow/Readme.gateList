@@ -1,0 +1,22 @@
+Workflow for scalable conversion of qiskit circuits to cudaQ decorator-based circuits
+
+A) generate qiskit circuits
+ ./simple_qcrank_EscherHands_backAer.py -e
+
+creates 2 files
+ out/exp_0bf631.h5
+ out/exp_0bf631_circ.qpy
+
+B) convert qpy to list of gates saved as numpy in HD5
+ ./convert_qpyCirc_gateList.py --expName exp_57c4d2
+
+creates 1 file :  out/exp_57c4d2.gate_list.h5
+
+C) running circuits using cudaq
+ ./run_cudaq_gateList.py  --expName exp_57c4d2
+
+2 INPUTs:
+ out/exp_0bf631.h5
+ out/exp_57c4d2.gate_list.h5
+1 output : out/gpu_exp_0bf631.h5
+ 

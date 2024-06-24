@@ -86,3 +86,24 @@ def cudaq_run_parallel_qpu(qKerL, shots, qpu_count):
 
 def cudaq_run(qKerL, shots):
     return [cudaq.sample(kernel, shots_count=shots) for kernel in qKerL]
+
+
+
+#...!...!....................
+@cudaq.kernel
+def circ_decor(N: int, flat_qpair: list[int], angles: list[float]):
+    qvector = cudaq.qvector(N)
+    h(qvector[0])
+    for i in range(N - 1):
+        x.ctrl(qvector[i], qvector[i+1])
+        
+    # Applying operations based on qpair
+    ng=len(angles)      
+    for i in range(ng):
+        j=2*i
+        ry(angles[i],qvector[flat_qpair[j]] )
+        rz(-angles[i],qvector[flat_qpair[j+1]] )
+        x.ctrl(qvector[flat_qpair[j]], qvector[flat_qpair[j+1]])
+        
+    mz(qvector)
+
