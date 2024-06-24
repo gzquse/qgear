@@ -283,6 +283,4 @@ def qiskit_to_gateList(qcL):
     outD['gate_angle']=gate_angle
     return outD
 
-    # clip arrays to match number of gates
-    #return gate_type[:k], gate_qid[:k], gate_angle[:k]
-        
+   
