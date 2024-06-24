@@ -91,7 +91,7 @@ if __name__ == "__main__":
         # print("ng:", ng, type(ng))
         # print("fpairs:", fpairs, type(fpairs))
         # print("fangles:", fangles, type(fangles))
-        counts = cudaq.sample(circ_decor, qubit_count, ng, fgate_type, fpairs, fangles, shots_count=shots)
+        counts = cudaq.sample(circ_kernel, qubit_count, ng, fgate_type, fpairs, fangles, shots_count=shots)
 
         print('  assembled & run  elaT= %.1f sec'%(time()-T0))
         if nq<6:  counts.dump()          
