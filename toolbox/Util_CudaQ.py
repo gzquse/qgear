@@ -1,5 +1,6 @@
 import cudaq
 import traceback
+import numpy as np
 
 # Function to reverse the keys
 def reverse_key(key):
@@ -91,19 +92,106 @@ def cudaq_run(qKerL, shots):
 
 #...!...!....................
 @cudaq.kernel
+<<<<<<< HEAD
 def circ_kernel(N: int, flat_qpair: list[int], angles: list[float]):
     qvector = cudaq.qvector(N)
     h(qvector[0])
     for i in range(N - 1):
         x.ctrl(qvector[i], qvector[i+1])
         
+=======
+def circ_decor(qubit_count: int, gate_len: int, gate_type: list[int], flat_qpair: list[int], angles: list[float]):
+    qvector = cudaq.qvector(qubit_count)
+    """
+        h: 0
+        ry: 1
+        rz: 2
+        cx: 3
+    """
+>>>>>>> bc2a63e (the new way!)
     # Applying operations based on qpair
-    ng=len(angles)      
-    for i in range(ng):
+    for i in range(gate_len):
         j=2*i
-        ry(angles[i],qvector[flat_qpair[j]] )
-        rz(-angles[i],qvector[flat_qpair[j+1]] )
-        x.ctrl(qvector[flat_qpair[j]], qvector[flat_qpair[j+1]])
-        
+        if gate_type[i] == 0:
+            h(qvector[j])
+        elif gate_type[i] == 1:
+            ry(angles[i],qvector[flat_qpair[j]] )
+        elif gate_type[i] == 2:
+            rz(angles[i],qvector[flat_qpair[j]] )
+        elif gate_type[i] == 3:    
+            x.ctrl(qvector[flat_qpair[j]], qvector[flat_qpair[j+1]])
     mz(qvector)
+
+
+#...!...!....................
+def qiskit_to_gateList(qcL):
+    nCirc=len(qcL)
+    qc=qcL[0]
+    
+    nGate=len(qc)  # this is overestimate, includes barriers & measurements
+    print('nGate',nGate)
+
+    # pre-alocate memory
+    nqL=np.zeros(shape=(nCirc),dtype=int)
+    nqL = [qc.num_qubits for qc in qcL]
+    gate_len=np.zeros(shape=(nCirc),dtype=int)
+    gate_type=np.zeros(shape=(nCirc,nGate),dtype=int)
+    gate_qid=np.zeros(shape=(nCirc,nGate,2),dtype=int)
+    gate_angle=np.zeros(shape=(nCirc,nGate),dtype=float)
+    """
+        h: 0
+        ry: 1
+        rz: 2
+        cx: 3
+    """
+    for j,qc in enumerate(qcL):
+        qregs = qc.qregs[0]
+        nq = qc.num_qubits
+        # Construct a dictionary with address:index of the qregs objects
+        qregAddrD = {hex(id(obj)): idx for idx, obj in enumerate(qregs)}
+        k=0 # gate counter per circuit
+        for op in qc:
+            qAddrL = [hex(id(q)) for q in op.qubits]
+            qIdxL = [qregAddrD[a] for a in qAddrL]
+            gate = op.operation.name
+            params = op.operation.params
+            # set first gate counter is the real gate name mapping
+            if gate == 'h':
+                gate_type[j,k]=0
+                gate_qid[j,k]= [qIdxL[0], 0]
+            elif gate == 'ry':
+                gate_type[j,k]=1
+                gate_angle[j,k]=params[0]
+                gate_qid[j,k]= [qIdxL[0], 0]
+            elif gate == 'rz':
+                gate_type[j,k]=2
+                gate_angle[j,k]=params[0]
+                gate_qid[j,k]= [qIdxL[0], 0]
+            elif gate == 'cx':
+                gate_type[j,k]=3
+                gate_qid[j,k]= qIdxL
+            elif gate == 'barrier' or gate == 'measure':
+                continue           
+            else:
+                print('ABORT; unknown gate', gate)
+                exit(99) 
+            k+=1
+        gate_len[j]=k  # remember number of gates per circuit
+    # print({
+    #     'gate_len': gate_len,
+    #     'gate_type': gate_type,
+    #     'gate_qid': gate_qid,
+    #     'gate_angle': gate_angle,
+    #     'num_qubits': nqL,
+    # })
+    return {
+        'gate_len': gate_len,
+        'gate_type': gate_type,
+        'gate_qid': gate_qid,
+        'gate_angle': gate_angle,
+        'num_qubits': nqL,
+    }
+
+
+
 

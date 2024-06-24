@@ -33,12 +33,12 @@ def get_parser():
     parser.add_argument("-v","--verbosity",type=int,choices=[0, 1, 2, 3],  help="increase output verbosity", default=1, dest='verb')
 
     parser.add_argument("-e","--expName",  default='exp_i14brq',help='(optional)replaces IBMQ jobID assigned during submission by users choice')
-    parser.add_argument('-n','--numShots',type=int,default=None, help="(optional) shots per circuit")
+    parser.add_argument('-n','--numShots',type=int, default=None, help="(optional) shots per circuit")
     parser.add_argument('-i','--numSample', default=None, type=int, help='(optional) num of images to be processed')
-    parser.add_argument("-m", "--target", default="nvidia-mqpu", help="GPU settings")
+    parser.add_argument("-m", "--target", default="nvidia", help="GPU settings")
 
     parser.add_argument("--inpPath",default='out/',help="input circuits location")
-    parser.add_argument("--outPath",default='out/',help="all outputs from  experiment")
+    parser.add_argument("--outPath",default='out/',help="all outputs from experiment")
     
     args = parser.parse_args()
     # make arguments  more flexible
@@ -58,13 +58,12 @@ if __name__ == "__main__":
     
     inpF=args.expName+'.h5'
     expD,expMD=read4_data_hdf5(os.path.join(args.outPath,inpF))
-
+    
     if args.verb>=2:
         print('M:expMD:');  pprint(expMD)
 
     inpF2=inpF.replace('.h5','.gate_list.h5')
     gateD,_=read4_data_hdf5(os.path.join(args.outPath,inpF2))
-    
     if args.numShots==None:
         shots = expMD['submit']['num_shots']
     else:
@@ -78,14 +77,22 @@ if __name__ == "__main__":
     T0=time()
     for i in range(nCirc):
         print('\nM:run circ ',i)
-        ng=gateD['gate_len'][i]
-        gate_qid=gateD['gate_qid'][i,:ng]
-        gate_angle=gateD['gate_angle'][i,:ng]
+        ng=int(gateD['gate_len'][i])
+        gate_type = gateD['gate_type'][i]
+        gate_qid=gateD['gate_qid'][i]
+        gate_angle=gateD['gate_angle'][i]
+        qubit_count=int(gateD['num_qubits'][0][i])
         # Flatten qpair list
         fpairs = [int(qubit) for pair in gate_qid for qubit in pair]
-        fangles = [float(x) for x in gate_angle ]
-   
-        counts = cudaq.sample(circ_kernel, nq,fpairs, fangles, shots_count=shots)
+        fangles = [float(x) for x in gate_angle]
+        fgate_type = [int(x) for x in gate_type]
+        # print("num_qubits:", qubit_count, type(qubit_count))
+        # print("gate_type:", fgate_type, type(fgate_type))
+        # print("ng:", ng, type(ng))
+        # print("fpairs:", fpairs, type(fpairs))
+        # print("fangles:", fangles, type(fangles))
+        counts = cudaq.sample(circ_decor, qubit_count, ng, fgate_type, fpairs, fangles, shots_count=shots)
+
         print('  assembled & run  elaT= %.1f sec'%(time()-T0))
         if nq<6:  counts.dump()          
         countsL[i]=counts

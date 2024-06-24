@@ -74,7 +74,6 @@ def read4_data_hdf5(inpF,verb=1):
         inpMD=None
     if verb>0:
         print(' done h5, num rec:%d  elaT=%.1f sec'%(len(objD),(time.time() - start)))
-
     h5f.close()
     return objD,inpMD
 
