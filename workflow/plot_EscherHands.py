@@ -94,7 +94,7 @@ def plot_EhesrHand(axL,md, rdataV, tdataV):
     pprint(md)
     pmd=md['payload']
     smd=md['submit']
-    tmd=md['qiskit_transp']
+    tmd=md['qiskit_circ']
     
     mathOp=pmd['ehand_math_op']
     W=pmd['ehand_weight']

@@ -54,12 +54,12 @@ if __name__ == "__main__":
        
     # converter list of circ
     T0=time()
-    outD=qiskit_to_gateList(qcL)
+    outD,outMD=qiskit_to_gateList(qcL)
     print('M: converted %d circ, elaT=%.1f sec'%(len(qcL),time()-T0))
     
     #...... WRITE  OUTPUT .........
     outF=os.path.join(args.outPath,expMD['short_name']+'.gate_list.h5')
-    write4_data_hdf5(outD,outF)
+    write4_data_hdf5(outD,outF,outMD)
     print('\n   ./run_cudaq_gateList.py  --expName %s  '%(expMD['short_name']))
     print('M:done')
 

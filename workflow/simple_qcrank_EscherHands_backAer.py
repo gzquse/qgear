@@ -228,7 +228,7 @@ if __name__ == "__main__":
     qcrankObj,qcEL=circ_qcrank_and_EscherHands_one(f_data, MD,barrier=not args.noBarrier)
     qc1=qcEL[0]
     print('M: circuit has %d qubits'% qc1.num_qubits)
-    circ_depth_aziz(qc1,text='circ_orig')
+    depthTC,opsTC=circ_depth_aziz(qc1,text='circ_orig')
     prCirc=args.verb>0 and qc1.num_qubits<5
     if prCirc : print(circuit_drawer(qc1.decompose(), output='text',cregbundle=True))
 
@@ -239,12 +239,10 @@ if __name__ == "__main__":
     
     qc1=qcTL[0];  nCirc=len(qcTL)
     if prCirc :  print(qc1.draw(output='text',idle_wires=False))  # skip ancilla
-    depthTC,opsTC=circ_depth_aziz(qc1,'transpiled')
         
     #... auxil MD , filled partially
     MD['submit']={'backend': backend.name,'num_circ':nCirc}
-    MD[ 'qiskit_transp']={'num_qubit': qcEL[0].num_qubits,'2q_depth':depthTC['2q'],'num_2q':opsTC['cx']}
-
+    MD[ 'qiskit_circ']={'num_qubit': qcEL[0].num_qubits,'2q_depth':depthTC['2q'],'num_2q':opsTC['cx']}
     
     if args.exportQPY:
         export_QPY_circs(qcTL,MD,args)

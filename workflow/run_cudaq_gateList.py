@@ -71,7 +71,7 @@ if __name__ == "__main__":
     else:
         shots=args.numShots        
     assert shots <1024*1024  ,' empirical limit of GPU shots using CudaQ'
-    nq=expMD['qiskit_transp']['num_qubit']
+
     nCirc=expMD['payload']['num_sample']
 
      # select backend
@@ -86,23 +86,17 @@ if __name__ == "__main__":
     T0=time()
     for i in range(nCirc):
         #print('\nM:run circ ',i)
-        prOn= nq<6 and i==0 or args.verb>1
-        ng=int(gateD['gate_len'][i])
-        gate_type = gateD['gate_type'][i]
-        gate_qid=gateD['gate_qid'][i]
-        gate_angle=gateD['gate_angle'][i]
-        qubit_count=int(gateD['num_qubits'][0][i])  # drop '0'
-        # Flatten qpair list
-        fpairs = [int(qubit) for pair in gate_qid for qubit in pair]
-        fangles = [float(x) for x in gate_angle]
-        fgate_type = [int(x) for x in gate_type]
-        # print("num_qubits:", qubit_count, type(qubit_count))
-        # print("gate_type:", fgate_type, type(fgate_type))
-        # print("ng:", ng, type(ng))
-        # print("fpairs:", fpairs, type(fpairs))
-        # print("fangles:", fangles, type(fangles))
-        if prOn:   print(cudaq.draw(circ_kernel, qubit_count, ng, fgate_type, fpairs, fangles))
-        results = cudaq.sample(circ_kernel, qubit_count, ng, fgate_type, fpairs, fangles, shots_count=shots)
+       
+        # Convert values to Python int and assign to a, b
+        num_qubit, num_gate = map(int,gateD['circ_type'][i] )
+        # Convert to list of integers
+        gate_type=list(map(int,gateD['gate_type'][i].flatten()))
+        gate_param=list(map(float,gateD['gate_param'][i]))
+        assert num_gate<=len(gate_param)
+        prOn= num_qubit<6 and i==0 or args.verb>1
+        
+        if prOn:   print(cudaq.draw(circ_kernel, num_qubit, num_gate, gate_type, gate_param))        
+        results = cudaq.sample(circ_kernel,num_qubit, num_gate, gate_type, gate_param, shots_count=shots)
         resL[i]=results
         if prOn:
             print('  assembled & run  elaT= %.1f sec, circ=%d  raw counts:'%(i,time()-T0))
@@ -116,7 +110,7 @@ if __name__ == "__main__":
     probsBL=counts_cudaq_to_qiskit(resL)
    
     pp0 = probsBL[0]
-    if nq<6:
+    if num_qubit<6:
         print('counts: %s'%pp0)
     else:
         print("counts size: %d"%len(pp0))

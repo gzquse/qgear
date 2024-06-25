@@ -90,22 +90,26 @@ def cudaq_run(qKerL, shots):
 
 #...!...!....................
 @cudaq.kernel
-def circ_kernel(qubit_count: int, gate_len: int, gate_type: list[int], flat_qpair: list[int], angles: list[float]):
-    qvector = cudaq.qvector(qubit_count)
-
-    for i in range(gate_len):
-        j = 2 * i
-        q0 = qvector[flat_qpair[j]]
+def circ_kernel(num_qubit: int, num_gate: int, gate_type: list[int], angles: list[float]):
+    qvector = cudaq.qvector(num_qubit)
+    
+    for i in range(num_gate):
+        j = 3 * i
+        gateId=gate_type[j]
+        q0 = qvector[gate_type[j+1]]
         
-        if gate_type[i] == 0:
+        if gateId == 1:
             h(q0)
-        elif gate_type[i] == 1:
+        elif gateId == 2:
             ry(angles[i], q0)
-        elif gate_type[i] == 2:
+        elif gateId == 3:
             rz(angles[i], q0)
-        elif gate_type[i] == 3:
-            q1 = qvector[flat_qpair[j + 1]]
+        elif gateId == 4:
+            q1 = qvector[gate_type[j + 2]]
             x.ctrl(q0, q1)
+        elif gateId == 5:
+            #martin_add_measurement
+            continue
     
     mz(qvector)
 
@@ -119,20 +123,17 @@ def qiskit_to_gateList(qcL):
     print('nGate',nGate)
 
     # pre-alocate memory
-    nqL = [qc.num_qubits for qc in qcL]
-    gate_len=np.zeros(shape=(nCirc),dtype=int)
-    gate_type=np.zeros(shape=(nCirc,nGate),dtype=int)
-    gate_qid=np.zeros(shape=(nCirc,nGate,2),dtype=int)
-    gate_angle=np.zeros(shape=(nCirc,nGate),dtype=float)
-    """
-        h: 0
-        ry: 1
-        rz: 2
-        cx: 3
-    """
+    circ_type=np.zeros(shape=(nCirc,2),dtype=np.int32) # [num_qubit, num_gate]
+    gate_type=np.zeros(shape=(nCirc,nGate,3),dtype=np.int32) # [gate_type, qubit1, qubit2] 
+    gate_param=np.zeros(shape=(nCirc,nGate),dtype=np.float32)
+
+    m={'h': 1, 'ry': 2,  'rz': 3, 'cx':4, 'measure':5 } # mapping of gates
+    
     for j,qc in enumerate(qcL):
         qregs = qc.qregs[0]
         nq = qc.num_qubits
+        assert  nGate>=len(qc)  # to be sure we reserved enough space
+        
         # Construct a dictionary with address:index of the qregs objects
         qregAddrD = {hex(id(obj)): idx for idx, obj in enumerate(qregs)}
         k=0 # gate counter per circuit
@@ -143,40 +144,30 @@ def qiskit_to_gateList(qcL):
             params = op.operation.params
             # set first gate counter is the real gate name mapping
             if gate == 'h':
-                gate_type[j,k]=0
-                gate_qid[j,k]= [qIdxL[0], 0]
+                gate_type[j,k]= [m[gate],qIdxL[0], 0]
             elif gate == 'ry':
-                gate_type[j,k]=1
-                gate_angle[j,k]=params[0]
-                gate_qid[j,k]= [qIdxL[0], 0]
+                gate_param[j,k]=params[0]
+                gate_type[j,k]= [m[gate],qIdxL[0], 0]
             elif gate == 'rz':
-                gate_type[j,k]=2
-                gate_angle[j,k]=params[0]
-                gate_qid[j,k]= [qIdxL[0], 0]
+                gate_param[j,k]=params[0]
+                gate_type[j,k]= [m[gate],qIdxL[0], 0]
             elif gate == 'cx':
-                gate_type[j,k]=3
-                gate_qid[j,k]= qIdxL
-            elif gate == 'barrier' or gate == 'measure':
-                continue           
+                gate_type[j,k]= [m[gate]]+qIdxL
+            elif gate == 'barrier':                
+                continue
+            elif  gate == 'measure':
+                continue # Martin, ADD ME
             else:
-                print('ABORT; unknown gate', gate)
+                print('ABORT; unknown qiskit gate', gate)
                 exit(99) 
             k+=1
-        gate_len[j]=k  # remember number of gates per circuit
-    # print({
-    #     'gate_len': gate_len,
-    #     'gate_type': gate_type,
-    #     'gate_qid': gate_qid,
-    #     'gate_angle': gate_angle,
-    #     'num_qubits': nqL,
-    # })
+        circ_type[j]=[nq,k]  # remember number of gates per circuit
+    
     return {
-        'gate_len': gate_len,
+        'circ_type': circ_type,
         'gate_type': gate_type,
-        'gate_qid': gate_qid,
-        'gate_angle': gate_angle,
-        'num_qubits': nqL,
-    }
+        'gate_param': gate_param
+    },{'gate_map':m}
 
 
 
