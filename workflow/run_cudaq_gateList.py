@@ -77,6 +77,7 @@ if __name__ == "__main__":
     T0=time()
     for i in range(nCirc):
         print('\nM:run circ ',i)
+        prOn= nq<6 and i==0 or args.verb>1
         ng=int(gateD['gate_len'][i])
         gate_type = gateD['gate_type'][i]
         gate_qid=gateD['gate_qid'][i]
@@ -91,10 +92,11 @@ if __name__ == "__main__":
         # print("ng:", ng, type(ng))
         # print("fpairs:", fpairs, type(fpairs))
         # print("fangles:", fangles, type(fangles))
+        if prOn:   print(cudaq.draw(circ_kernel, qubit_count, ng, fgate_type, fpairs, fangles))
         counts = cudaq.sample(circ_kernel, qubit_count, ng, fgate_type, fpairs, fangles, shots_count=shots)
 
         print('  assembled & run  elaT= %.1f sec'%(time()-T0))
-        if nq<6:  counts.dump()          
+        if prOn:  counts.dump()          
         countsL[i]=counts
 
     print('M: converted %d circ, elaT=%.1f sec'%(nCirc,time()-T0))
