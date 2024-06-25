@@ -92,23 +92,21 @@ def cudaq_run(qKerL, shots):
 @cudaq.kernel
 def circ_kernel(qubit_count: int, gate_len: int, gate_type: list[int], flat_qpair: list[int], angles: list[float]):
     qvector = cudaq.qvector(qubit_count)
-    """
-        h: 0
-        ry: 1
-        rz: 2
-        cx: 3
-    """
-    # Applying operations based on qpair
+
     for i in range(gate_len):
-        j=2*i
+        j = 2 * i
+        q0 = qvector[flat_qpair[j]]
+        
         if gate_type[i] == 0:
-            h(qvector[j])
+            h(q0)
         elif gate_type[i] == 1:
-            ry(angles[i],qvector[flat_qpair[j]] )
+            ry(angles[i], q0)
         elif gate_type[i] == 2:
-            rz(angles[i],qvector[flat_qpair[j]] )
-        elif gate_type[i] == 3:    
-            x.ctrl(qvector[flat_qpair[j]], qvector[flat_qpair[j+1]])
+            rz(angles[i], q0)
+        elif gate_type[i] == 3:
+            q1 = qvector[flat_qpair[j + 1]]
+            x.ctrl(q0, q1)
+    
     mz(qvector)
 
 
