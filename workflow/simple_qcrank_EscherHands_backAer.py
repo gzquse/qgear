@@ -285,5 +285,5 @@ if __name__ == "__main__":
         print('\n   ./dump_QPY_circs.py  --expName %s  '%(MD['short_name']))
         # one node
         print('\n srun -n 1 ./run_cudaq_qpyCircs.py --expName %s -n 1001000'%(MD['short_name']))  # use 'srun -n 1 ...' instead
-        print('  ./convert_qpyCirc_gateList.py --expName %s \n'%(MD['short_name']))
+        print('  time ./convert_qpyCirc_gateList.py --expName %s \n'%(MD['short_name']))
 

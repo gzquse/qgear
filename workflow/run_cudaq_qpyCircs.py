@@ -90,7 +90,7 @@ if __name__ == "__main__":
     if nq<6:
         print(cudaq.draw(qKerL[0]))
 
-    # preset
+    # select backend
     target = args.target
     gpu_count = cudaq.num_available_gpus()
     cudaq.set_target(target)
@@ -138,20 +138,3 @@ if __name__ == "__main__":
 
 
     
-    '''  TO DO
- 
-    2)DONE  call  u_true,u_reco,res_data=evaluate(probsBL,MD,qcrankObj,u_data)
-    imported form simple_qcrank_EscherHands_backAer
-
-    3) SKIP verify the bitstrings are mapped the same way
-
-    3.1) OPEN ISSUE fix  Segmentation fault for  514 CX-circuit: ./simple_qcrank_EscherHands_backAer.py --nqAddr 8 -e -i 2
-
-    4)DONE  add run time to MD
-
-    5) DONE  save hd5 with new results under different name
-    '''
-        
-   
-
-  
