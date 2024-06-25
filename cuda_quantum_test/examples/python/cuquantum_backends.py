@@ -9,7 +9,7 @@ import cudaq
 
 # qubit_count = 5
 # We can set a larger `qubit_count` if running on a GPU backend.
-qubit_count = 31
+qubit_count = 32
 
 
 @cudaq.kernel
