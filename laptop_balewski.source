@@ -3,6 +3,7 @@
 # after start install QPIXL:  cd   /qpixl_wrk;   pip install -e .
 
 IMG=balewski/ubu22-qiskit1.0:p2j # + QML + IonQ +Braket + pytorch+PennyLane_0.35  
+IMG=balewski/cudaq-qiskit:p1   # CudaQ+Qiskit
 
 echo launch image $IMG
 echo you are launching Podman image ...  remeber to exit
