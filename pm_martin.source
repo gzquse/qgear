@@ -1,7 +1,7 @@
 #!/bin/bash
 #  salloc -q interactive -C gpu -t 4:00:00 -A nintern -N 1 
 # podman-hpc run -it gzquse/ubu22-qiskit1.0:p2j bash
-
+# export IMG=gzquse/cudaquanmpi-qiskit1:p2.1 
 
 #export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_common/
 
