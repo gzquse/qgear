@@ -1,0 +1,5 @@
+#reset  :  do it manually  
+pkill -9 qemu       
+pkill -9 podman
+podman machine stop 
+podman machine start  

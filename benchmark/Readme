@@ -1,0 +1,22 @@
+ Workflow to benchamrk various methods of running large quantum circuit
+
+Input & output are saved at
+myArg: inpPath /dataVault2024/dataCudaq_tmp/circ
+myArg: outPath /dataVault2024/dataCudaq_tmp/meas
+
+
+A)= = = =  Generate big circuit in gateList-format
+
+./gen_gateList.py -k 201000 -i2  --expName  mac17q  -q17
+
+
+B) = = = = =  Execute circuit on CPU using Qiskit
+
+ ./run_qiskit_gateList.py  --expName mac18q
+
+Example output:
+
+M:  gen_circ  elaT= 28.6 sec 
+job started, nCirc=2  nq=18  shots/circ=101000 at AerSimulator('aer_simulator') ...
+M:  ended elaT=177.5 sec, end_load1=6.6
+

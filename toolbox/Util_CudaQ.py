@@ -122,7 +122,7 @@ def qiskit_to_gateList(qcL):
     nGate=len(qc)  # this is overestimate, includes barriers & measurements
     print('nGate',nGate)
 
-    # pre-alocate memory
+    # pre-allocate memory
     circ_type=np.zeros(shape=(nCirc,2),dtype=np.int32) # [num_qubit, num_gate]
     gate_type=np.zeros(shape=(nCirc,nGate,3),dtype=np.int32) # [gate_type, qubit1, qubit2] 
     gate_param=np.zeros(shape=(nCirc,nGate),dtype=np.float32)
@@ -163,11 +163,7 @@ def qiskit_to_gateList(qcL):
             k+=1
         circ_type[j]=[nq,k]  # remember number of gates per circuit
     
-    return {
-        'circ_type': circ_type,
-        'gate_type': gate_type,
-        'gate_param': gate_param
-    },{'gate_map':m}
+    return {'circ_type': circ_type, 'gate_type': gate_type, 'gate_param': gate_param},{'gate_map':m}
 
 
 

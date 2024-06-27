@@ -27,7 +27,7 @@ podman run -it \
        --volume /docker_volumes/2024_martin_gradient:$WORK_DIR \
        --volume /docker_volumes/daan_qcrank:/daan_qcrank \
        --volume $DATA_VAULT:/dataVault2024 \
-       -e EHands_dataVault=/dataVault2024/dataEhands_tmp \
+       -e Cudaq_dataVault=/dataVault2024/dataCudaq_tmp \
        --workdir $WORK_DIR \
        --user $(id -u):$(id -g)  $JNB_PORT \
        $IMG /bin/bash
