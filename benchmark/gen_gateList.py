@@ -179,7 +179,7 @@ if __name__ == "__main__":
     outF=os.path.join(args.outPath,MD['short_name']+'.gate_list.h5')
     write4_data_hdf5(outD,outF,MD)
 
-    print('\n time  ./run_qiskit_gateList.py  --expName %s  '%(MD['short_name']))
+    print('\n time  ./run_gateList.py  --expName %s  '%(MD['short_name']))
     print('\n time  ./run_cudaq_gateList.py  --expName %s  '%(MD['short_name']))
     print('M:done')
 

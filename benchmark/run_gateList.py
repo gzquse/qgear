@@ -81,7 +81,7 @@ if __name__ == "__main__":
     load1, _, _ = psutil.getloadavg()
     
     print('M:  ended elaT=%.1f sec, end_load1=%.1f\n'%(elaT,load1))
-    MD['run_cpu']={'num_cpu':os.cpu_count(),'elapsed_time':elaT,'cpu_load1':load1}
+    MD['run_cpu']={'num_cpu':os.cpu_count(),'elapsed_time':elaT,'cpu_load_1min':load1}
 
     MD['short_name']+='_cpu%d'%MD['run_cpu']['num_cpu']
     expD={} # no arrays to save

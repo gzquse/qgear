@@ -8,8 +8,9 @@
 
 export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_common/
 #IMG=gzquse/cudaq-qiskit1:p2
-IMG=gzquse/cudaquanmpi-qiskit1:p2.2
+IMG=gzquse/cudaquanmpi-qiskit1:p3
 #IMG=balewski/ubu22-qiskit1.0:p3 # + QML + IonQ +Braket + pytorch+PennyLane
+IMG=balewski/cudaquanmpi-qiskit:j1
 CFSH=/global/cfs/cdirs/mpccc/balewski/
 
 echo launch image $IMG
@@ -17,7 +18,7 @@ echo you are launching Podman image ...  remeber to exit
 
 JNB_PORT=' '
 BASE_DIR=2024_martin_gradient  # here git has home
-WORK_DIR=$BASE_DIR/workflow
+WORK_DIR=$BASE_DIR/benchmark
 DATA_VAULT=${CFSH}/quantDataVault2024
 DATA_DIR=/dataCudaQ_tmp
 
@@ -39,7 +40,7 @@ podman-hpc run --gpu  -it \
    --volume ${CFSH}/daan_qcrank:/daan_qcrank \
    --volume ${DATA_VAULT}:/dataVault2024 \
    --volume ${DATA_VAULT}/$DATA_DIR:/data_tmp \
-   -e EHands_dataVault=/data_tmp \
+   -e Cudaq_dataVault=/data_tmp \
    -e DISPLAY  -v $HOME:$HOME -e HOME  \
    -e HDF5_USE_FILE_LOCKING='FALSE' \
    --workdir /$WORK_DIR \
