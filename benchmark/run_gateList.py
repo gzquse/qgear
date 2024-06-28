@@ -17,8 +17,10 @@ from toolbox.Util_H5io4 import  read4_data_hdf5, write4_data_hdf5
 import os
 from time import time
 from pprint import pprint
-from gen_gateList import qiskit_circ_gateList
+from toolbox.Util_Qiskit import qiskit_circ_gateList
 from qiskit_aer import AerSimulator
+from toolbox.Util_CudaQ import circ_kernel
+import cudaq
 
 import argparse
 def get_parser():
@@ -27,6 +29,7 @@ def get_parser():
 
     parser.add_argument("-e","--expName",  default='rblock_a946df',help='[.gate_list.h5]  defines list of circuits to run')
     parser.add_argument('-n','--numShots',type=int, default=101000, help="(optional) shots per circuit")
+    parser.add_argument("-t", "--target", default="nvidia", choices=['qiskit-cpu','tensornet','nvidia-mgpu','nvidia-mqpu','nvidia','qpp-cpu'], help="cudaQ target settings")
 
     # IO paths
     parser.add_argument("--basePath",default='env',help="head path for set of experiments, or env")
@@ -44,6 +47,34 @@ def get_parser():
     assert os.path.exists(args.outPath)
     return args
 
+#...!...!....................
+def run_qiskit_aer():
+    job=backend.run(qcL,shots=args.numShots)
+    #print('   job id:%s , running ...'%job.job_id())
+    result=job.result()
+    probsBL=result.get_counts()
+    return len(probsBL[0])
+
+#...!...!....................
+def run_cudaq():
+    # converter  and run circuits one by one
+    resL=[0]* nCirc # prime the list
+    
+    for i in range(nCirc):
+        # Convert values to Python int and assign to a, b
+        num_qubit, num_gate = map(int,gateD['circ_type'][i] )
+        # Convert to list of integers
+        gate_type=list(map(int,gateD['gate_type'][i].flatten()))
+        gate_param=list(map(float,gateD['gate_param'][i]))
+        assert num_gate<=len(gate_param)
+        prOn= num_qubit<6 and i==0 or args.verb>1
+        
+        if prOn:   print(cudaq.draw(circ_kernel, num_qubit, num_gate, gate_type, gate_param))        
+        results = cudaq.sample(circ_kernel,num_qubit, num_gate, gate_type, gate_param, shots_count=args.numShots)
+        resL[i]=results
+    
+    return len(results)
+
 
 #=================================
 #  M A I N 
@@ -51,37 +82,39 @@ def get_parser():
 #=================================
 if __name__ == "__main__": 
     args=get_parser()
-    
+    target = args.target
     inpF=args.expName+'.gate_list.h5'
     gateD,MD=read4_data_hdf5(os.path.join(args.inpPath,inpF))
-    
+    nCirc=MD['num_circ']
     if args.verb>=2:
         print('M: MD:');  pprint(MD)
-
-    T0=time()
-    qcL=qiskit_circ_gateList(gateD,MD)
-    print('\nM:  gen_circ  elaT= %.1f sec '%(time()-T0))
-    MD.pop('gate_map')
-    nCirc=len(qcL)
     
-    #....  excution using backRun(.) .....
-    backend = AerSimulator()
+    T0=time()
+    if 'qiskit' in target:
+        qcL=qiskit_circ_gateList(gateD,MD)
+        print('\nM:  gen_circ  elaT= %.1f sec '%(time()-T0))
+        MD.pop('gate_map')
+        #....  excution using backRun(.) .....
+        backend = AerSimulator()
+    else:
+        cudaq.set_target(target)
+    
 
     #... auxil MD , filled partially
-    MD['submit']={'backend': backend.name,'num_circ':nCirc}
+    #XMD['submit']={'backend': backend.name,'num_circ':nCirc}
 
-    print('job started, nCirc=%d  nq=%d  shots/circ=%d at %s ...'%(nCirc,qcL[0].num_qubits,args.numShots,backend))
+    print('job started, nCirc=%d  nq=%d  shots/circ=%d   target=%s ...'%(nCirc,MD['num_qubit'],args.numShots,target))
         
     T0=time()
-    job=backend.run(qcL,shots=args.numShots)
-    #print('   job id:%s , running ...'%job.job_id())
-    result=job.result()
-    probsBL=result.get_counts()
+    if 'qiskit' in target:
+        resLen=run_qiskit_aer()
+    else:
+        resLen=run_cudaq()
     elaT=time()-T0
     load1, _, _ = psutil.getloadavg()
     
     print('M:  ended elaT=%.1f sec, end_load1=%.1f\n'%(elaT,load1))
-    MD['run_cpu']={'num_cpu':os.cpu_count(),'elapsed_time':elaT,'cpu_load_1min':load1}
+    MD['run_cpu']={'num_cpu':os.cpu_count(),'elapsed_time':elaT,'cpu_load_1min':load1,'num_mstrings':resLen,'target':target}
 
     MD['short_name']+='_cpu%d'%MD['run_cpu']['num_cpu']
     expD={} # no arrays to save
@@ -89,6 +122,7 @@ if __name__ == "__main__":
     #...... WRITE  OUTPUT .........
     outF=os.path.join(args.outPath,MD['short_name']+'.h5')
     write4_data_hdf5(expD,outF,MD)
-
+    
     print('M:done qiskit %s  elaT %.1f'%(MD['short_name'],elaT))
 
+    pprint(MD)

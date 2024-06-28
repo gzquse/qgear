@@ -115,43 +115,6 @@ def generate_random_gateList(args):
     md={'gate_map':m, 'num_cx':args.numCX, 'num_qubit':nq,'num_gate':nGate,'num_circ':nCirc}
     return outD,md 
          
-#...!...!....................
-def qiskit_circ_gateList(gateD,md):
-    from qiskit import QuantumCircuit
-    from qiskit.circuit import ParameterVector
-
-    nCirc=gateD['circ_type'].shape[0]
-    #print('md:',md)
-    m1=md['gate_map']
-    # Create the reverse mapping
-    m = {v: k for k, v in m1.items()}
-    #print('m:',m)
-
-    qcL=[0]*nCirc
-    for j in range(nCirc):        
-        nq, nGate = gateD['circ_type'][j]
-        qc = QuantumCircuit(nq)        
-        gate_type=gateD['gate_type'][j] # nGate* [gate_type, qubit1, qubit2]
-        angles=gateD['gate_param'][j]
-  
-        for i in range(nGate):
-            if i%3==0: qc.barrier()
-            gate=m[gate_type[i,0]]
-            q0=gate_type[i,1]
-            if gate =='ry' :
-                qc.ry(angles[i], q0)
-            if gate =='rz' :
-                qc.rz(angles[i], q0)
-            if gate =='cx' :
-                q1=gate_type[i,2]
-                qc.cx(q0,q1)
-            
-        qc.measure_all()
-        # Draw the circuit
-        if j==0 and nq<6 and nGate<13: print(qc.draw())
-        qcL[j]=qc
-    return qcL
-
 
 
 #=================================
@@ -180,12 +143,9 @@ if __name__ == "__main__":
     write4_data_hdf5(outD,outF,MD)
 
     print('\n time  ./run_gateList.py  --expName %s  '%(MD['short_name']))
-    print('\n time  ./run_cudaq_gateList.py  --expName %s  '%(MD['short_name']))
+    print('\n time numactl --cpunodebind=0 --membind=0    ./run_gateList.py  --expName %s  -t qiskit-cpu '%(MD['short_name']))
+    print('\n time     ./run_gateList.py  --expName %s  -t nvidia '%(MD['short_name']))
     print('M:done')
 
-    exit(0)
-    T0=time()
-    qiskit_circ_gateList(outD,outMD)
-    print('M:  gen_circ  elaT= %.1f sec '%(time()-T0))
-
+    
     

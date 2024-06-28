@@ -9,10 +9,15 @@ A)= = = =  Generate big circuit in gateList-format
 
 ./gen_gateList.py -k 201000 -i2  --expName  mac17q  -q17
 
+2 images
+17 qubits
+CX count : 201k
+
 
 B) = = = = =  Execute circuit on CPU using Qiskit
 
- ./run_qiskit_gateList.py  --expName mac18q
+on CPU using qiskit
+numactl --cpunodebind=0 --membind=0   ./run_gateList.py  --expName mac18q -t qiskit-cpu
 
 Example output:
 

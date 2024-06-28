@@ -240,3 +240,41 @@ def measL_int2bits(probsIL,nclbit): # converts int(mbits) back to bitstring
             #print(key,mbit,val)
         probsBL[ic]=probs
     return probsBL
+
+#...!...!....................
+def qiskit_circ_gateList(gateD,md):
+    from qiskit import QuantumCircuit
+    from qiskit.circuit import ParameterVector
+
+    nCirc=gateD['circ_type'].shape[0]
+    #print('md:',md)
+    m1=md['gate_map']
+    # Create the reverse mapping
+    m = {v: k for k, v in m1.items()}
+    #print('m:',m)
+
+    qcL=[0]*nCirc
+    for j in range(nCirc):        
+        nq, nGate = gateD['circ_type'][j]
+        qc = QuantumCircuit(nq)        
+        gate_type=gateD['gate_type'][j] # nGate* [gate_type, qubit1, qubit2]
+        angles=gateD['gate_param'][j]
+  
+        for i in range(nGate):
+            if i%3==0: qc.barrier()
+            gate=m[gate_type[i,0]]
+            q0=gate_type[i,1]
+            if gate =='ry' :
+                qc.ry(angles[i], q0)
+            if gate =='rz' :
+                qc.rz(angles[i], q0)
+            if gate =='cx' :
+                q1=gate_type[i,2]
+                qc.cx(q0,q1)
+            
+        qc.measure_all()
+        # Draw the circuit
+        if j==0 and nq<6 and nGate<13: print(qc.draw())
+        qcL[j]=qc
+    return qcL
+

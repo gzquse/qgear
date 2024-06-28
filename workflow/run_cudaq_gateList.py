@@ -19,14 +19,13 @@ from toolbox.Util_Qiskit import  import_QPY_circs
 import os
 from time import time
 from pprint import pprint
-from toolbox.Util_CudaQ import  circ_kernel
 
 from toolbox.logger import log
 import cudaq
 import traceback
 from  Util_EscherHands_ver0  import  make_qcrankObj
 from  simple_qcrank_EscherHands_backAer import evaluate
-from toolbox.Util_CudaQ import counts_cudaq_to_qiskit
+from toolbox.Util_CudaQ import circ_kernel, counts_cudaq_to_qiskit
 
 import argparse
 def get_parser():
@@ -36,7 +35,7 @@ def get_parser():
     parser.add_argument("-e","--expName",  default='exp_i14brq',help='(optional)replaces IBMQ jobID assigned during submission by users choice')
     parser.add_argument('-n','--numShots',type=int, default=None, help="(optional) shots per circuit")
     parser.add_argument('-i','--numSample', default=None, type=int, help='(optional) num of images to be processed')
-    parser.add_argument("-t", "--target", default="nvidia", choices=['tensornet','nvidia-mgpu','nvidia-mqpu','nvidia'], help="cudaQ target settings")
+    parser.add_argument("-t", "--target", default="nvidia", choices=['tensornet','nvidia-mgpu','nvidia-mqpu','nvidia','qpp-cpu'], help="cudaQ target settings")
 
 
     parser.add_argument("--inpPath",default='out/',help="input circuits location")
