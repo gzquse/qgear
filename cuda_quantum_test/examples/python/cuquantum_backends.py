@@ -9,7 +9,7 @@ import cudaq
 
 # qubit_count = 5
 # We can set a larger `qubit_count` if running on a GPU backend.
-qubit_count = 31
+qubit_count = 11
 cudaq.set_target("nvidia-mgpu")
 
 @cudaq.kernel
@@ -21,5 +21,5 @@ def kernel(qubit_count: int):
     mz(qvector)
 
 
-result = cudaq.sample(kernel, qubit_count, shots_count=1000)
-result.dump()
+result = cudaq.sample_async(kernel, qubit_count, shots_count=1000)
+print(result)
