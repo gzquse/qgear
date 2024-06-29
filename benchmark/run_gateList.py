@@ -29,8 +29,7 @@ def get_parser():
 
     parser.add_argument("-e","--expName",  default='rblock_a946df',help='[.gate_list.h5]  defines list of circuits to run')
     parser.add_argument('-n','--numShots',type=int, default=101000, help="(optional) shots per circuit")
-    parser.add_argument("-t", "--target", default="nvidia", choices=['qiskit-cpu','tensornet','nvidia-mgpu','nvidia-mqpu','nvidia','qpp-cpu'], help="cudaQ target settings")
-
+    parser.add_argument("-b", "--backend", default="nvidia", choices=['qiskit-cpu','tensornet','nvidia-mgpu','nvidia-mqpu','nvidia','qpp-cpu'], help="cudaQ target settings")
     # IO paths
     parser.add_argument("--basePath",default='env',help="head path for set of experiments, or env")
     parser.add_argument("--inpPath",default=None,help="input circuits location")
