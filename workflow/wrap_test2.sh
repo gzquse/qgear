@@ -1,6 +1,7 @@
 #!/bin/bash
+export OMPI_MCA_opal_cuda_support=true OMPI_MCA_btl='^openib'
 export IMG=gzquse/cudaquanmpi-qiskit1:p3
-export CMD="python3 cuda_quantum_test/examples/python/cuquantum_backends.py -target nvidia-mqpu "
+export CMD="python3 cuda_quantum_test/examples/python/cuquantum_backends.py "
 #CMD=" ls -l "
 #CMD=" nvidia-smi "
 export CFSH=/pscratch/sd/g/gzquse
