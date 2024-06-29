@@ -56,7 +56,7 @@ def run_qiskit_aer():
     return len(probsBL[0])
 
 #...!...!....................
-def run_cudaq():
+def run_cudaq(num_qpus):
     # converter  and run circuits one by one
     resL=[0]* nCirc # prime the list
     
@@ -69,8 +69,14 @@ def run_cudaq():
         assert num_gate<=len(gate_param)
         prOn= num_qubit<6 and i==0 or args.verb>1
         
-        if prOn:   print(cudaq.draw(circ_kernel, num_qubit, num_gate, gate_type, gate_param))        
-        results = cudaq.sample(circ_kernel,num_qubit, num_gate, gate_type, gate_param, shots_count=args.numShots)
+        if prOn:   print(cudaq.draw(circ_kernel, num_qubit, num_gate, gate_type, gate_param))    
+        if target == "nvidia-mgpu" or target == "nvidia":    
+            results = cudaq.sample(circ_kernel,num_qubit, num_gate, gate_type, gate_param, shots_count=args.numShots)
+        elif target == "nvidia-mqpu":
+            gpu_id = i % num_qpus
+            futures = cudaq.sample_async(circ_kernel, shots_count=args.numShots, qpu_id=gpu_id)
+            # Retrieve and print results
+            results = [counts.get() for counts in futures]
         resL[i]=results
     
     return len(results)
@@ -98,6 +104,9 @@ if __name__ == "__main__":
         backend = AerSimulator()
     else:
         cudaq.set_target(target)
+        target = cudaq.get_target()
+        # only get qpus not gpus
+        num_qpus = target.num_qpus()
     
 
     #... auxil MD , filled partially
@@ -109,7 +118,7 @@ if __name__ == "__main__":
     if 'qiskit' in target:
         resLen=run_qiskit_aer()
     else:
-        resLen=run_cudaq()
+        resLen=run_cudaq(num_qpus)
     elaT=time()-T0
     load1, _, _ = psutil.getloadavg()
     
