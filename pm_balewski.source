@@ -1,7 +1,9 @@
 #!/bin/bash
-#  salloc -q interactive -C gpu -t 4:00:00 -A nstaff     # 4 GPUs + CPU128 cores
+#  salloc -q interactive -C gpu -t 4:00:00 -A nstaff   --gpus-per-task=1 --ntasks  4  --gpu-bind=none --module=cuda-mpich   # 4 GPUs + CPU128 cores
 #  salloc -q interactive -C cpu -t 4:00:00 -A nstaff     # CPU:256 cores
 #  salloc -q shared_interactive -C gpu -t 4:00:00 -A nstaff  # 1 GPU
+#   salloc -N 1 -q interactive -t 00:30:00 -C "gpu&hbm80g" -A mxxxx  # 80GB-gpu nodes
+# https://docs.nersc.gov/systems/perlmutter/running-jobs/#1-node-4-tasks-4-gpus-all-gpus-visible-to-all-tasks
 
 #IMG=balewski/ubu22-qiskit-qml:p3e 
 #IMG=balewski/ubu22-qiskit1.0:p2h
@@ -10,7 +12,8 @@ export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_commo
 #IMG=gzquse/cudaq-qiskit1:p2
 IMG=gzquse/cudaquanmpi-qiskit1:p3
 #IMG=balewski/ubu22-qiskit1.0:p3 # + QML + IonQ +Braket + pytorch+PennyLane
-IMG=balewski/cudaquanmpi-qiskit:j1
+
+#IMG=balewski/cudaquanmpi-qiskit:j2
 CFSH=/global/cfs/cdirs/mpccc/balewski/
 
 echo launch image $IMG
@@ -46,7 +49,7 @@ podman-hpc run --gpu  -it \
    --workdir /$WORK_DIR \
    $IMG 
 
-# fixes HDF5 : error message = 'Unknown error 524')
+#  -e HDF5_USE... fixes error message:  'Unknown error 524'
 
 # 
 # after start install QPIXL:  cd   /daan_qcrank;   pip install -e .

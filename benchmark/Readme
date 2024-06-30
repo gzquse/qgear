@@ -25,3 +25,86 @@ M:  gen_circ  elaT= 28.6 sec
 job started, nCirc=2  nq=18  shots/circ=101000 at AerSimulator('aer_simulator') ...
 M:  ended elaT=177.5 sec, end_load1=6.6
 
+C) = = = = =  Execute circuit on 1 GPU using cudaq
+
+ ./run_gateList.py  --expName mac18q -t nvidia
+
+job started, nCirc=2  nq=18  shots/circ=101000  on target=nvidia ...
+M:  ended elaT=7.5 sec, end_load1=0.9
+
+  closed  yaml: /data_tmp/meas/mac18q_gpu1.yaml  size=0.3 kB   elaT=0.0 sec
+M:done qiskit mac18q_gpu1  elaT 7.5
+{'cpu_1min_load': 0.9287109375,
+ 'date': '20240628_190457_PDT',
+ 'elapsed_time': 7.482309818267822,
+ 'gpu_info': {0: {'gpu_model': 'NVIDIA A100-SXM4-80GB',
+                  'pci_bus_id': '0000:03:00.0',
+                  'tot_mem_gb': 81.9}},
+ 'hash': 'c358a4',
+ 'num_circ': 2,
+ 'num_cx': 201000,
+ 'num_gate': 603000,
+ 'num_gpu': 1,
+ 'num_meas_strings': 72836,
+ 'num_qubit': 18,
+ 'short_name': 'mac18q_gpu1',
+ 'target': 'nvidia'}
+
+D = = = = =  Execute circuit on 4 GPU using cudaq with target=nvidia-mqpu 
+
+*  get GPU node on PM
+ssh pm
+salloc -q interactive -C gpu -t 4:00:00 -A nstaff   --gpus-per-task=1 --ntasks  4  --gpu-bind=none --module=cuda-mpich
+
+*start image
+export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_common/
+IMG=gzquse/cudaquanmpi-qiskit1:p3
+
+*check you see 4 GPUs
+nvidia-smi |grep SXM
+|   0  NVIDIA A100-SXM...  Off  | 00000000:03:00.0 Off |                    0 |
+|   1  NVIDIA A100-SXM...  Off  | 00000000:41:00.0 Off |                    0 |
+|   2  NVIDIA A100-SXM...  Off  | 00000000:82:00.0 Off |                    0 |
+|   3  NVIDIA A100-SXM...  Off  | 00000000:C1:00.0 Off |                    0 |
+
+* generate gateList.h5 for 8 circuits
+./gen_gateList.py  -i 8 -q 20
+
+* test you can run on 1 GPU
+./run_gateList.py  --expName rcirc_1dc177  -b nvidia
+
+* test it runs 4x faster on 4 GPUs
+./run_gateList.py  --expName rcirc_1dc177  -b nvidia-mqpu 
+********************************************
+********************************************
+********************************************
+Jobs submisison setup consists of 2 steps
+See: https://docs.google.com/document/d/1h3uAJkMN5p8XzHfkwPkrQVbIfP8894H1A9alSbFEBaw/edit?usp=sharing
+
+***Step1***
+ ./prep_circ_gateList.sh   (executed inside image)
+
+Objective: generate circuits files according to following specs:
+nCX=101000  # num cx-gates
+nCirc=2
+for nq in {22..33}; do
+    expN=ck${nq}q
+    ./gen_gateList.py -k $nCX -i $nCirc  --expName  $expN  -q $nq  --basePath ${basePath}
+
+***Step2***
+./big_sbatch.sh  (executed on bare OS, login node)
+       using :  wrapPodman.sh batchPodman.slr
+
+Objective: submit a list  slurm job for all circuits for:
+
+for nq in {22..33}; do
+    for trg in  gpu cpu  ; do
+	for shots in 10000 1001000 ; do
+	    expN=ck${nq}q
+	    sbatch   -C $trg  ./batchPodman.slr  $expN $trg $shots
+	done
+    done
+done
+
+
+

@@ -1,16 +1,15 @@
-Possible method of enabling GPU on MacOS
-https://sinrega.org/2024-03-06-enabling-containers-gpu-macos/
 
+Dockerfile.cudaq-qiskit  is used to work on PM by Jan & Martin
 
-Dockerfile.cudaq-qiskit  is used to work on PM
-
-
- Dockerfile.ubu22-qiskit1.0 is experimental version assembled by Jan
+Dockerfile.ubu22-qiskit is experimental version assembled by Jan
 
 To erase all podman files for private images:
 rm -rf $SCRATCH/storage
 
 To erase all podman files for public images:
-Marin: /global/cfs/cdirs/nintern/gzquse/podman_common/
+Marin:  rm -rf  /global/cfs/cdirs/nintern/gzquse/podman_common/
 
-Jan: rm -rf /global/cfs/cdirs/nintern/gzquse/podman_common/
+Jan: rm -rf /global/cfs/cdirs/nstaff/balewski/podman_common/
+
+Possible method of enabling GPU on MacOS
+https://sinrega.org/2024-03-06-enabling-containers-gpu-macos/

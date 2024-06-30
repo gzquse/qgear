@@ -17,6 +17,7 @@ import numpy as np
 from time import time
 from toolbox.Util_H5io4 import  read4_data_hdf5, write4_data_hdf5
 
+
 import argparse
 #...!...!..................
 def get_parser():
@@ -142,9 +143,9 @@ if __name__ == "__main__":
     outF=os.path.join(args.outPath,MD['short_name']+'.gate_list.h5')
     write4_data_hdf5(outD,outF,MD)
 
-    print('\n time  ./run_gateList.py  --expName %s  '%(MD['short_name']))
-    print('\n time numactl --cpunodebind=0 --membind=0    ./run_gateList.py  --expName %s  -t qiskit-cpu '%(MD['short_name']))
-    print('\n time     ./run_gateList.py  --expName %s  -t nvidia '%(MD['short_name']))
+    print('\n time numactl --cpunodebind=0 --membind=0    ./run_gateList.py  --expName %s  -b qiskit-cpu '%(MD['short_name']))
+    print('\n time     ./run_gateList.py  --expName %s  -b nvidia    # 1 GPU'%(MD['short_name']))
+    print(' time     ./run_gateList.py  --expName %s  -b nvidia-mqpu   # all GPUs parallel'%(MD['short_name']))
     print('M:done')
 
     

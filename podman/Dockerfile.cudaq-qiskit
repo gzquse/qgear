@@ -1,5 +1,5 @@
 # MacOS: time podman build -f Dockerfile.cudaq-qiskit -t balewski/cudaq-qiskit:p1  .
-# on PM private image:  ./podman-hpc-build.sh  -f Dockerfile.cudaq-qiskit -t cudaquanmpi-qiskit:j1
+# on PM private image:  ./podman-hpc-build.sh  -f Dockerfile.cudaq-qiskit -t cudaquanmpi-qiskit:j2
 # it takes real	8m20.969s
 
 FROM ubuntu:22.04
@@ -72,13 +72,14 @@ RUN echo 2e-AAAAAAAAAAAAAAAAAAAAAAAAAAAAA   python libs  && \
 
 # notes: cupy for gpu operations
 RUN echo 2f-AAAAAAAAAAAAAAAAAAAAAAAAAAAAA   python libs  && \   
-    pip3 install cupy-cuda12x fitz
-#WORKDIR /root/cuda_quantum
-#hENTRYPOINT ["bash", "-l"]
+    pip3 install cupy-cuda12x fitz nvidia-ml-py3
 
-#.... Jan: add software to fix affiniy, not sure if it is helpfull
+#.... Jan: add software to fix affiniy for CPU-only running
 RUN echo 2d-AAAAAAAAAAAAAAAAAAAAAAAAAAAAA  perhaps needed && \
     apt-get update
 RUN apt-get install numactl  && \
-    apt-get clean all
-# use case: numactl --cpunodebind=0 --membind=0   ./run_gateList.py  --expName mac18q 
+    apt-get clean all    
+# use case for CPUs on PM: numactl --cpunodebind=0 --membind=0   ./run_gateList.py  --expName mac18q
+
+#WORKDIR /root/cuda_quantum
+#hENTRYPOINT ["bash", "-l"]

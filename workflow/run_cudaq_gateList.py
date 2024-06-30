@@ -76,6 +76,7 @@ if __name__ == "__main__":
      # select backend
     target = args.target
     gpu_count = cudaq.num_available_gpus()
+    
     cudaq.set_target(target)
     
     print('M: run %d cudaq-circuit on %d GPUs, %d shots/circ'%(nCirc,gpu_count,shots))
