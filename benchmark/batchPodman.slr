@@ -1,56 +1,58 @@
 #!/bin/bash 
 #SBATCH  -N 1  -C cpu  -A nstaff
-# SBATCH  --time=28:00 -q debug
-#SBATCH --time 23:28:00  -q regular 
+#SBATCH  --time=28:00 -q debug
+# SBATCH --time 23:58:00  -q regular 
 #SBATCH --output=out/%j.out
 #SBATCH  --licenses=scratch
 # - - - E N D    O F    SLURM    C O M M A N D S
+
 set -u ;  # exit  if you try to use an uninitialized variable
 
 expN=${1:-ck16q}
 trg=${2:-cpu}
-shots=${3:-20000}
+#shots=${3:-20000}
 if [ "$trg" == "cpu" ]; then
     backend='qiskit-cpu'
 elif [ "$trg" == "gpu" ]; then
     backend="nvidia"
 fi
 
-echo S:  expN=$expN  backend=$backend   shots=$shots  expN=$expN
+echo S:  expN=$expN  backend=$backend    expN=$expN  
 
+#.....  define Podman image
 export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_common/
 IMG=balewski/cudaquanmpi-qiskit:j2
-
-echo use image $IMG
+echo S: head:`hostname`  use image $IMG
 
 #..... input data
 CFSH=/global/cfs/cdirs/mpccc/balewski
+#BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_june28 - good campaign
+BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_june30
+
+#...  sandbox code
 DATA_SRC=${CFSH}/2024_martin_gradient
-BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_june28
-
-#basePath=/dataVault2024/dataCudaQ_june28
-
-#... output
 jobId=${SLURM_JOBID:-999}
 wrkPath=$SCRATCH/jobs_cudaq/$jobId
 
 echo wrkPath=$wrkPath
 mkdir -p $wrkPath
 cp -rp ../toolbox *py  wrapPodman.sh batchPodman.slr $wrkPath/
-
 cd $wrkPath
 
-CMD="   ./run_gateList.py  --expName $expN --backend $backend --numShots $shots   --basePath /myData  "
+# .... task to be executed by Podman
+CMD="   ./run_gateList.py  --expName $expN --backend $backend   --basePath /myData  "
+# spare: --numShots $shots 
 
-if [ "$trg" == "cpu" ]; then
-    CMD=" numactl --cpunodebind=0 --membind=0   "$CMD
-fi
+#if [ "$trg" == "cpu" ]; then
+#    CMD=" numactl --cpunodebind=0 --membind=0   "$CMD
+#fi
 
 echo S: CMD=$CMD
 #pwd
 #ls
 #nvidia-smi
 
+#..... fire the task
 srun -n 1  ./wrapPodman.sh $IMG " $CMD " $wrkPath  $BASE_PATH
 echo S:done ; date 
 

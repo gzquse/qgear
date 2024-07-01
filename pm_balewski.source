@@ -10,10 +10,10 @@
 
 export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_common/
 #IMG=gzquse/cudaq-qiskit1:p2
-IMG=gzquse/cudaquanmpi-qiskit1:p3
+#IMG=gzquse/cudaquanmpi-qiskit1:p3
 #IMG=balewski/ubu22-qiskit1.0:p3 # + QML + IonQ +Braket + pytorch+PennyLane
 
-#IMG=balewski/cudaquanmpi-qiskit:j2
+IMG=balewski/cudaquanmpi-qiskit:j2
 CFSH=/global/cfs/cdirs/mpccc/balewski/
 
 echo launch image $IMG

@@ -77,7 +77,7 @@ def run_cudaq(shots,num_qpus):
             results = cudaq.sample(circ_kernel,num_qubit, num_gate, gate_type, gate_param, shots_count=shots)
         elif target == "nvidia-mqpu":
             gpu_id = i % num_qpus
-            futures = cudaq.sample_async(circ_kernel, num_qubit, num_gate, gate_type, gate_param, shots_count=shots, qpu_id=gpu_id)
+            futures = cudaq.sample_async(circ_kernel, shots_count=shots, qpu_id=gpu_id)
             # Retrieve and print results
             results = [counts.get() for counts in futures]
 
@@ -99,7 +99,6 @@ if __name__ == "__main__":
         print('M: MD:');  pprint(MD)
     
     T0=time()
-    
     if 'qiskit' in target:
         print('M: will run on CPUs ...')
         qcL=qiskit_circ_gateList(gateD,MD)
@@ -112,19 +111,18 @@ if __name__ == "__main__":
         num_qpus = cudaq.get_target().num_qpus()
 
     shots=args.numShots
-    print('job %s started, nCirc=%d  nq=%d  shots/circ=%d  on target=%s ...'%(MD['short_name'],nCirc,MD['num_qubit'],shots,target))
+    print('job started, nCirc=%d  nq=%d  shots/circ=%d  on target=%s ...'%(nCirc,MD['num_qubit'],shots,target))
         
     T0=time()
     if 'qiskit' in target:
         resLen=run_qiskit_aer(shots)
         MD['cpu_info']=get_cpu_info(verb=0)
-        MD['short_name']+='_cpu' #%d'%MD['cpu_info']['phys_cores']
+        MD['short_name']+='_cpu%d'%MD['cpu_info']['phys_cores']
     else:
         resLen=run_cudaq(shots,num_qpus)
         MD['num_qpus']=num_qpus
         MD['gpu_info']=get_gpu_info(verb=0)
-        #MD['short_name']+='_qpus%d'%MD['num_qpus']
-        MD['short_name']+='_gpu'
+        MD['short_name']+='_qpus%d'%MD['num_qpus']
 
     elaT=time()-T0
     load1, _, _ = psutil.getloadavg()
@@ -133,7 +131,9 @@ if __name__ == "__main__":
     MD.pop('gate_map')
     MD['cpu_1min_load']=load1
     MD['num_shots']=shots
-    #MD['short_name']+='_%dk'%(shots/1000) if shots <1000000 else '_%dM'%(shots/1000000)     
+    MD['short_name']+='_%dk'%(shots/1000) if shots <1000000 else '_%dM'%(shots/1000000)     
+    expD={} # no arrays to save
+
     #...... WRITE  OUTPUT .........
     outF=os.path.join(args.outPath,MD['short_name']+'.yaml')
     write_yaml(MD,outF)

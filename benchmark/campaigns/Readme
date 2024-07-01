@@ -1,0 +1,15 @@
+large scale campaigns with valuable results
+
+**** june28 ****
+CFSH=/global/cfs/cdirs/mpccc/balewski
+BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_june28 - good campaign
+IMG=balewski/cudaquanmpi-qiskit:j2
+
+for shots in 10000 1001000 ; do
+    for nq in {22..32}; do
+	for trg in  gpu cpu  ; do
+
+gDoc: https://docs.google.com/document/d/1h3uAJkMN5p8XzHfkwPkrQVbIfP8894H1A9alSbFEBaw/edit?usp=sharing
+
+Full nodes were  used for testing. Single job per setting
+

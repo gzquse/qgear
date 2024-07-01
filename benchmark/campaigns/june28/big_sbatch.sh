@@ -5,14 +5,15 @@ set -e ;  #  bash exits if any statement returns a non-true return value
  
 # runs in PM login node, bere-OS
 k=0
-for nq in {17..18}; do
+for shots in 10000 1001000 ; do
+    for nq in {17..18}; do
 #    for nq in {22..32}; do
 #     for nq in {22..24}; do	    
 	for trg in  gpu cpu  ; do
 	    k=$[ $k +1 ]
 	    expN=ck${nq}q
- 	    echo $k  expN:$expN   trg:$trg 
-	    SCMD="  ./batchPodman.slr  $expN $trg  "
+ 	    echo $k  expN:$expN   trg:$trg  shots:$shots
+	    SCMD="  ./batchPodman.slr  $expN $trg $shots "
 	    
 	    # Slurm incantation depends on GPU vs. CPU
 	    if [ "$trg" == "cpu" ]; then
@@ -30,10 +31,6 @@ date
 # testing :   sbatch   -C gpu  ./batchPodman.slr
 #       sbatch   -C cpu  ./batchPodman.slr
 #
-# re-submit one job by hand on FULL node
+# re-submit one job by hand:
 #   	sbatch -C gpu --gpus-per-task=1 --ntasks 4 --gpu-bind=none --module=cuda-mpich  ./batchPodman.slr ck29q gpu 1001000
 #       sbatch -C cpu --exclusive  --ntasks-per-node=1   ./batchPodman.slr ck24q cpu 1001000
-
-# re-submit one job by hand on shared 1/4 of a node
-#      sbatch  -q shared -C gpu --gpus-per-task 1 --cpus-per-task=32  --ntasks=1 ./batchPodman.slr cb22q gpu 
-#     sbatch  -q shared -C cpu  --cpus-per-task=64  --ntasks=1  ./batchPodman.slr cb22q cpu 

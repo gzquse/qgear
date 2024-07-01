@@ -156,7 +156,6 @@ def get_gpu_info(verb=1):
     import pynvml  # for inpection of GPUs
     pynvml.nvmlInit()
     device_count = pynvml.nvmlDeviceGetCount()
-
     
     for i in range(device_count):
         handle = pynvml.nvmlDeviceGetHandleByIndex(i)
@@ -174,13 +173,16 @@ def get_gpu_info(verb=1):
         free_memory = memory_info.free / (1024 ** 2)    # Convert bytes to MB
 
         memGB=float( '%.1f'%(total_memory/1000.))
-        md={'gpu_model':model_name,'pci_bus_id':pci_bus_id, 'tot_mem_gb': memGB}
-        if verb<1: break
-        print(f"{i}  {model_name}   bus_id: {pci_bus_id} ")
-        print(f"Total Memory: {total_memory:.2f} MB")
-        print(f"Used Memory: {used_memory:.2f} MB")
-        print(f"Free Memory: {free_memory:.2f} MB")
-        print()
+        
+        if i==0:
+                md={'gpu_model':model_name, 'tot_mem_gb': memGB, 'pci_bus':[pci_bus_id] }
+        else:  md['pci_bus'].append(pci_bus_id)
+        if verb>1:
+            print(f"{i}  {model_name}   bus_id: {pci_bus_id} ")
+            print(f"Total Memory: {total_memory:.2f} MB")
+            print(f"Used Memory: {used_memory:.2f} MB")
+            print(f"Free Memory: {free_memory:.2f} MB")
+            print()
     md['device_count']=device_count
 
     pynvml.nvmlShutdown()

@@ -5,7 +5,7 @@ set -e ;  #  bash exits if any statement returns a non-true return value
 
 # runs inside IMAGE
 
-basePath=/dataVault2024/dataCudaQ_june30
+basePath=/dataVault2024/dataCudaQ_june28
 
 if [ ! -d "$basePath" ]; then
     echo create $basePath
@@ -15,10 +15,6 @@ if [ ! -d "$basePath" ]; then
     cd -
 fi
 
-# testing
-#nq=18 ; ./gen_gateList.py -k 10000 -i 4  --expName  cb${nq}q  -q $nq  --basePath ${basePath} ; exit
-  ./run_gateList.py  --expName cb18q  -b qiskit-cpu --basePath ${basePath} ; exit
-
 nCX=101000  # num cx-gates
 nCirc=2
 
@@ -27,7 +23,7 @@ k=0
 
 for nq in {22..33}; do
 #for nq in {16..18}; do  # for testing
-    expN=cb${nq}q
+    expN=ck${nq}q
     k=$[ $k +1 ]
     echo $k  expN: $expN
     ./gen_gateList.py -k $nCX -i $nCirc  --expName  $expN  -q $nq  --basePath ${basePath}
@@ -35,4 +31,3 @@ for nq in {22..33}; do
 done
 echo done $k jobs
 date
-

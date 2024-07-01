@@ -31,14 +31,15 @@ def get_parser():
     parser.add_argument("--expName",  default=None,help='(optional) ')
 
     # IO paths
-    parser.add_argument("--basePath",default='env',help="head path for set of experiments, or env")
-    parser.add_argument("--outPath",default=None,help="(optional) redirect all outputs ")
+    parser.add_argument("--basePath",default=None,help="head path for set of experiments, or 'env'")
+    parser.add_argument("--outPath",default='out/',help="(optional) redirect all outputs ")
     
     args = parser.parse_args()
     # make arguments  more flexible
-    if 'env'==args.basePath: args.basePath= os.environ['Cudaq_dataVault']    
-    if args.outPath==None: args.outPath=os.path.join(args.basePath,'circ') 
-  
+    if args.basePath=='env': args.basePath= os.environ['Cudaq_dataVault']
+    if args.basePath!=None:
+        args.outPath=os.path.join(args.basePath,'circ') 
+
     for arg in vars(args):  print( 'myArgs:',arg, getattr(args, arg))
     assert os.path.exists(args.outPath)
 
@@ -144,7 +145,7 @@ if __name__ == "__main__":
     write4_data_hdf5(outD,outF,MD)
 
     print('\n time numactl --cpunodebind=0 --membind=0    ./run_gateList.py  --expName %s  -b qiskit-cpu '%(MD['short_name']))
-    print('\n time     ./run_gateList.py  --expName %s  -b nvidia    # 1 GPU'%(MD['short_name']))
+    print('time     ./run_gateList.py  --expName %s  -b nvidia    # 1 GPU'%(MD['short_name']))
     print(' time     ./run_gateList.py  --expName %s  -b nvidia-mqpu   # all GPUs parallel'%(MD['short_name']))
     print('M:done')
 

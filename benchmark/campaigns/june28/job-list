@@ -1,0 +1,103 @@
+./big_sbatch.sh
+1 expN:ck22q trg:gpu ns:10000
+Submitted batch job 27342457
+2 expN:ck22q trg:cpu ns:10000
+Submitted batch job 27342458
+3 expN:ck23q trg:gpu ns:10000
+Submitted batch job 27342459
+4 expN:ck23q trg:cpu ns:10000
+Submitted batch job 27342460
+5 expN:ck24q trg:gpu ns:10000
+Submitted batch job 27342461
+6 expN:ck24q trg:cpu ns:10000
+Submitted batch job 27342462
+7 expN:ck25q trg:gpu ns:10000
+Submitted batch job 27342463
+8 expN:ck25q trg:cpu ns:10000
+Submitted batch job 27342464
+9 expN:ck26q trg:gpu ns:10000
+Submitted batch job 27342465
+10 expN:ck26q trg:cpu ns:10000
+Submitted batch job 27342466
+11 expN:ck27q trg:gpu ns:10000
+Submitted batch job 27342467
+12 expN:ck27q trg:cpu ns:10000
+Submitted batch job 27342468
+13 expN:ck28q trg:gpu ns:10000
+Submitted batch job 27342469
+14 expN:ck28q trg:cpu ns:10000
+Submitted batch job 27342470
+15 expN:ck29q trg:gpu ns:10000
+Submitted batch job 27342471
+16 expN:ck29q trg:cpu ns:10000
+Submitted batch job 27342472
+17 expN:ck30q trg:gpu ns:10000
+Submitted batch job 27342473
+18 expN:ck30q trg:cpu ns:10000
+Submitted batch job 27342475
+19 expN:ck31q trg:gpu ns:10000
+Submitted batch job 27342476
+20 expN:ck31q trg:cpu ns:10000
+Submitted batch job 27342477
+21 expN:ck32q trg:gpu ns:10000
+Submitted batch job 27342478
+22 expN:ck32q trg:cpu ns:10000
+Submitted batch job 27342479
+23 expN:ck22q trg:gpu ns:1001000
+Submitted batch job 27342480
+24 expN:ck22q trg:cpu ns:1001000
+Submitted batch job 27342481
+25 expN:ck23q trg:gpu ns:1001000
+Submitted batch job 27342482
+26 expN:ck23q trg:cpu ns:1001000
+Submitted batch job 27342483
+27 expN:ck24q trg:gpu ns:1001000
+Submitted batch job 27342484
+28 expN:ck24q trg:cpu ns:1001000
+Submitted batch job 27342485
+29 expN:ck25q trg:gpu ns:1001000
+Submitted batch job 27342486
+30 expN:ck25q trg:cpu ns:1001000
+Submitted batch job 27342487
+31 expN:ck26q trg:gpu ns:1001000
+Submitted batch job 27342488
+32 expN:ck26q trg:cpu ns:1001000
+Submitted batch job 27342489
+33 expN:ck27q trg:gpu ns:1001000
+Submitted batch job 27342490
+34 expN:ck27q trg:cpu ns:1001000
+Submitted batch job 27342491
+35 expN:ck28q trg:gpu ns:1001000
+Submitted batch job 27342492
+36 expN:ck28q trg:cpu ns:1001000
+Submitted batch job 27342493
+37 expN:ck29q trg:gpu ns:1001000
+Submitted batch job 27342494
+38 expN:ck29q trg:cpu ns:1001000
+Submitted batch job 27342495
+39 expN:ck30q trg:gpu ns:1001000
+Submitted batch job 27342496
+40 expN:ck30q trg:cpu ns:1001000
+Submitted batch job 27342498
+41 expN:ck31q trg:gpu ns:1001000
+Submitted batch job 27342499
+42 expN:ck31q trg:cpu ns:1001000
+Submitted batch job 27342500
+43 expN:ck32q trg:gpu ns:1001000
+Submitted batch job 27342501
+44 expN:ck32q trg:cpu ns:1001000
+Submitted batch job 27342502
+submitted: 44 jobs
+
+
+redo because I was changing python code
+ sbatch -C gpu --gpus-per-task=1 --ntasks 4 --gpu-bind=none --module=cuda-mpich  ./batchPodman.slr ck28q gpu 1001000 
+Submitted batch job 27386972
+balewski@perlmutter:login07:~/prjs/2024_martin_gradient/benchmark> sbatch -C gpu --gpus-per-task=1 --ntasks 4 --gpu-bind=none --module=cuda-mpich  ./batchPodman.slr ck29q gpu 1001000 
+Submitted batch job 27386979
+balewski@perlmutter:login07:~/prjs/2024_martin_gradient/benchmark> sbatch -C gpu --gpus-per-task=1 --ntasks 4 --gpu-bind=none --module=cuda-mpich  ./batchPodman.slr ck30q gpu 1001000 
+Submitted batch job 27386984
+ 
+   sbatch -C cpu --exclusive  --ntasks-per-node=1   ./batchPodman.slr ck24q cpu 1001000
+Submitted batch job 27392441
+Submitted batch job 27396708
