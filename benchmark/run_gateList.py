@@ -64,7 +64,7 @@ def run_qiskit_aer(shots):
 def run_cudaq(shots,num_qpus):
     # converter  and run circuits one by one
     resL=[0]* nCirc # prime the list
-    
+    futures = []
     for i in range(nCirc):
         # Convert values to Python int and assign to a, b
         num_qubit, num_gate = map(int,gateD['circ_type'][i] )
@@ -77,15 +77,14 @@ def run_cudaq(shots,num_qpus):
         if prOn:   print(cudaq.draw(circ_kernel, num_qubit, num_gate, gate_type, gate_param))    
         if target == "nvidia-mgpu" or target == "nvidia":    
             results = cudaq.sample(circ_kernel,num_qubit, num_gate, gate_type, gate_param, shots_count=shots)
+            resL[i]=results
         elif target == "nvidia-mqpu":
             gpu_id = i % num_qpus
-            futures = cudaq.sample_async(circ_kernel, num_qubit, num_gate, gate_type, gate_param, shots_count=shots, qpu_id=gpu_id)
+            futures.append(cudaq.sample_async(circ_kernel, num_qubit, num_gate, gate_type, gate_param, shots_count=shots, qpu_id=gpu_id))
             # Retrieve and print results
-            results = [counts.get() for counts in futures]
-
-        resL[i]=results
-    
-    return len(results)
+    if target == "nvidia-mqpu":
+        resL = [res.get() for res in futures]
+    return len(resL)
 
 #=================================
 #  M A I N 
