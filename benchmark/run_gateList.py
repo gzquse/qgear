@@ -47,7 +47,9 @@ def get_parser():
 
     for arg in vars(args):  print( 'myArg:',arg, getattr(args, arg))
     assert os.path.exists(args.inpPath)
-    assert os.path.exists(args.outPath)
+    if not os.path.exists(args.outPath):
+        os.mkdir(args.outPath)
+
     return args
 
 #...!...!....................

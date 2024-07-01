@@ -37,12 +37,12 @@ def get_parser():
     args = parser.parse_args()
     # make arguments  more flexible
     if args.basePath=='env': args.basePath= os.environ['Cudaq_dataVault']
-    if args.basePath!=None:
+    if args.basePath!=None and args.outPath!=None :
         args.outPath=os.path.join(args.basePath,'circ') 
 
     for arg in vars(args):  print( 'myArgs:',arg, getattr(args, arg))
-    assert os.path.exists(args.outPath)
-
+    if not os.path.exists(args.outPath):
+        os.makedirs(args.outPath, exist_ok=True)
     assert args.numQubits>=2
     return args
 

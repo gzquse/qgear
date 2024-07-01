@@ -75,6 +75,9 @@ nvidia-smi |grep SXM
 
 * test it runs 4x faster on 4 GPUs
 ./run_gateList.py  --expName rcirc_1dc177  -b nvidia-mqpu 
+
+
+
 ********************************************
 ********************************************
 ********************************************

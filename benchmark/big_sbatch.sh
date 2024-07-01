@@ -5,23 +5,22 @@ set -e ;  #  bash exits if any statement returns a non-true return value
  
 # runs in PM login node, bere-OS
 k=0
-for nq in {17..18}; do
+#for nq in {17..18}; do
 #    for nq in {22..32}; do
-#     for nq in {22..24}; do	    
+     for nq in {22..22}; do	    
 	for trg in  gpu cpu  ; do
 	    k=$[ $k +1 ]
-	    expN=ck${nq}q
+	    expN=mar${nq}q
  	    echo $k  expN:$expN   trg:$trg 
 	    SCMD="  ./batchPodman.slr  $expN $trg  "
 	    
 	    # Slurm incantation depends on GPU vs. CPU
 	    if [ "$trg" == "cpu" ]; then
-		sbatch -C cpu --exclusive  --ntasks-per-node=1  $SCMD
+		sbatch -C cpu --exclusive  --ntasks-per-node=1 -A nintern  $SCMD
 	    elif [ "$trg" == "gpu" ]; then
-		sbatch -C gpu --gpus-per-task=1 --ntasks 4 --gpu-bind=none --module=cuda-mpich  $SCMD
+		sbatch -C gpu --gpus-per-task=1 --ntasks 4 --gpu-bind=none --module=cuda-mpich -A nintern  $SCMD
 	    fi	    
 	done
-    done
 done
 
 echo submitted:  $k jobs

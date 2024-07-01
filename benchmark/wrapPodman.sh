@@ -1,6 +1,6 @@
 #!/bin/bash
 echo W:myRank is $SLURM_PROCID
-echo W:args '1= '$1 ',2= '$2  ',3= '$3 ',4= '$4
+echo W:args '1= '$1 ', 2= '$2  ', 3= '$3 ', 4= '$4
 
 IMG=$1
 CMD=$2

@@ -8,8 +8,8 @@
 
 set -u ;  # exit  if you try to use an uninitialized variable
 
-expN=${1:-ck16q}
-trg=${2:-cpu}
+expN=${1:-mar24q}
+trg=${2:-gpu}
 #shots=${3:-20000}
 if [ "$trg" == "cpu" ]; then
     backend='qiskit-cpu'
@@ -22,15 +22,23 @@ echo S:  expN=$expN  backend=$backend    expN=$expN
 #.....  define Podman image
 export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_common/
 IMG=balewski/cudaquanmpi-qiskit:j2
+IMG=gzquse/cudaquanmpi-qiskit1:p3
+
 echo S: head:`hostname`  use image $IMG
 
-#..... input data
+#..... input data: $USER
+# jan
 CFSH=/global/cfs/cdirs/mpccc/balewski
 #BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_june28 - good campaign
-BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_june30
+#BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_june30
+#DATA_SRC=${CFSH}/2024_martin_gradient
+# Martin
+CFSH=/pscratch/sd/g/gzquse
+BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_test2
+DATA_SRC=${CFSH}/GRADIENT_IMAGE
+
 
 #...  sandbox code
-DATA_SRC=${CFSH}/2024_martin_gradient
 jobId=${SLURM_JOBID:-999}
 wrkPath=$SCRATCH/jobs_cudaq/$jobId
 
@@ -43,17 +51,14 @@ cd $wrkPath
 CMD="   ./run_gateList.py  --expName $expN --backend $backend   --basePath /myData  "
 # spare: --numShots $shots 
 
-#if [ "$trg" == "cpu" ]; then
-#    CMD=" numactl --cpunodebind=0 --membind=0   "$CMD
-#fi
-
 echo S: CMD=$CMD
 #pwd
 #ls
 #nvidia-smi
 
 #..... fire the task
-srun -n 1  ./wrapPodman.sh $IMG " $CMD " $wrkPath  $BASE_PATH
+#srun -n 1
+./wrapPodman.sh $IMG " $CMD " $wrkPath  $BASE_PATH
 echo S:done ; date 
 
 #Cancel all my jobs:
