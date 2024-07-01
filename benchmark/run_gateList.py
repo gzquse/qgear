@@ -130,7 +130,7 @@ if __name__ == "__main__":
 
     elaT=time()-T0
     load1, _, _ = psutil.getloadavg()
-    print('M:  ended elaT=%.1f sec, end_load1=%.1f\n'%(elaT,load1))
+    print('M:  %s ended elaT=%.1f sec, end_load1=%.1f\n'%(MD['short_name'],elaT,load1))
     MD.update({'elapsed_time':elaT,'num_meas_strings':resLen,'target':target,'date':dateT2Str()})
     MD.pop('gate_map')
     MD['cpu_1min_load']=load1
@@ -140,7 +140,7 @@ if __name__ == "__main__":
     outF=os.path.join(args.outPath,MD['short_name']+'.yaml')
     write_yaml(MD,outF)
     
-    print('M:done qiskit %s  elaT %.1f'%(MD['short_name'],elaT))
+    print('M:done  %s  elaT %.1f sec\n'%(MD['short_name'],elaT))
 
     pprint(MD)
    

@@ -63,3 +63,7 @@ echo S:done ; date
 
 #Cancel all my jobs:
 #  squeue -u $USER -h | awk '{print $1}' | xargs scancel
+
+# all jobs in the qos
+#  squeue --qos=gpu_shared -o "%.7i %.10P %.12j %.8u %.2t %.10M %.6D %R %.20N"
+
