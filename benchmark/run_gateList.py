@@ -40,6 +40,7 @@ def get_parser():
        
     args = parser.parse_args()
     # make arguments  more flexible
+    
     if 'env'==args.basePath: args.basePath= os.environ['Cudaq_dataVault']
     if args.inpPath==None: args.inpPath=os.path.join(args.basePath,'circ') 
     if args.outPath==None: args.outPath=os.path.join(args.basePath,'meas') 
@@ -76,7 +77,7 @@ def run_cudaq(shots,num_qpus):
             results = cudaq.sample(circ_kernel,num_qubit, num_gate, gate_type, gate_param, shots_count=shots)
         elif target == "nvidia-mqpu":
             gpu_id = i % num_qpus
-            futures = cudaq.sample_async(circ_kernel, shots_count=shots, qpu_id=gpu_id)
+            futures = cudaq.sample_async(circ_kernel, num_qubit, num_gate, gate_type, gate_param, shots_count=shots, qpu_id=gpu_id)
             # Retrieve and print results
             results = [counts.get() for counts in futures]
 
