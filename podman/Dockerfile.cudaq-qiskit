@@ -83,4 +83,4 @@ RUN apt-get install numactl  && \
 # use case for CPUs on PM: numactl --cpunodebind=0 --membind=0   ./run_gateList.py  --expName mac18q
 
 #WORKDIR /root/cuda_quantum
-#hENTRYPOINT ["bash", "-l"]
+#ENTRYPOINT ["bash", "-l"]
