@@ -20,10 +20,8 @@ fi
 echo S:  expN=$expN  backend=$backend    expN=$expN  
 
 #.....  define Podman image
-export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_common/
-IMG=balewski/cudaquanmpi-qiskit:j2
-IMG=gzquse/cudaquanmpi-qiskit1:p3
-
+export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nstaff/balewski/podman_common/
+IMG=balewski/cudaquanmpi-qiskit:p4
 echo S: head:`hostname`  use image $IMG
 
 #..... input data: $USER

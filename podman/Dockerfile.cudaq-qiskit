@@ -1,6 +1,9 @@
+#--------------------------------------
 # MacOS: time podman build -f Dockerfile.cudaq-qiskit -t balewski/cudaq-qiskit:p1  .
-# on PM private image:  ./podman-hpc-build.sh  -f Dockerfile.cudaq-qiskit -t cudaquanmpi-qiskit:j2
 # it takes real	8m20.969s
+# on PM public image:  ./podman-hpc-build.sh  -f Dockerfile.cudaq-qiskit -t cudaquanmpi-qiskit:p4 -p
+# # it takes real	15m57s
+#--------------------------------------
 
 FROM ubuntu:22.04
 ARG arch=x86_64
@@ -59,8 +62,6 @@ RUN echo 2b-AAAAAAAAAAAAAAAAAAAAAAAAAAAAA   Qiskit 1.0 libs  && \
 RUN echo 2c-AAAAAAAAAAAAAAAAAAAAAAAAAAAAA   ML+QML  libs  && \
     pip3 install scikit-learn pandas seaborn[stats]  networkx[default] optuna
 
-# pylatexenc  ??
-
 RUN echo 2d-AAAAAAAAAAAAAAAAAAAAAAAAAAAAA   python libs  && \
     pip3 install --upgrade pip && \
     pip3 install matplotlib h5py   scipy    jupyter notebook  bitstring coloredlogs
@@ -75,7 +76,7 @@ RUN echo 2f-AAAAAAAAAAAAAAAAAAAAAAAAAAAAA   python libs  && \
     pip3 install cupy-cuda12x fitz nvidia-ml-py3
 
 #.... Jan: add software to fix affiniy for CPU-only running
-RUN echo 2d-AAAAAAAAAAAAAAAAAAAAAAAAAAAAA  perhaps needed && \
+RUN echo 2d-AAAAAAAAAAAAAAAAAAAAAAAAAAAAA  afinity and monitoring tools  && \
     apt-get update
 RUN apt-get install numactl  && \
     apt-get clean all    

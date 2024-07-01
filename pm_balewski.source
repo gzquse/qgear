@@ -5,15 +5,11 @@
 #   salloc -N 1 -q interactive -t 00:30:00 -C "gpu&hbm80g" -A mxxxx  # 80GB-gpu nodes
 # https://docs.nersc.gov/systems/perlmutter/running-jobs/#1-node-4-tasks-4-gpus-all-gpus-visible-to-all-tasks
 
-#IMG=balewski/ubu22-qiskit-qml:p3e 
-#IMG=balewski/ubu22-qiskit1.0:p2h
-
-export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_common/
+#export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_common/
 #IMG=gzquse/cudaq-qiskit1:p2
-#IMG=gzquse/cudaquanmpi-qiskit1:p3
-#IMG=balewski/ubu22-qiskit1.0:p3 # + QML + IonQ +Braket + pytorch+PennyLane
-
-IMG=balewski/cudaquanmpi-qiskit:j2
+export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nstaff/balewski/podman_common/
+IMG=balewski/cudaquanmpi-qiskit:p4
+#IMG=balewski/cudaquanmpi-qiskit:j2
 CFSH=/global/cfs/cdirs/mpccc/balewski/
 
 echo launch image $IMG
