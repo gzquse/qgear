@@ -68,14 +68,33 @@ nvidia-smi |grep SXM
 |   3  NVIDIA A100-SXM...  Off  | 00000000:C1:00.0 Off |                    0 |
 
 * generate gateList.h5 for 8 circuits
+cd benchmark
 ./gen_gateList.py  -i 8 -q 20
 
-* test you can run on 1 GPU
+* testA you can run on 1 GPU
 ./run_gateList.py  --expName rcirc_1dc177  -b nvidia
 
-* test it runs 4x faster on 4 GPUs
+* testB it runs few times faster on 4 GPUs
 ./run_gateList.py  --expName rcirc_1dc177  -b nvidia-mqpu 
 
+The 20-qubit circuit is too small and runs too fast to show the advantage
+
+* testC : generate  8 large circuits, each should take 1 minute on 1 GPU
+./gen_gateList.py  -i 8 -q 24 -k 101000
+
+ 'num_circ': 8,
+ 'num_cx': 101000,
+ 'num_gate': 303000,
+ 'num_meas_strings': 8,
+ 'num_qpus': 1,
+ 'num_qubit': 24,
+
+Now compare:
+time     ./run_gateList.py  --expName rcirc_f1e83d  -b nvidia    # 1 GPU
+ elaT=339.8 sec,  vs.
+time     ./run_gateList.py  --expName rcirc_f1e83d  -b nvidia-mqpu   # all GPUs parallel
+ elaT=88.3 sec
+Now speedup is x3.85
 
 
 ********************************************
