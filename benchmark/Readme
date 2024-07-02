@@ -17,7 +17,7 @@ CX count : 201k
 B) = = = = =  Execute circuit on CPU using Qiskit, one rank
 
 on CPU using qiskit
-numactl --cpunodebind=0 --membind=0   ./run_gateList.py  --expName mac18q -t qiskit-cpu
+numactl --cpunodebind=0 --membind=0   ./run_gateList.py  --expName mac18q -b qiskit-cpu
 
 Example output:
 
@@ -107,7 +107,7 @@ Problem:
 
 F) = = = = =  Execute circuit on CPU using Qiskit, mutiple ranks, on mutipl enodes
 e.g.: sbatch -C cpu --exclusive  --ntasks-per-node=4 -N 3   ./batchPodman.slr 
-
+# sbatch -C cpu --exclusive  --ntasks-per-node=4 -N 3  -A nintern ./batchPodman.slr
 F.0) Prepare large enough list of circuits, must be divisible total ranks
 
 E.g.:
@@ -193,5 +193,19 @@ for nq in {22..33}; do
     done
 done
 
+********************************************
+********************************************
+********************************************
+### Profiling (Nsight)
+Pause the backend profiling daemon 
+1. dcgmi profile --pause 
 
+2. mkdir gpu_reports (GRADIENT_IMAGE)
 
+Generate proiles
+3. srun nsys profile --stats=true -t cuda --output=../gpu_reports/__report_name__ --force-overwrite true . batchPodman.slr
+
+Copy to local laptop for analyzing 
+4. scp username@saul.nersc.gov . /Documents
+
+### Download Nsight macos version
