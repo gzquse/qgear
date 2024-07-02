@@ -54,18 +54,19 @@ D = = = = =  Execute circuit on 4 GPU using cudaq with target=nvidia-mqpu
 
 *  get GPU node on PM
 ssh pm
-salloc -q interactive -C gpu -t 4:00:00 -A nstaff   --gpus-per-task=1 --ntasks  4  --gpu-bind=none --module=cuda-mpich
-
+#salloc -q interactive -C gpu -t 4:00:00 -A nstaff   --gpus-per-task=1 --ntasks  4  --gpu-bind=none --module=cuda-mpich
+salloc -q interactive -C gpu -t 4:00:00 -A nstaff -N 1
+ ./run_gateList.py  --expName mac21q -t nvidia-mqpu
 *start image
-export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_common/
-IMG=gzquse/cudaquanmpi-qiskit1:p3
+export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nstaff/balewski/podman_common/
+IMG=balewski/cudaquanmpi-qiskit:p4
 
 *check you see 4 GPUs
 nvidia-smi |grep SXM
-|   0  NVIDIA A100-SXM...  Off  | 00000000:03:00.0 Off |                    0 |
-|   1  NVIDIA A100-SXM...  Off  | 00000000:41:00.0 Off |                    0 |
-|   2  NVIDIA A100-SXM...  Off  | 00000000:82:00.0 Off |                    0 |
-|   3  NVIDIA A100-SXM...  Off  | 00000000:C1:00.0 Off |                    0 |
+|   0  NVIDIA A100-SXM...  Off  | 00000000:03:00.0 Off |                    100 |
+|   1  NVIDIA A100-SXM...  Off  | 00000000:41:00.0 Off |                    100 |
+|   2  NVIDIA A100-SXM...  Off  | 00000000:82:00.0 Off |                    100 |
+|   3  NVIDIA A100-SXM...  Off  | 00000000:C1:00.0 Off |                    100 |
 
 * generate gateList.h5 for 8 circuits
 cd benchmark
