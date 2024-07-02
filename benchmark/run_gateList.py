@@ -111,7 +111,9 @@ if __name__ == "__main__":
         cudaq.set_target(target)
         # only get qpus not gpus
         num_qpus = cudaq.get_target().num_qpus()
-
+        used_qpus=num_qpus if  target == "nvidia-mqpu" else 1
+        print('M: use %d of  %d seen qpus'%(used_qpus,num_qpus))
+                
     shots=args.numShots
     print('job %s started, nCirc=%d  nq=%d  shots/circ=%d  on target=%s ...'%(MD['short_name'],nCirc,MD['num_qubit'],shots,target))
         
