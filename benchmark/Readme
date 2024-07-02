@@ -14,7 +14,7 @@ A)= = = =  Generate big circuit in gateList-format
 CX count : 201k
 
 
-B) = = = = =  Execute circuit on CPU using Qiskit
+B) = = = = =  Execute circuit on CPU using Qiskit, one rank
 
 on CPU using qiskit
 numactl --cpunodebind=0 --membind=0   ./run_gateList.py  --expName mac18q -t qiskit-cpu
@@ -102,6 +102,64 @@ Problem:
   how to start   ./run_gateList.py  to see
   M: use 8 of 8 seen qpus
 ???
+
+
+F) = = = = =  Execute circuit on CPU using Qiskit, mutiple ranks, on mutipl enodes
+e.g.: sbatch -C cpu --exclusive  --ntasks-per-node=4 -N 3   ./batchPodman.slr 
+
+F.0) Prepare large enough list of circuits, must be divisible total ranks
+
+E.g.:
+salloc ...
+podman-hpc run -it ...
+basePath=/dataVault2024/dataCudaQ_june30
+ nq=18 ; ./gen_gateList.py -k 30000 -i 24  --expName  mar${nq}q  -q $nq  --basePath ${basePath}
+ It will generate those circuits:
+ {'gate_map': {'cx': 4, 'h': 1, 'measure': 5, 'ry': 2, 'rz': 3},
+ 'hash': '079ae3',
+ 'num_circ': 24,
+ 'num_cx': 30000,
+ 'num_gate': 90000,
+ 'num_qubit': 18,
+ 'short_name': 'mar20q'}
+
+F.1) Baseline1 : single task full node
+  sbatch -C cpu --exclusive  --ntasks-per-node=1 -N 1   ./batchPodman.slr mar18q cpu
+
+M:  gen_circ  elaT= 34.2 sec 
+job mar18q started, nCirc=24  nq=18  shots/circ=101000  on target=qiskit-cpu ...
+M:  mar18q_cpu ended elaT=237.9 sec, numRank=1 end_load1=219.5
+It is overestimate, code runs inefficiently
+
+F.1b) Baseline2 : single task 1/4 node
+ sbatch  -q shared -C cpu  --cpus-per-task=64  --ntasks=1 --ntasks-per-node=1   ./batchPodman.slr mar18q cpu
+ 
+M:  gen_circ  elaT= 38.8 sec 
+M: job mar18q started, nCirc=24  nq=18  shots/circ=10000  on target=qiskit-cpu ...
+M:  mar18q_cpu ended elaT=126.7 sec, numRank=1 end_load1=181.6
+
+
+F.2) 2 ranks on same node
+ sbatch -C cpu --exclusive  --ntasks-per-node=2 -N 1   ./batchPodman.slr mar18q cpu
+
+M:  gen_circ  elaT= 16.8 sec 
+job mar18q started, nCirc=12  nq=18  shots/circ=10000  on target=qiskit-cpu ...
+ M:  mar18q_cpu ended elaT=49.3 sec, numRank=2 end_load1=130.0
+
+
+F.3) 4 ranks on same node
+ sbatch -C cpu --exclusive  --ntasks-per-node=4 -N 1   ./batchPodman.slr mar18q cpu
+crashes:
+ level=error msg="Failed to create temp directory for user: mkdir /tmp/containers-user-31480: file exists"
+
+
+F.4) 4 ranks on 2 nodes
+ sbatch -C cpu --exclusive  --ntasks-per-node=2 -N 2   ./batchPodman.slr mar18q cpu
+
+M:  gen_circ  elaT= 8.6 sec 
+job mar18q started, nCirc=6  nq=18  shots/circ=10000  on target=qiskit-cpu ...
+M:  mar18q_cpu ended elaT=28.3 sec, numRank=4 end_load1=59.1
+
 
 ********************************************
 ********************************************

@@ -30,7 +30,7 @@ def get_parser():
     parser.add_argument("-v","--verbosity",type=int,choices=[0, 1, 2, 3],  help="increase output verbosity", default=1, dest='verb')
 
     parser.add_argument("-e","--expName",  default='mac10q',help='[.gate_list.h5]  defines list of circuits to run')
-    parser.add_argument('-n','--numShots',type=int, default=101000, help="(optional) shots per circuit")
+    parser.add_argument('-n','--numShots',type=int, default=10000, help="(optional) shots per circuit")
     parser.add_argument("-b", "--backend", default="nvidia", choices=['qiskit-cpu','tensornet','nvidia-mgpu','nvidia-mqpu','nvidia','qpp-cpu'], help="cudaQ target settings")
 
     # IO paths
@@ -45,11 +45,19 @@ def get_parser():
         args.inpPath=os.path.join(args.basePath,'circ') 
         args.outPath=os.path.join(args.basePath,'meas') 
 
-    for arg in vars(args):  print( 'myArg:',arg, getattr(args, arg))
+    try:
+        args.myRank  = int(os.environ['SLURM_PROCID'])
+        args.numRank = int(os.environ['SLURM_NTASKS'])
+    except:
+        args.myRank,  args.numRank = 0,1
+    
+    if args.myRank==0:
+        for arg in vars(args):  print( 'myArg:',arg, getattr(args, arg))
+        if not os.path.exists(args.outPath):
+            os.mkdir(args.outPath)
+    else: args.verb=0 # absolute silence for ranks>0
     assert os.path.exists(args.inpPath)
-    if not os.path.exists(args.outPath):
-        os.mkdir(args.outPath)
-
+    
     return args
 
 #...!...!....................
@@ -86,25 +94,48 @@ def run_cudaq(shots,num_qpus):
         resL = [res.get() for res in futures]
     return len(resL)
 
+#...!...!....................
+def input_shard(bigD,args):
+    if args.verb>0: print('Shard for rank=%d of %d'%(args.myRank,args.numRank))
+    totSamp=bigD['circ_type'].shape[0]
+    assert totSamp%args.numRank==0
+    shardSize=totSamp//args.numRank
+    if args.verb>0: print(' select %d-shard of size %d'%(args.myRank,shardSize))
+    iOff=args.myRank*shardSize
+    for xx in bigD:
+        arr=bigD[xx]
+        #print(xx,arr.shape)
+        bigD[xx]=arr[iOff:iOff+shardSize]
+    return shardSize
+    
+
 #=================================
 #  M A I N 
 #=================================
 #=================================
-if __name__ == "__main__": 
+if __name__ == "__main__":
+    
     args=get_parser()
     target = args.backend
     inpF=args.expName+'.gate_list.h5'
-    gateD,MD=read4_data_hdf5(os.path.join(args.inpPath,inpF))
-    nCirc=MD['num_circ']
+    gateD,MD=read4_data_hdf5(os.path.join(args.inpPath,inpF),args.verb)
+    
+    if args.numRank>1:
+        shardSize=input_shard(gateD,args)
+        MD['num_circ']=shardSize
+        MD['my_rank']=args.myRank
+        MD['num_rank']=args.numRank
+        
+        
+    nCirc=MD['num_circ']    
     if args.verb>=2:
-        print('M: MD:');  pprint(MD)
-    
-    T0=time()
-    
+        print('M:pre MD:');  pprint(MD)
+       
     if 'qiskit' in target:
-        print('M: will run on CPUs ...')
+        if args.verb: print('M: will run %d circ on CPUs numRank=%d ...'%(nCirc,args.numRank))
+        T0=time()
         qcL=qiskit_circ_gateList(gateD,MD)
-        print('\nM:  gen_circ  elaT= %.1f sec '%(time()-T0))
+        if args.verb: print('\nM:  gen_circ  elaT= %.1f sec '%(time()-T0))
         #....  excution using backRun(.) .....
         backend = AerSimulator()
     else:
@@ -112,36 +143,36 @@ if __name__ == "__main__":
         # only get qpus not gpus
         num_qpus = cudaq.get_target().num_qpus()
         used_qpus=num_qpus if  target == "nvidia-mqpu" else 1
-        print('M: use %d of  %d seen qpus'%(used_qpus,num_qpus))
+        if args.verb: print('M: use %d of  %d seen qpus'%(used_qpus,num_qpus))
                 
     shots=args.numShots
-    print('job %s started, nCirc=%d  nq=%d  shots/circ=%d  on target=%s ...'%(MD['short_name'],nCirc,MD['num_qubit'],shots,target))
+    if args.verb: print('M: job %s started, nCirc=%d  nq=%d  shots/circ=%d  on target=%s ...'%(MD['short_name'],nCirc,MD['num_qubit'],shots,target))
         
     T0=time()
     if 'qiskit' in target:
         resLen=run_qiskit_aer(shots)
         MD['cpu_info']=get_cpu_info(verb=0)
-        MD['short_name']+='_cpu' #%d'%MD['cpu_info']['phys_cores']
+        MD['short_name']+='_cpu' 
     else:
         resLen=run_cudaq(shots,num_qpus)
         MD['num_qpus']=num_qpus
         MD['gpu_info']=get_gpu_info(verb=0)
-        #MD['short_name']+='_qpus%d'%MD['num_qpus']
         MD['short_name']+='_gpu'
 
     elaT=time()-T0
     load1, _, _ = psutil.getloadavg()
-    print('M:  %s ended elaT=%.1f sec, end_load1=%.1f\n'%(MD['short_name'],elaT,load1))
+    if args.verb: print('M:  %s ended elaT=%.1f sec, numRank=%d end_load1=%.1f\n'%(MD['short_name'],elaT,args.numRank,load1))
     MD.update({'elapsed_time':elaT,'num_meas_strings':resLen,'target':target,'date':dateT2Str()})
     MD.pop('gate_map')
     MD['cpu_1min_load']=load1
     MD['num_shots']=shots
-    #MD['short_name']+='_%dk'%(shots/1000) if shots <1000000 else '_%dM'%(shots/1000000)     
+    if args.numRank>1: MD['short_name']+='_r%d.%d'%(args.myRank,args.numRank)
+
     #...... WRITE  OUTPUT .........
     outF=os.path.join(args.outPath,MD['short_name']+'.yaml')
     write_yaml(MD,outF)
     
-    print('M:done  %s  elaT %.1f sec\n'%(MD['short_name'],elaT))
-
-    pprint(MD)
+    if args.verb:
+        print('M:done  %s  elaT %.1f sec\n'%(MD['short_name'],elaT))
+        pprint(MD)
    

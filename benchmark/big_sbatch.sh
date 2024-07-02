@@ -31,7 +31,7 @@ date
 #
 # re-submit one job by hand on FULL node
 #   	sbatch -C gpu --gpus-per-task=1 --ntasks 4 --gpu-bind=none --module=cuda-mpich  ./batchPodman.slr ck29q gpu 1001000
-#       sbatch -C cpu --exclusive  --ntasks-per-node=1   ./batchPodman.slr ck24q cpu 1001000
+#       sbatch -C cpu --exclusive  --ntasks-per-node=1   ./batchPodman.slr c20q cpu 
 
 # re-submit one job by hand on shared 1/4 of a node
 #      sbatch  -q shared -C gpu --gpus-per-task 1 --cpus-per-task=32  --ntasks=1 ./batchPodman.slr cb22q gpu 
