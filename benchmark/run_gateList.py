@@ -30,7 +30,7 @@ def get_parser():
     parser.add_argument("-v","--verbosity",type=int,choices=[0, 1, 2, 3],  help="increase output verbosity", default=1, dest='verb')
 
     parser.add_argument("-e","--expName",  default='mac10q',help='[.gate_list.h5]  defines list of circuits to run')
-    parser.add_argument('-n','--numShots',type=int, default=10000, help="(optional) shots per circuit")
+    parser.add_argument('-n','--numShots',type=int, default=10240, help="(optional) shots per circuit")
     parser.add_argument("-b", "--backend", default="nvidia", choices=['qiskit-cpu','tensornet','nvidia-mgpu','nvidia-mqpu','nvidia','qpp-cpu'], help="cudaQ target settings")
 
     # IO paths

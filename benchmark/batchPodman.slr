@@ -1,7 +1,7 @@
 #!/bin/bash 
-#SBATCH  -N 1  -C cpu  -A nstaff --ntasks-per-node=2
-#SBATCH  --time=28:00 -q debug
-# SBATCH --time 23:58:00  -q regular 
+#SBATCH  -N 1  -C cpu  -A nstaff 
+# SBATCH  --time=28:00 -q debug
+#SBATCH --time 23:58:00  -q regular 
 #SBATCH --output=out/%j.out
 #SBATCH  --licenses=scratch
 # - - - E N D    O F    SLURM    C O M M A N D S
@@ -14,7 +14,8 @@ trg=${2:-gpu}
 if [ "$trg" == "cpu" ]; then
     backend='qiskit-cpu'
 elif [ "$trg" == "gpu" ]; then
-    backend="nvidia"
+    #backend="nvidia"      # single GPU
+    backend="nvidia-mqpu"  # all 4 GPUs in parallel
 fi
 
 #env
@@ -27,13 +28,14 @@ echo S: head:`hostname` N=$N  T=$T  G=$G
 #.....  define Podman image
 export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nstaff/balewski/podman_common/
 IMG=balewski/cudaquanmpi-qiskit:p4
+
 echo S: head:`hostname`  use image $IMG
 
 #..... input data:
-if [ "$USER" == "balewski" ]; then  #Jan
+if [ "$USER" == "balewski" ]; then    # Jan
     CFSH=/global/cfs/cdirs/mpccc/balewski
     #BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_june28 - good campaign
-    BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_june30
+    BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_july2
     DATA_SRC=${CFSH}/2024_martin_gradient
 elif [ "$USER" == "gzquse" ]; then    # Martin
     CFSH=/pscratch/sd/g/gzquse
@@ -51,19 +53,19 @@ cp -rp ../toolbox *py  wrapPodman.sh batchPodman.slr $wrkPath/
 cd $wrkPath
 
 # .... task to be executed by Podman
-CMD=" python3 -u  ./run_gateList.py  --expName $expN --backend $backend   --basePath /myData  "
+CMD=" python3 -u  ./run_gateList.py  --expName $expN --backend $backend  --numShots 10240  --basePath /myData  "
 # spare: --numShots $shots 
 
 echo S: CMD=$CMD
 #pwd
 #ls
 #nvidia-smi
-
+#env
 #..... fire the task
-srun  -n $G ./wrapPodman.sh $IMG " $CMD " $wrkPath  $BASE_PATH
+srun -n $G  ./wrapPodman.sh $IMG " $CMD " $wrkPath  $BASE_PATH
 echo S:done ; date 
 
-#Cancel all my jobs:
+# Cancel all my jobs:
 #  squeue -u $USER -h | awk '{print $1}' | xargs scancel
 
 # all jobs in the qos

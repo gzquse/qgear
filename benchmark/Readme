@@ -141,25 +141,29 @@ M:  mar18q_cpu ended elaT=126.7 sec, numRank=1 end_load1=181.6
 
 
 F.2) 2 ranks on same node
- sbatch -C cpu --exclusive  --ntasks-per-node=2 -N 1   ./batchPodman.slr mar18q cpu
+ sbatch -C cpu --exclusive  --cpus-per-task=32 --ntasks-per-node=2  -N 1   ./batchPodman.slr mar18q cpu
 
-M:  gen_circ  elaT= 16.8 sec 
-job mar18q started, nCirc=12  nq=18  shots/circ=10000  on target=qiskit-cpu ...
- M:  mar18q_cpu ended elaT=49.3 sec, numRank=2 end_load1=130.0
+
+M:  gen_circ  elaT= 17.4 sec 
+M: job mar18q started, nCirc=12  nq=18  shots/circ=10240  on target=qiskit-cpu ...
+M:  mar18q_cpu ended elaT=48.9 sec, numRank=2 end_load1=45.6
 
 
 F.3) 4 ranks on same node
- sbatch -C cpu --exclusive  --ntasks-per-node=4 -N 1   ./batchPodman.slr mar18q cpu
-crashes:
- level=error msg="Failed to create temp directory for user: mkdir /tmp/containers-user-31480: file exists"
+ sbatch -C cpu --exclusive  --cpus-per-task=32 --ntasks-per-node=4 -N 1   ./batchPodman.slr mar18q cpu
+
+M:  gen_circ  elaT= 8.4 sec
+M: job mar18q started, nCirc=6  nq=18  shots/circ=10240  on target=qiskit-cpu ...
+M:  mar18q_cpu ended elaT=24.4 sec, numRank=4 end_load1=41.9
 
 
-F.4) 4 ranks on 2 nodes
- sbatch -C cpu --exclusive  --ntasks-per-node=2 -N 2   ./batchPodman.slr mar18q cpu
+F.4) 8 ranks on 2 nodes
+ sbatch -C cpu --exclusive  --cpus-per-task=32 --ntasks-per-node=4 -N 2   ./batchPodman.slr mar18q cpu
+Submitted batch job 27495947
 
-M:  gen_circ  elaT= 8.6 sec 
-job mar18q started, nCirc=6  nq=18  shots/circ=10000  on target=qiskit-cpu ...
-M:  mar18q_cpu ended elaT=28.3 sec, numRank=4 end_load1=59.1
+M:  gen_circ  elaT= 4.1 sec
+M: job mar18q started, nCirc=3  nq=18  shots/circ=10240  on target=qiskit-cpu ...
+M:  mar18q_cpu ended elaT=12.3 sec, numRank=8 end_load1=44.0
 
 
 ********************************************

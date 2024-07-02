@@ -5,18 +5,18 @@ set -e ;  #  bash exits if any statement returns a non-true return value
  
 # runs in PM login node, bere-OS
 k=0
-for nq in {17..18}; do
-#    for nq in {22..32}; do
-	for trg in   cpu  ; do
+#for nq in {18..19}; do
+for nq in {20..33}; do
+	for trg in   gpu cpu ; do
 	    k=$[ $k +1 ]
 	    expN=cg${nq}q
  	    echo $k  expN:$expN   trg:$trg 
 	    SCMD="  ./batchPodman.slr  $expN $trg  "
 
 	    if [ "$trg" == "cpu" ]; then
-		sbatch -C cpu --exclusive  --ntasks-per-node=1 -A nintern  $SCMD
+		sbatch -C cpu --exclusive --cpus-per-task=32 --ntasks-per-node=4 -N1   $SCMD
 	    elif [ "$trg" == "gpu" ]; then
-		sbatch -C gpu --gpus-per-task=1 --ntasks 4 --gpu-bind=none --module=cuda-mpich -A nintern  $SCMD
+		sbatch -C gpu --gpus-per-task=4 --ntasks=1 -N1  $SCMD
 	    fi	    
 	done
 done
