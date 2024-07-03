@@ -1,0 +1,14 @@
+1 expN:mar22q trg:gpu
+Submitted batch job 27427168
+
+2 expN:mar22q trg:cpu
+Submitted batch job 27427180
+
+./prep_circ_gateList.sh   from 22 to 28
+
+mpicc -o ring_c ring_c.c
+mpirun -np 64 ring_c
+#
+# run again with srun
+#
+srun --mpi=pmix -n 64 ring_c
