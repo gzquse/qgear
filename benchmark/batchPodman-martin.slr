@@ -1,8 +1,6 @@
 #!/bin/bash 
 #SBATCH  -C gpu -N 1 -A nintern
-#SBATCH --ntasks-per-node=4
-#SBATCH --constraint=gpu
-#SBATCH --gpus-per-node=4
+# SBATCH --ntasks-per-node=4
 #SBATCH  --time=28:00 -q debug
 # SBATCH --time 23:58:00  -q regular 
 #SBATCH --output=out/%j.out
@@ -37,7 +35,7 @@ echo S: head:`hostname` N=$N  T=$T  G=$G
 
 #.....  define Podman image
 export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_common/
-IMG=balewski/cudaquanmpi-qiskit:p6
+IMG=gzquse/cudaquanmpi-qiskit:p6
 echo S: head:`hostname`  use image $IMG
 
 #..... input data:
@@ -63,8 +61,8 @@ cp -rp ../toolbox *py  wrapPodman-martin.sh batchPodman-martin.slr $wrkPath/
 cd $wrkPath
 
 # .... task to be executed by Podman
-# CMD=" python3 -u  ./run_gateList.py  --expName $expN --backend $backend   --basePath /myData  "
-CMD="mpirun -np 4 python3 -u  ./cuquantum_backends.py  "
+CMD=" python3 -u  ./run_gateList.py  --expName $expN --backend $backend   --basePath /myData  "
+# CMD="python3 -u  ./cuquantum_backends.py  "
 # spare: --numShots $shots 
 
 echo S: CMD=$CMD
@@ -73,7 +71,7 @@ echo S: CMD=$CMD
 #nvidia-smi
 
 #..... fire the task
-echo srun --mpi=pmix -n $G ./wrapPodman-martin.sh $IMG " $CMD " $wrkPath  $BASE_PATH
+#echo srun --mpi=pmix -n $G ./wrapPodman-martin.sh $IMG " $CMD " $wrkPath  $BASE_PATH
 srun --mpi=pmix -n $G ./wrapPodman-martin.sh $IMG " $CMD " $wrkPath  $BASE_PATH
 echo S:done ; date 
 

@@ -210,7 +210,7 @@ def post_process(md,bigD):
 if __name__ == '__main__':
     args=get_parser()
 
-    nqL=[17,18]+[i for i in range(22,33) ]
+    nqL=[i for i in range(18,22) ]
     #nqL=[17,18]+[i for i in range(22,30) ]
     #nqL=[17,18,22,23,24]
     
@@ -225,7 +225,7 @@ if __name__ == '__main__':
     #...  collect data
     for i in range(N):
         for j in range(4):
-            expN='ck%dq_%s'%(nqV[i],runLabs[j])
+            expN='mar%dq_%s'%(nqV[i],runLabs[j])
             nq,runt,xMD=readOne(expN,args.inpPath,i+j==0)
             print(i,j,expN)
             if j in [0,2]:  assert nq>0 

@@ -11,6 +11,6 @@
 # SBATCH --output=out/%j.out
 # SBATCH  --licenses=scratch
 # SBATCH --gpus-per-node=4
-
-nvidia-smi
+#SBATCH -C cpu --exclusive  --ntasks-per-node=1 -A nintern
+# nvidia-smi
 echo S:DONE

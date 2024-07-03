@@ -7,8 +7,8 @@ set -e ;  #  bash exits if any statement returns a non-true return value
 k=0
 #for nq in {17..18}; do
 #    for nq in {22..32}; do
-     for nq in {18..19}; do	    
-	for trg in  gpu ; do
+for nq in {18..30}; do	    
+	for trg in  gpu cpu; do
 	    k=$[ $k +1 ]
 	    expN=mar${nq}q
  	    echo $k  expN:$expN   trg:$trg 
@@ -18,8 +18,7 @@ k=0
 	    if [ "$trg" == "cpu" ]; then
 			sbatch -C cpu --exclusive  --ntasks-per-node=1 -A nintern  $SCMD
 	    elif [ "$trg" == "gpu" ]; then
-			sbatch -C gpu -A nintern  $SCMD
-			exit
+			sbatch -C gpu -A nintern --gpus-per-task=4 --ntasks=1 -N1 $SCMD
 	    fi	    
 	done
 done
