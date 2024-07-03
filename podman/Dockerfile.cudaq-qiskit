@@ -41,6 +41,7 @@ RUN python3 -m pip install numpy matplotlib
 RUN OMPI_CC="/opt/nvidia/cudaq/bin/clang" OMPI_CXX="/opt/nvidia/cudaq/bin/clang++" \
   python3 -m pip install mpi4py
 
+RUN export OMPI_MCA_opal_cuda_support=true OMPI_MCA_btl='^openib'
 # - - - - - - - CUSTOM CODE
 
 # is needed by  tzdada which sets sth for tzdata

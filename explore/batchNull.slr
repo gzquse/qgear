@@ -3,7 +3,14 @@
 # SBATCH  -q shared -C cpu  --cpus-per-task=64  --ntasks=1  -N1  -t 0:10:00 -A nstaff
 # 1/4 of GPU-node
 # SBATCH  -q shared -C gpu --gpus-per-task 1 --cpus-per-task=32  --ntasks=1  -N 1  -t 0:10:00 -A nstaff
-#SBATCH  -C gpu --gpus-per-task 1   --ntasks=1  -N 1  -t 0:10:00 -A nintern
+# SBATCH  -C gpu --gpus-per-task 1   --ntasks=1  -N 1  -t 0:10:00 -A nintern
+
+# SBATCH  -N 1  -C gpu  -A nintern --ntasks-per-node=1
+# SBATCH  --time=28:00 -q debug
+# SBATCH --time 23:58:00  -q regular 
+# SBATCH --output=out/%j.out
+# SBATCH  --licenses=scratch
+# SBATCH --gpus-per-node=4
 
 nvidia-smi
 echo S:DONE

@@ -15,7 +15,7 @@ if [ "$trg" == "cpu" ]; then
     backend='qiskit-cpu'
 elif [ "$trg" == "gpu" ]; then
     #backend="nvidia"      # single GPU
-    backend="nvidia-mqpu"  # all 4 GPUs in parallel
+    backend="nvidia"  # all 4 GPUs in parallel
 fi
 
 #env

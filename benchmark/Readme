@@ -196,20 +196,3 @@ for nq in {22..33}; do
 	done
     done
 done
-
-********************************************
-********************************************
-********************************************
-### Profiling (Nsight)
-Pause the backend profiling daemon 
-1. dcgmi profile --pause 
-
-2. mkdir gpu_reports (GRADIENT_IMAGE)
-
-Generate proiles
-3. srun nsys profile --stats=true -t cuda --output=../gpu_reports/__report_name__ --force-overwrite true . batchPodman.slr
-
-Copy to local laptop for analyzing 
-4. scp username@saul.nersc.gov . /Documents
-
-### Download Nsight macos version

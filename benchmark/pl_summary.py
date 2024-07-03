@@ -209,8 +209,8 @@ def post_process(md,bigD):
 #=================================
 if __name__ == '__main__':
     args=get_parser()
-
-    nqL=[17,18]+[i for i in range(22,33) ]
+    nqL = [18]
+    # nqL=[17,18]+[i for i in range(22,33) ]
     #nqL=[17,18]+[i for i in range(22,30) ]
     #nqL=[17,18,22,23,24]
     

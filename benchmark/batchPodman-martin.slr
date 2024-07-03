@@ -1,5 +1,8 @@
 #!/bin/bash 
-#SBATCH  -N 1  -C cpu  -A nintern --ntasks-per-node=2
+#SBATCH  -C gpu -N 1 -A nintern
+#SBATCH --ntasks-per-node=4
+#SBATCH --constraint=gpu
+#SBATCH --gpus-per-node=4
 #SBATCH  --time=28:00 -q debug
 # SBATCH --time 23:58:00  -q regular 
 #SBATCH --output=out/%j.out
@@ -7,6 +10,14 @@
 # - - - E N D    O F    SLURM    C O M M A N D S
 
 set -u ;  # exit  if you try to use an uninitialized variable
+
+#
+# cray-mpich and cray-libsci conflict with openmpi so unload them
+#
+module unload cray-mpich
+module unload cray-libsci
+module use /global/common/software/m3169/perlmutter/modulefiles
+module load openmpi
 
 expN=${1:-mar24q}
 trg=${2:-gpu}
@@ -25,8 +36,8 @@ G=$(( T * N ))
 echo S: head:`hostname` N=$N  T=$T  G=$G
 
 #.....  define Podman image
-export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nstaff/balewski/podman_common/
-IMG=balewski/cudaquanmpi-qiskit:p4
+export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_common/
+IMG=balewski/cudaquanmpi-qiskit:p6
 echo S: head:`hostname`  use image $IMG
 
 #..... input data:
@@ -37,7 +48,8 @@ if [ "$USER" == "balewski" ]; then  #Jan
     DATA_SRC=${CFSH}/2024_martin_gradient
 elif [ "$USER" == "gzquse" ]; then    # Martin
     CFSH=/pscratch/sd/g/gzquse
-    BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_test2
+    # remember to change this line
+    BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_test3
     DATA_SRC=${CFSH}/GRADIENT_IMAGE
 fi
 
@@ -47,11 +59,12 @@ wrkPath=$SCRATCH/jobs_cudaq/$jobId
 
 echo wrkPath=$wrkPath
 mkdir -p $wrkPath
-cp -rp ../toolbox *py  wrapPodman.sh batchPodman.slr $wrkPath/
+cp -rp ../toolbox *py  wrapPodman-martin.sh batchPodman-martin.slr $wrkPath/
 cd $wrkPath
 
 # .... task to be executed by Podman
-CMD=" python3 -u  ./run_gateList.py  --expName $expN --backend $backend   --basePath /myData  "
+# CMD=" python3 -u  ./run_gateList.py  --expName $expN --backend $backend   --basePath /myData  "
+CMD="mpirun -np 4 python3 -u  ./cuquantum_backends.py  "
 # spare: --numShots $shots 
 
 echo S: CMD=$CMD
@@ -60,7 +73,8 @@ echo S: CMD=$CMD
 #nvidia-smi
 
 #..... fire the task
-srun  -n $G ./wrapPodman.sh $IMG " $CMD " $wrkPath  $BASE_PATH
+echo srun --mpi=pmix -n $G ./wrapPodman-martin.sh $IMG " $CMD " $wrkPath  $BASE_PATH
+srun --mpi=pmix -n $G ./wrapPodman-martin.sh $IMG " $CMD " $wrkPath  $BASE_PATH
 echo S:done ; date 
 
 #Cancel all my jobs:
