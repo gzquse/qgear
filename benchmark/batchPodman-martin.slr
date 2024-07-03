@@ -1,8 +1,8 @@
 #!/bin/bash 
 #SBATCH  -C gpu -N 1 -A nintern
 # SBATCH --ntasks-per-node=4
-#SBATCH  --time=28:00 -q debug
-# SBATCH --time 23:58:00  -q regular 
+# SBATCH  --time=28:00 -q debug
+#SBATCH --time 23:58:00  -q regular 
 #SBATCH --output=out/%j.out
 #SBATCH  --licenses=scratch
 # - - - E N D    O F    SLURM    C O M M A N D S
@@ -47,7 +47,7 @@ if [ "$USER" == "balewski" ]; then  #Jan
 elif [ "$USER" == "gzquse" ]; then    # Martin
     CFSH=/pscratch/sd/g/gzquse
     # remember to change this line
-    BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_test3
+    BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_July3
     DATA_SRC=${CFSH}/GRADIENT_IMAGE
 fi
 

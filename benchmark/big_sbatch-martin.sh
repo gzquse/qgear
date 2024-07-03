@@ -7,7 +7,7 @@ set -e ;  #  bash exits if any statement returns a non-true return value
 k=0
 #for nq in {17..18}; do
 #    for nq in {22..32}; do
-for nq in {18..30}; do	    
+for nq in {21..28}; do	    
 	for trg in  gpu cpu; do
 	    k=$[ $k +1 ]
 	    expN=mar${nq}q
