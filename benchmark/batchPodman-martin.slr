@@ -1,0 +1,71 @@
+#!/bin/bash 
+#SBATCH  -N 1  -C cpu  -A nintern --ntasks-per-node=2
+#SBATCH  --time=28:00 -q debug
+# SBATCH --time 23:58:00  -q regular 
+#SBATCH --output=out/%j.out
+#SBATCH  --licenses=scratch
+# - - - E N D    O F    SLURM    C O M M A N D S
+
+set -u ;  # exit  if you try to use an uninitialized variable
+
+expN=${1:-mar24q}
+trg=${2:-gpu}
+#shots=${3:-20000}
+if [ "$trg" == "cpu" ]; then
+    backend='qiskit-cpu'
+elif [ "$trg" == "gpu" ]; then
+    backend="nvidia"
+fi
+
+#env
+echo S:  expN=$expN  backend=$backend    expN=$expN   user=$USER
+N=${SLURM_NNODES:-1}
+T=${SLURM_NTASKS_PER_NODE:-1}
+G=$(( T * N ))
+echo S: head:`hostname` N=$N  T=$T  G=$G
+
+#.....  define Podman image
+export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nstaff/balewski/podman_common/
+IMG=balewski/cudaquanmpi-qiskit:p4
+echo S: head:`hostname`  use image $IMG
+
+#..... input data:
+if [ "$USER" == "balewski" ]; then  #Jan
+    CFSH=/global/cfs/cdirs/mpccc/balewski
+    #BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_june28 - good campaign
+    BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_june30
+    DATA_SRC=${CFSH}/2024_martin_gradient
+elif [ "$USER" == "gzquse" ]; then    # Martin
+    CFSH=/pscratch/sd/g/gzquse
+    BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_test2
+    DATA_SRC=${CFSH}/GRADIENT_IMAGE
+fi
+
+#...  sandbox code
+jobId=${SLURM_JOBID:-999}
+wrkPath=$SCRATCH/jobs_cudaq/$jobId
+
+echo wrkPath=$wrkPath
+mkdir -p $wrkPath
+cp -rp ../toolbox *py  wrapPodman.sh batchPodman.slr $wrkPath/
+cd $wrkPath
+
+# .... task to be executed by Podman
+CMD=" python3 -u  ./run_gateList.py  --expName $expN --backend $backend   --basePath /myData  "
+# spare: --numShots $shots 
+
+echo S: CMD=$CMD
+#pwd
+#ls
+#nvidia-smi
+
+#..... fire the task
+srun  -n $G ./wrapPodman.sh $IMG " $CMD " $wrkPath  $BASE_PATH
+echo S:done ; date 
+
+#Cancel all my jobs:
+#  squeue -u $USER -h | awk '{print $1}' | xargs scancel
+
+# all jobs in the qos
+#  squeue --qos=gpu_shared -o "%.7i %.10P %.12j %.8u %.2t %.10M %.6D %R %.20N"
+
