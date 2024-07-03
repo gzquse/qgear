@@ -7,7 +7,7 @@ set -e ;  #  bash exits if any statement returns a non-true return value
 k=0
 for nq in {17..18}; do
 #    for nq in {22..32}; do
-	for trg in   cpu  ; do
+	for trg in  gpu cpu  ; do
 	    k=$[ $k +1 ]
 	    expN=cg${nq}q
  	    echo $k  expN:$expN   trg:$trg 

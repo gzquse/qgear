@@ -5,7 +5,7 @@ set -e ;  #  bash exits if any statement returns a non-true return value
 
 # runs inside IMAGE
 
-basePath=/dataVault2024/dataCudaQ_test2
+basePath=/quantDataVault2024/dataCudaQ_test3
 
 if [ ! -d "$basePath" ]; then
     echo create $basePath
@@ -20,12 +20,12 @@ fi
 #  ./run_gateList.py  --expName cb18q  -b qiskit-cpu --basePath ${basePath} ; exit
 
 nCX=101000  # num cx-gates
-nCirc=2
+nCirc=4
 
 # ......  run jobs .......
 k=0
 
-for nq in {22..33}; do
+for nq in {18..21}; do
 #for nq in {16..18}; do  # for testing
     expN=mar${nq}q
     k=$[ $k +1 ]
