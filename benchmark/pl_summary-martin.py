@@ -24,10 +24,10 @@ def get_parser():
     parser.add_argument("-v","--verbosity",type=int,choices=[0, 1, 2],help="increase output verbosity", default=1, dest='verb')
     parser.add_argument( "-Y","--noXterm", dest='noXterm',  action='store_false', default=True, help="enables X-term for interactive mode")
 
-    parser.add_argument("-p", "--showPlots",  default='ab', nargs='+',help="abc-string listing shown plots")
+    parser.add_argument("-p", "--showPlots",  default='a', nargs='+',help="abc-string listing shown plots")
 
  # IO paths
-    parser.add_argument("--basePath",default='/pscratch/sd/g/gzquse/quantDataVault2024/dataCudaQ_test3',help="head path for set of experiments, or 'env'")
+    parser.add_argument("--basePath",default='/pscratch/sd/g/gzquse/quantDataVault2024/dataCudaQ_July3',help="head path for set of experiments, or 'env'")
     parser.add_argument("--inpPath",default=None,help="input circuits location")
     parser.add_argument("--outPath",default=None,help="all outputs from experiment")
        
@@ -83,9 +83,7 @@ class Plotter(PlotterBackbone):
         nqV=bigD['num_qubit']
         runtV=bigD['run_time_1circ']/60.
         dLab=['CudaQ: 1GPU','Qiskit: 32CPUs']
-        nG=nqV.shape[0]
-        nC=md['num_cpu_runs']
-        kL=[nG,nC] # size of GPU & CPU runs
+       
         nqR=(nqV[0]-0.5,nqV[-1]+1.5)
         
         tit='Compute state-vector, %dk CX-gates, PM: %s'%(md['num_cx']/1000,md['run_day'])
@@ -95,8 +93,7 @@ class Plotter(PlotterBackbone):
         
         #....  time vs. nq
         for j in range(1,-1,-1):
-            k=kL[j]
-            ax1.plot(nqV[:k],runtV[:k,j],label=dLab[j], marker='*', linestyle='-')
+            ax1.plot(nqV,runtV[:,j],label=dLab[j], marker='*', linestyle='-')
         ax1.set_yscale('log')
         # Set y-axis formatter
         ax1.yaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
@@ -107,7 +104,7 @@ class Plotter(PlotterBackbone):
 
         #... draw limiting lines
         ax1.axhline(1440,ls='--',lw=2,c='m')
-        ax1.text(20,600,'24h time-out',c='m')
+        ax1.text(19,600,'24h time-out',c='m') 
 
         ax1.axvline(32.5,ls='--',lw=2,c='firebrick')
         ax1.text(31.5,1,'A100 RAM limit',c='firebrick', rotation=90)
@@ -115,59 +112,17 @@ class Plotter(PlotterBackbone):
         
         #....  gain factor
         gainV=bigD['runt_spedup']
-        ax2.plot(nqV[:nC],gainV, marker='*', linestyle='-', color='red')
+        ax2.plot(nqV,gainV, marker='*', linestyle='-', color='red')
         ax2.set(xlabel='num qubits',ylabel='GPU/CPU speed-up')
         ax2.set_ylim(0,35)
         ax2.set_xlim(nqR)
         ax2.grid()
         ax2.yaxis.set_major_locator(MaxNLocator(4))
         return    
-
 #...!...!....................
-    def sample_time(self,md,bigD,figId=1):
+    def other_plot(self,md,bigD,figId=1):
         ax1,ax2=self._make_2_canvas(figId)
-
-        nqV=bigD['num_qubit']
-        smpltV=bigD['sample_time']
-        dLab=['CudaQ: 1GPU','Qiskit: 32CPUs']
-        nG=nqV.shape[0]
-        nC=md['num_cpu_runs']
-        kL=[nG,nC] # size of GPU & CPU runs
-        nqR=(nqV[0]-0.5,nqV[-1]+1.5)
-        
-        shotsM=bigD['shots'][0,2]/1000000
-        
-        tit=' %dM shots sample from state-vector, PM: %s'%(shotsM,md['run_day'])
-        # sampling circuit, 1M shots, ....
-        ax1.set(xlabel='num qubits',ylabel='sample end-state (seconds)')
-        ax1.set_title(tit, pad=20)  # Adjust the pad value as needed
-        
-        #....  time vs. nq
-        for j in range(1,-1,-1):
-            k=kL[j]
-            ax1.plot(nqV[:k],smpltV[:k,j],label=dLab[j], marker='*', linestyle='-')
-        ax1.set_yscale('log')
-        # Set y-axis formatter
-        ax1.yaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
-        #ax2.set_ylim(0.2,1900)
-        ax1.set_xlim(nqR)
-        ax1.grid()
-        ax1.legend(loc='lower right')#, title=lgTit,bbox_to_anchor=(0.5, 1.18), ncol=3)
-
-        return
-        
-        #.... mis text
-        txt1='device: '+md['submit']['backend']
-        txt1+='\nexec: %s'%md['job_qa']['exec_date']
-        txt1+='\ndist %s um'%(md['payload']['atom_dist_um'])
-        txt1+='\nOmaga %.1f MHz'%md['payload']['rabi_omega_MHz']
-        txt1+='\nshots/job: %d'%md['submit']['num_shots']
-        txt1+='\ntot atoms: %d'%md['payload']['tot_num_atom']
-        txt1+='\nnum jobs: %d'%nTime
-        txt1+='\nreadErr eps: %s'%md['analyzis']['readErr_eps']
-        ax.text(0.02,0.55,txt1,transform=ax.transAxes,color='g')
-
-        return
+        print('other plot is empty')
   
 #...!...!....................
 def readOne(expN,path,verb):
@@ -178,29 +133,16 @@ def readOne(expN,path,verb):
     nq=float(xMD['num_qubit'])
     runt=float(xMD['elapsed_time'])/float(xMD['num_circ'])
 
-    #june29 hack, add numshots to MD
-    if '10k' in expN: xMD['num_shots']=10000
-    if '1M'  in expN: xMD['num_shots']=1001000
     return nq,runt,xMD
 
 #...!...!....................
 def post_process(md,bigD):
-    nC=md['num_cpu_runs']
     runtV=bigD['run_time_1circ']
-    print('g10k',runtV[:,0])
-    smpltV=np.zeros_like(runtV[:,:2])
-    for j in range(2):
-        smpltV[:,j]=runtV[:,j+2] - runtV[:,j]
-
-    # hack2:  assume slower has more shots
-    smpltV=np.abs(smpltV)
-    
-    print('smpltV:\n',smpltV)
+   
     #... compute gain
-    gainV=runtV[:nC,1]/runtV[:nC,0]    
+    gainV=runtV[:,1]/runtV[:,0]    
           
     #... store 2ndary data
-    bigD['sample_time']=smpltV
     bigD['runt_spedup']=gainV
 #=================================
 #=================================
@@ -210,40 +152,33 @@ def post_process(md,bigD):
 if __name__ == '__main__':
     args=get_parser()
 
-    nqL=[i for i in range(18,22) ]
-    #nqL=[17,18]+[i for i in range(22,30) ]
-    #nqL=[17,18,22,23,24]
+    nqL=[i for i in range(18,21) ]
     
     nqV=np.array(nqL)
     N=nqV.shape[0]
-    runtV=np.zeros(shape=(N,4))
-    shotsV=np.zeros(shape=(N,4)) 
-    runLabs=[ 'gpu1_10k', 'cpu128_10k', 'gpu1_1M', 'cpu128_1M']
-    
+    runtV=np.zeros(shape=(N,2))
+    #shotsV=np.zeros(shape=(N,2))  # not needed for now
+    runLabs=[ 'gpu', 'cpu']
     cMD=None; gMD=None
-    nC=0 # counts cpu runs
+
     #...  collect data
     for i in range(N):
-        for j in range(4):
+        for j in range(2):
             expN='mar%dq_%s'%(nqV[i],runLabs[j])
             nq,runt,xMD=readOne(expN,args.inpPath,i+j==0)
             print(i,j,expN)
-            if j in [0,2]:  assert nq>0 
-            if nq==0: continue # no data was found
             if gMD==None: gMD=xMD
             if cMD==None and j==1: cMD=xMD
-            if j==0: nqV[i]=nq
-            if j==1 : nC+=1
             runtV[i,j]=runt
-            shotsV[i,j]=xMD['num_shots']
+            #shotsV[i,j]=xMD['num_shots']
               
     expD={}
     expD['num_qubit']=nqV
     expD['run_time_1circ']=runtV
-    expD['shots']=shotsV
+    #expD['shots']=shotsV
 
-    expMD={'run_label': runLabs,'num_cpu_runs':nC}
-    
+    expMD={'run_label': runLabs}
+    pprint(gMD)
     for xx in ['date','hash','num_circ','num_cx','num_gate','gpu_info']:
         expMD[xx]=gMD[xx]
     xx='cpu_info'
@@ -254,14 +189,17 @@ if __name__ == '__main__':
 
     post_process(expMD,expD)
     
+    #...... WRITE  OUTPUT .........
+    #outF=os.path.join(args.outPath,MD['short_name?']+'.sum.h5')
+    #write4_data_hdf5(outD,outF,MD)
+
     # ----  just plotting
     args.prjName=expMD['short_name']
     plot=Plotter(args)
     if 'a' in args.showPlots:
         plot.compute_time(expMD,expD,figId=1)
     if 'b' in args.showPlots:
-        plot.sample_time(expMD,expD,figId=2)
+        plot.other_plot(expMD,expD,figId=1)
         
-
     plot.display_all(png=1)
     

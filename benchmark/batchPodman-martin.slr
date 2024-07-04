@@ -12,10 +12,10 @@ set -u ;  # exit  if you try to use an uninitialized variable
 #
 # cray-mpich and cray-libsci conflict with openmpi so unload them
 #
-module unload cray-mpich
-module unload cray-libsci
-module use /global/common/software/m3169/perlmutter/modulefiles
-module load openmpi
+#module unload cray-mpich
+#module unload cray-libsci
+#module use /global/common/software/m3169/perlmutter/modulefiles
+#module load openmpi
 
 expN=${1:-mar24q}
 trg=${2:-gpu}
@@ -24,6 +24,8 @@ if [ "$trg" == "cpu" ]; then
     backend='qiskit-cpu'
 elif [ "$trg" == "gpu" ]; then
     backend="nvidia"
+elif [ "$trg" == "adjGPU" ]; then
+    backend="nvidia-mgpu"
 fi
 
 #env

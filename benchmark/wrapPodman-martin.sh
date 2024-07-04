@@ -25,13 +25,11 @@ echo podman-hpc run -i --gpu \
    --workdir  /wrk \
    -e HDF5_USE_FILE_LOCKING='FALSE' \
    -e SLURM_NTASKS=${SLURM_NTASKS:-0} -e SLURM_PROCID=${SLURM_PROCID-1} \
+   -e OMPI_ALLOW_RUN_AS_ROOT=1 \
+   -e OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
    $IMG <<EOF
    echo I:started `date`
-   #nvidia-smi
-   #env
    pwd
-   #ls -l
-   #ls -l /myData/circ
    $CMD
 EOF
 

@@ -5,7 +5,7 @@ set -e ;  #  bash exits if any statement returns a non-true return value
 
 # runs inside IMAGE
 
-basePath=/dataVault2024/dataCudaQ_July3
+basePath=/dataVault2024/dataCudaQ_temp4
 
 if [ ! -d "$basePath" ]; then
     echo create $basePath

@@ -12,6 +12,8 @@ ENV CUDAQ_REPO_ROOT=/workspaces/cuda-quantum
 ENV CUDAQ_INSTALL_PREFIX=/usr/local/cudaq
 ENV PATH="$CUDAQ_INSTALL_PREFIX/bin:${PATH}"
 ENV PYTHONPATH="$CUDAQ_INSTALL_PREFIX:${PYTHONPATH}"
+ENV UCX_WARN_UNUSED_ENV_VARS=n
+ENV UCX_TLS=cma,cuda,cuda_copy,cuda_ipc,mm,posix,self,shm,sm,sysv,tcp
 
 ARG workspace=.
 ARG destination="$CUDAQ_REPO_ROOT"
@@ -51,6 +53,8 @@ RUN if [ -n "$install" ]; \
         echo "source-sha: $git_source_sha" > "$CUDAQ_INSTALL_PREFIX/build_info.txt"; \
     fi
 RUN export OMPI_MCA_opal_cuda_support=true OMPI_MCA_btl='^openib'
+RUN echo 1024 > /proc/sys/net/core/somaxconn
+
 # - - - - - - - CUSTOM CODE
 
 # is needed by  tzdada which sets sth for tzdata

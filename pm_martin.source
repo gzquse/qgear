@@ -2,7 +2,6 @@
 #  salloc -q interactive -C gpu -t 4:00:00 -A nintern -N 1 
 # podman-hpc run -it gzquse/ubu22-qiskit1.0:p2j bash
 # export IMG=gzquse/cudaquanmpi-qiskit1:p2.1 
-
 export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_common/
 IMG=gzquse/cudaquanmpi-qiskit1:p6
 #IMG=balewski/cudaquanmpi-qiskit:p4
@@ -33,7 +32,9 @@ for var in "$@"; do
   # ... more ...
 done
 
-podman-hpc run --gpu -it \
+ENABLE_MPI="source /$BASE_DIR/benchmark/distributed/activate_custom_mpi.sh"
+
+podman-hpc run --privileged --gpu -it \
    --volume $CFSH/$BASE_DIR:/$BASE_DIR \
    --volume ${CFSH}/daan_qcrank:/daan_qcrank \
    --volume ${DATA_VAULT}:/dataVault2024 \
@@ -41,9 +42,13 @@ podman-hpc run --gpu -it \
    -e Cudaq_dataVault=/data_tmp \
    -e DISPLAY  -v $HOME:$HOME -e HOME  \
    -e HDF5_USE_FILE_LOCKING='FALSE' \
+   -e OMPI_ALLOW_RUN_AS_ROOT=1 \
+   -e OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
+   -e UCX_WARN_UNUSED_ENV_VARS=n \
    --workdir /$BASE_DIR \
-   $IMG 
-
+   $IMG \
+   bash \
+   -c "source /$BASE_DIR/benchmark/distributed/activate_custom_mpi.sh" 
 # fixes HDF5 : error message = 'Unknown error 524')
 
 # 
