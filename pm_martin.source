@@ -32,7 +32,7 @@ for var in "$@"; do
   # ... more ...
 done
 
-ENABLE_MPI="source /$BASE_DIR/benchmark/distributed/activate_custom_mpi.sh"
+ENABLE_MPI="source /$BASE_DIR/benchmark/distributed/activate_custom_mpi.sh && exec bash"
 
 podman-hpc run --privileged --gpu -it \
    --volume $CFSH/$BASE_DIR:/$BASE_DIR \
@@ -48,7 +48,8 @@ podman-hpc run --privileged --gpu -it \
    --workdir /$BASE_DIR \
    $IMG \
    bash \
-   -c "source /$BASE_DIR/benchmark/distributed/activate_custom_mpi.sh" 
+   -c "$ENABLE_MPI" \
+   
 # fixes HDF5 : error message = 'Unknown error 524')
 
 # 
