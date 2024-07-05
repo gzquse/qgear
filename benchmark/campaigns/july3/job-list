@@ -1,0 +1,35 @@
+./big_sbatch-martin.sh 
+1 expN:mar21q trg:gpu
+Submitted batch job 27554891
+2 expN:mar21q trg:cpu
+Submitted batch job 27554892
+3 expN:mar22q trg:gpu
+Submitted batch job 27554894
+4 expN:mar22q trg:cpu
+Submitted batch job 27554896
+5 expN:mar23q trg:gpu
+Submitted batch job 27554898
+6 expN:mar23q trg:cpu
+Submitted batch job 27554900
+7 expN:mar24q trg:gpu
+Submitted batch job 27554901
+8 expN:mar24q trg:cpu
+Submitted batch job 27554903
+9 expN:mar25q trg:gpu
+Submitted batch job 27554904
+10 expN:mar25q trg:cpu
+Submitted batch job 27554906
+11 expN:mar26q trg:gpu
+Submitted batch job 27554907
+12 expN:mar26q trg:cpu
+Submitted batch job 27554910
+13 expN:mar27q trg:gpu
+Submitted batch job 27554912
+14 expN:mar27q trg:cpu
+Submitted batch job 27554913
+15 expN:mar28q trg:gpu
+Submitted batch job 27554915
+16 expN:mar28q trg:cpu
+Submitted batch job 27554917
+submitted: 16 jobs
+Wed 03 Jul 2024 11:11:45 AM PDT
