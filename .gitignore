@@ -6,7 +6,6 @@ out/
 .bash_history
 .qiskit/
 .viminfo
-*.png
 __pycache__
 *-checkpoint.ipynb
 .ipynb_checkpoints/
