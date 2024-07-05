@@ -5,7 +5,7 @@ set -e ;  #  bash exits if any statement returns a non-true return value
 
 # runs inside IMAGE
 
-basePath=/dataVault2024/dataCudaQ_temp4
+basePath=/dataVault2024/dataCudaQ_July4
 
 if [ ! -d "$basePath" ]; then
     echo create $basePath
@@ -25,7 +25,7 @@ nCirc=4
 # ......  run jobs .......
 k=0
 
-for nq in {18..29}; do
+for nq in {33..35}; do
 #for nq in {16..18}; do  # for testing
     expN=mar${nq}q
     k=$[ $k +1 ]

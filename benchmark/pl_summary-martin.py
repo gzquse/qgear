@@ -26,7 +26,7 @@ def get_parser():
     parser.add_argument("-p", "--showPlots", default='a', nargs='+', help="abc-string listing shown plots")
     
     # IO paths
-    parser.add_argument("--basePath", default='/pscratch/sd/g/gzquse/quantDataVault2024/dataCudaQ_July3', help="head path for set of experiments, or 'env'")
+    parser.add_argument("--basePath", default='/pscratch/sd/g/gzquse/quantDataVault2024/dataCudaQ_July4', help="head path for set of experiments, or 'env'")
     parser.add_argument("--inpPath", default=None, help="input circuits location")
     parser.add_argument("--outPath", default=None, help="all outputs from experiment")
        
