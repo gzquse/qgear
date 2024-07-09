@@ -32,7 +32,7 @@ podman-hpc run --privileged -i --gpu \
    -e OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
    -e UCX_WARN_UNUSED_ENV_VARS=n \
    --workdir /wrk \
-   $IMG bash -c "$ENABLE_MPI" <<EOF
+   $IMG bash -c "$ENABLE_MPI"<<EOF
    echo I:started `date`
    $CMD
    echo I:ended
