@@ -4,6 +4,8 @@
 # on PM public image:  ./podman-hpc-build.sh  -f Dockerfile.cudaq-qiskit -t cudaquanmpi-qiskit:p4 -p
 # # it takes real	15m57s
 #--------------------------------------
+#  IMG=gzquse/cudaquanmpi-qiskit:p6
+#  IMG=balewski/cudaquanmpi-qiskit:p7
 
 ARG base_image=ghcr.io/nvidia/cuda-quantum-devdeps:ext-gcc12-main
 FROM $base_image
@@ -97,6 +99,8 @@ RUN echo 2d-AAAAAAAAAAAAAAAAAAAAAAAAAAAAA  afinity and monitoring tools  && \
 RUN apt-get install numactl  && \
     apt-get clean all    
 # use case for CPUs on PM: numactl --cpunodebind=0 --membind=0   ./run_gateList.py  --expName mac18q
+
+RUN  pip3 install  mpi4py
 
 #WORKDIR /root/cuda_quantum
 #ENTRYPOINT ["bash", "-l"]

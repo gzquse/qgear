@@ -51,7 +51,7 @@ def get_parser():
         args.numRank = int(os.environ['SLURM_NTASKS'])
     if args.backend=='nvidia-mqpu':  # let Cudaq to manage ranks
         args.myRank,  args.numRank = 0,1
-    if args.backend=='nvidia-mgpu':  # use `mpich -np 4` executed inside podman
+    if args.backend=='nvidia-mgpu':  # use mpich executed inside podman
         from mpi4py import MPI  # for 'nvidia-mgpu'
         comm= MPI.COMM_WORLD
         args.myRank = comm.Get_rank()
@@ -73,12 +73,13 @@ def run_qiskit_aer(shots):
     #print('   job id:%s , running ...'%job.job_id())
     result=job.result()
     probsBL=result.get_counts()
-    return probsBL
+    return len(probsBL[0])
 
 #...!...!....................
 def run_cudaq(shots,num_qpus):
     # converter  and run circuits one by one
     resL=[0]* nCirc # prime the list
+    futures = []
     for i in range(nCirc):
         # Convert values to Python int and assign to a, b
         num_qubit, num_gate = map(int,gateD['circ_type'][i] )
@@ -90,20 +91,17 @@ def run_cudaq(shots,num_qpus):
         
         if prOn:   print(cudaq.draw(circ_kernel, num_qubit, num_gate, gate_type, gate_param))    
         if target == "nvidia-mgpu":    
-            target2='adj-gpu'
             results = cudaq.sample(circ_kernel,num_qubit, num_gate, gate_type, gate_param, shots_count=shots)
-            resL[i]=results  # store  bistsrings
-            
+            resL[i]=len(results)  # store number of bistsrings
+            target2='adj-gpu'
         elif target == "nvidia-mqpu":  # 4 GPUs parallel
-            target2='par-gpu'
             gpu_id = i % num_qpus
             results = cudaq.sample_async(circ_kernel, num_qubit, num_gate, gate_type, gate_param, shots_count=shots, qpu_id=gpu_id)
             # Retrieve  results - this is where the time is used???
-            resL[i]=results.get() # store bistsrings
-            
-            
-    print('RCQ: done',len(resL[0]),target2)
-    return resL,target2
+            resL[i]=len(results.get()) # store number of bistsrings
+            target2='par-gpu'
+    print('RCQ: done',resL[0],target2)
+    return resL[0],target2
 
 ''' OLD    
             resL[i]=results
@@ -143,11 +141,12 @@ if __name__ == "__main__":
     inpF=args.expName+'.gate_list.h5'
     gateD,MD=read4_data_hdf5(os.path.join(args.inpPath,inpF),args.verb)
     
-    if target=='qiskit-cpu':  # use srun ranks
+    if args.numRank>1:
         shardSize=input_shard(gateD,args)
         MD['num_circ']=shardSize
         MD['my_rank']=args.myRank
-        MD['num_rank']=args.numRank        
+        MD['num_rank']=args.numRank
+        
         
     nCirc=MD['num_circ']    
     if args.verb>=2:
@@ -172,18 +171,17 @@ if __name__ == "__main__":
         
     T0=time()
     if 'qiskit' in target:
-        resL=run_qiskit_aer(shots)
+        resLen=run_qiskit_aer(shots)
         MD['cpu_info']=get_cpu_info(verb=0)
         target2='par-cpu'
     else:
-        resL,target2=run_cudaq(shots,num_qpus)
+        resLen,target2=run_cudaq(shots,num_qpus)
         MD['num_qpus']=num_qpus
         MD['gpu_info']=get_gpu_info(verb=0)
         
 
     elaT=time()-T0
     load1, _, _ = psutil.getloadavg()
-    resLen=len(resL[0])
     if args.verb: print('M:  %s ended elaT=%.1f sec, numRank=%d end_load1=%.1f\n'%(MD['short_name'],elaT,args.numRank,load1))
     MD.update({'elapsed_time':elaT,'num_meas_strings':resLen,'target':target,'date':dateT2Str()})
     MD['target2']=target2
@@ -193,12 +191,6 @@ if __name__ == "__main__":
     MD['num_shots']=shots
     if args.numRank>1: MD['short_name']+='_r%d.%d'%(args.myRank,args.numRank)
 
-    if args.myRank==0:  # dump some bitstrings
-        res0=resL[0]
-        for i,bstr in enumerate(res0):
-            print('bstr:',bstr,res0[bstr])
-            if i >10: break
-    
     if target=='nvidia-mgpu':
         print('M:Comm.Finalize(), myRank:%d of %d'%(args.myRank,  args.numRank ))
         # for this case all ranks carry the same information, quit all be rank0
@@ -212,8 +204,6 @@ if __name__ == "__main__":
     
     if args.verb:
         print('M:done  %s  elaT %.1f sec\n'%(MD['short_name'],elaT))
-        if 'qiskit' in target:  MD.pop('cpu_info')
-        else:  MD.pop('gpu_info')
         pprint(MD)
    
     #if target=='nvidia-mgpu':

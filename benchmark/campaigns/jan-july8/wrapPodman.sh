@@ -22,18 +22,8 @@ sleep $tSleep
 ENABLE_MPI="source ./distributed/activate_custom_mpi.sh && exec bash"
 
 # it is harmless to use '--gpu' on CPU node, so same script on CPU or GPU node
-echo podman-hpc run --privileged -it --gpu \
-   --volume $absDataPath:/myData \
-   --volume $wrkPath:/wrk \
-   -e HDF5_USE_FILE_LOCKING='FALSE' \
-   -e SLURM_NTASKS=${SLURM_NTASKS:-0} -e SLURM_PROCID=${SLURM_PROCID-1} \
-   -e OMPI_ALLOW_RUN_AS_ROOT=1 \
-   -e OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
-   -e UCX_WARN_UNUSED_ENV_VARS=n \
-   --workdir /wrk \
-   $IMG bash -c "\"$ENABLE_MPI\""
-
-podman-hpc run --privileged -it --gpu \
+ 
+podman-hpc run --privileged -i --gpu \
    --volume $absDataPath:/myData \
    --volume $wrkPath:/wrk \
    -e HDF5_USE_FILE_LOCKING='FALSE' \
@@ -45,6 +35,8 @@ podman-hpc run --privileged -it --gpu \
    $IMG bash -c "$ENABLE_MPI" <<EOF
    echo I:started `date`
    $CMD
+   echo I:ended
+   exit
 EOF
 
 

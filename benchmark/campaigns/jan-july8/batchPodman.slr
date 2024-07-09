@@ -9,6 +9,14 @@
 
 set -u ;  # exit  if you try to use an uninitialized variable
 
+#
+# cray-mpich and cray-libsci conflict with openmpi so unload them
+#
+#module unload cray-mpich
+#module unload cray-libsci
+#module use /global/common/software/m3169/perlmutter/modulefiles
+#module load openmpi
+
 expN=${1:-mar34q}
 trg=${2:-adjGPU}
 shots=${3:-10240}
@@ -37,7 +45,7 @@ echo S: head:`hostname`  use image $IMG
 if [ "$USER" == "balewski" ]; then  #Jan
     CFSH=/global/cfs/cdirs/mpccc/balewski
     #BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_june28 - good campaign
-    BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_July9
+    BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_July8
     DATA_SRC=${CFSH}/2024_martin_gradient
 elif [ "$USER" == "gzquse" ]; then    # Martin
     CFSH=/pscratch/sd/g/gzquse
@@ -52,10 +60,12 @@ wrkPath=$SCRATCH/jobs_cudaq/$jobId
 
 echo wrkPath=$wrkPath
 mkdir -p $wrkPath
-cp -rp ../toolbox distributed *py  wrapPodman.sh batchPodman.slr $wrkPath/
+cp -rp ../toolbox distributed *py  wrapPodman-martin.sh batchPodman-martin.slr $wrkPath/
 cd $wrkPath
 
 # .... task to be executed by Podman
+#1CMD="mpirun -np 4 python3 -u  ./run_gateList.py  --expName $expN --backend $backend   --numShots $shots  --basePath /myData  "
+
 # CPU version uses srun  for mutiple tasks
 CMD=" python3 -u  ./run_gateList.py  --expName $expN --backend $backend   --numShots $shots  --basePath /myData  "
 
@@ -74,7 +84,7 @@ echo S: CMD=$CMD
 #nvidia-smi
 
 #..... fire the task ....
-srun -l --mpi=pmix -n $G ./wrapPodman.sh $IMG " $CMD " $wrkPath  $BASE_PATH
+srun -l --mpi=pmix -n $G ./wrapPodman-martin.sh $IMG " $CMD " $wrkPath  $BASE_PATH
 echo S:done ; date 
 
 #Cancel all my jobs:

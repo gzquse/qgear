@@ -1,7 +1,6 @@
 
 Dockerfile.cudaq-qiskit  is used to work on PM by Jan & Martin
 
-Dockerfile.ubu22-qiskit is experimental version assembled by Jan
 
 To erase all podman files for private images:
 rm -rf $SCRATCH/storage
@@ -13,3 +12,7 @@ Jan: rm -rf /global/cfs/cdirs/nstaff/balewski/podman_common/
 
 Possible method of enabling GPU on MacOS
 https://sinrega.org/2024-03-06-enabling-containers-gpu-macos/
+
+Image compilation on PM, work for Jan & Martin the same way
+
+time  ./podman-hpc-build.sh -f Dockerfile.cudaq-qiskit-ompi-full -t cudaquanmpi-qiskit:p7

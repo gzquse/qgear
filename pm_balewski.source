@@ -16,7 +16,7 @@ echo launch image $IMG
 echo you are launching Podman image ...  remeber to exit
 
 JNB_PORT=' '
-BASE_DIR=2024_martin_gradient  # here git has home
+BASE_DIR=2024_martin_gradient-dev  # here git has home
 WORK_DIR=$BASE_DIR/benchmark
 DATA_VAULT=${CFSH}/quantDataVault2024
 DATA_DIR=/dataCudaQ_tmp
