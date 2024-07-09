@@ -34,7 +34,7 @@ done
 
 ENABLE_MPI="source /$BASE_DIR/benchmark/distributed/activate_custom_mpi.sh && exec bash"
 
-podman-hpc run --privileged --gpu -i \
+podman-hpc run --privileged --gpu -it \
    --volume $CFSH/$BASE_DIR:/$BASE_DIR \
    --volume ${CFSH}/daan_qcrank:/daan_qcrank \
    --volume ${DATA_VAULT}:/dataVault2024 \
@@ -47,8 +47,8 @@ podman-hpc run --privileged --gpu -i \
    -e UCX_WARN_UNUSED_ENV_VARS=n \
    --workdir /$BASE_DIR \
    $IMG \
-   bash \
-   -c "$ENABLE_MPI" <<EOF
+   # bash \
+   # -c "$ENABLE_MPI"
    
 # fixes HDF5 : error message = 'Unknown error 524')
 

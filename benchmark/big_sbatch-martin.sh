@@ -7,12 +7,14 @@ set -e ;  #  bash exits if any statement returns a non-true return value
 k=0
 #for nq in {17..18}; do
 #    for nq in {22..32}; do
-for nq in {33..34}; do	    
+# how many nodes want
+N=${1:-1}
+for nq in {35..36}; do	    
 	for trg in  adjGPU; do
 	    k=$[ $k +1 ]
 	    expN=mar${nq}q
  	    echo $k  expN:$expN   trg:$trg 
-	    SCMD="  ./batchPodman-martin.slr  $expN $trg  "
+	    SCMD="  ./batchPodman-martin.slr  $expN $trg "
 	    
 	    # Slurm incantation depends on GPU vs. CPU
 	    if [ "$trg" == "cpu" ]; then
@@ -20,7 +22,7 @@ for nq in {33..34}; do
 	    elif [ "$trg" == "gpu" ]; then
 			sbatch -C gpu -A nintern --gpus-per-task=4 --ntasks=1 -N1 $SCMD
 		elif [ "$trg" == "adjGPU" ]; then
-			sbatch -C gpu -A nintern --gpus-per-task=4 --ntasks=1 -N1 $SCMD
+			sbatch -C gpu -A nintern --gpus-per-task=1 -N 4 $SCMD
 	    fi	    
 	done
 done

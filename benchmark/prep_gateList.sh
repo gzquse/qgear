@@ -25,7 +25,7 @@ nCirc=4
 # ......  run jobs .......
 k=0
 
-for nq in {33..35}; do
+for nq in {28..35}; do
 #for nq in {16..18}; do  # for testing
     expN=mar${nq}q
     k=$[ $k +1 ]
