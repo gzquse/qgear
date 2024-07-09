@@ -129,7 +129,7 @@ class Plotter(PlotterBackbone):
 def readOne(expN,path,verb):
     assert os.path.exists(path)
     inpF=os.path.join(path,expN+'.yaml')
-    #print('iii',inpF);aa
+    print('iii',inpF)
     if not os.path.exists(inpF): return 0,0,{}
     xMD=read_yaml(inpF,verb)
     #print(inpF,xMD['num_qubit'],xMD['elapsed_time'],float(xMD['num_circ']))
@@ -157,14 +157,16 @@ if __name__ == '__main__':
     args=get_parser()
 
     nqL=[i for i in range(18,33) ]
-    nqL=[16,18,20]
+    nqL=[20,21]
     
     nqV=np.array(nqL)
     N=nqV.shape[0]
-    nT=2
+    runLabs=[  'par-cpu', 'par-gpu']
+    nT=len(runLabs)
+    mdT=[None]*nT  # capture meta data
+    
     runtV=np.zeros(shape=(N,nT))
     shotsV=np.zeros(shape=(N,nT)) 
-    runLabs=[ 'gpu', 'cpu']
     
     cMD=None; gMD=None
     nC=0 # counts cpu runs
@@ -172,12 +174,11 @@ if __name__ == '__main__':
     for i in range(N):
         for j in range(nT):
             expN='cg%dq_%s'%(nqV[i],runLabs[j])
-            #if j==1: expN+='_r0.4'
+            if j==0: expN+='_r0.4'
             nq,runt,xMD=readOne(expN,args.inpPath,i+j==0)
             print(i,j,expN,nq)
             if nq==0: continue # no data was found
-            if gMD==None: gMD=xMD
-            if cMD==None and j==1: cMD=xMD
+            if mdT[j]==None: mdT[j]=xMD
             if j==0: nqV[i]=nq
             if j==1 : nC+=1
             runtV[i,j]=runt
@@ -189,12 +190,14 @@ if __name__ == '__main__':
     expD['shots']=shotsV
 
     expMD={'run_label': runLabs,'num_cpu_runs':nC}
-    
-    for xx in ['date','hash','num_circ','num_cx','num_gate','gpu_info']:
-        expMD[xx]=gMD[xx]
+    xMD=mdT[0]
+    for xx in ['date','hash','num_circ','num_cx','num_gate']: #,'gpu_info']:
+        expMD[xx]=xMD[xx]
+    '''
     pprint(cMD)
     xx='cpu_info'
     expMD[xx]=cMD[xx]
+    '''
     expMD['run_day']=expMD['date'].split('_')[0]
     expMD['short_name']='gpuSpeed_'+expMD['run_day']
     pprint(expMD)

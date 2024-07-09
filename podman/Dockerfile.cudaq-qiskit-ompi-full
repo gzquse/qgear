@@ -55,7 +55,7 @@ RUN if [ -n "$install" ]; \
         echo "source-sha: $git_source_sha" > "$CUDAQ_INSTALL_PREFIX/build_info.txt"; \
     fi
 RUN export OMPI_MCA_opal_cuda_support=true OMPI_MCA_btl='^openib'
-RUN echo 1024 > /proc/sys/net/core/somaxconn
+
 
 # - - - - - - - CUSTOM CODE
 
