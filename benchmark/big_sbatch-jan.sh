@@ -7,22 +7,23 @@ ACCT=nstaff
 # runs in PM login node, bere-OS
 k=0
 #for nq in 16  ; do
-for nq in {20..28}; do	    
-	for trg in par-cpu par-gpu  adj-gpu ; do
-	    k=$[ $k +1 ]
-	    expN=cg${nq}q
- 	    echo $k  expN:$expN   trg:$trg 
-	    SCMD="  ./batchPodman.slr  $expN $trg  "
+for nq in {20..28}; do
+    echo nq=nq
+    for trg in par-cpu par-gpu  adj-gpu ; do
+	k=$[ $k +1 ]
+	expN=cg${nq}q
+ 	echo $k  expN:$expN   trg:$trg 
+	SCMD="  ./batchPodman.slr  $expN $trg  "
 	    
-	    # Slurm incantation depends on GPU vs. CPU
-	    if [ "$trg" == "par-cpu" ]; then
-	       sbatch  -C cpu --exclusive --cpus-per-task=32 --ntasks-per-node=4 -N1 -A $ACCT $SCMD
-	    elif [ "$trg" == "par-gpu" ]; then
-	        sbatch  -C gpu   --gpus-per-task=4 --ntasks=1 -N1  -A $ACCT $SCMD
-	    elif [ "$trg" == "adj-gpu" ]; then
-	        sbatch  -C gpu   --gpus-per-task=4 --ntasks=1 -N1  -A $ACCT $SCMD			
-	    fi	    
-	done
+	# Slurm incantation depends on GPU vs. CPU
+	if [ "$trg" == "par-cpu" ]; then
+	    sbatch  -C cpu --exclusive --cpus-per-task=32 --ntasks-per-node=4 -N1 -A $ACCT $SCMD
+	elif [ "$trg" == "par-gpu" ]; then
+	    sbatch  -C gpu   --gpus-per-task=4 --ntasks=1 -N1  -A $ACCT $SCMD
+	elif [ "$trg" == "adj-gpu" ]; then
+	    sbatch  -C gpu   --gpus-per-task=4 --ntasks=1 -N1  -A $ACCT $SCMD
+	fi	    
+    done
 done
 
 echo submitted:  $k jobs

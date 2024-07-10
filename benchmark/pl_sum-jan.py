@@ -82,10 +82,9 @@ class Plotter(PlotterBackbone):
 
         nqV=bigD['num_qubit']
         runtV=bigD['run_time_1circ']/60.
-        dLab=['CudaQ: 1GPU','Qiskit: 32CPUs']
-        nG=nqV.shape[0]
-        nC=md['num_cpu_runs']
-        kL=[nG,nC] # size of GPU & CPU runs
+        dLab=md['run_label']
+        dCnt=md['run_count']
+        nT=len(dLab)
         nqR=(nqV[0]-0.5,nqV[-1]+1.5)
         
         tit='Compute state-vector, %dk CX-gates, PM: %s'%(md['num_cx']/1000,md['run_day'])
@@ -94,8 +93,8 @@ class Plotter(PlotterBackbone):
         ax1.set_title(tit, pad=20)  # Adjust the pad value as needed
         
         #....  time vs. nq
-        for j in range(1,-1,-1):
-            k=kL[j]
+        for j in range(nT):
+            k=dCnt[j]
             ax1.plot(nqV[:k],runtV[:k,j],label=dLab[j], marker='*', linestyle='-')
         ax1.set_yscale('log')
         # Set y-axis formatter
@@ -109,9 +108,11 @@ class Plotter(PlotterBackbone):
         ax1.axhline(1440,ls='--',lw=2,c='m')
         ax1.text(20,600,'24h time-out',c='m')
 
+        return #tmp
         ax1.axvline(32.5,ls='--',lw=2,c='firebrick')
         ax1.text(31.5,1,'A100 RAM limit',c='firebrick', rotation=90)
         self._add_stateSize_axis(ax1)
+
         
         #....  gain factor
         gainV=bigD['runt_spedup']
@@ -129,7 +130,7 @@ class Plotter(PlotterBackbone):
 def readOne(expN,path,verb):
     assert os.path.exists(path)
     inpF=os.path.join(path,expN+'.yaml')
-    print('iii',inpF)
+    #print('iii',inpF)
     if not os.path.exists(inpF): return 0,0,{}
     xMD=read_yaml(inpF,verb)
     #print(inpF,xMD['num_qubit'],xMD['elapsed_time'],float(xMD['num_circ']))
@@ -156,53 +157,49 @@ def post_process(md,bigD):
 if __name__ == '__main__':
     args=get_parser()
 
-    nqL=[i for i in range(18,33) ]
-    nqL=[20,21]
+    nqL=[i for i in range(20,29) ]
+    #nqL=[20,21]
     
     nqV=np.array(nqL)
     N=nqV.shape[0]
-    runLabs=[  'par-cpu', 'par-gpu']
+    runLabs=[  'par-cpu', 'par-gpu', 'adj-gpu']
     nT=len(runLabs)
     mdT=[None]*nT  # capture meta data
+    cntT=[0]*nT  # capture number of finished runs
     
     runtV=np.zeros(shape=(N,nT))
     shotsV=np.zeros(shape=(N,nT)) 
     
-    cMD=None; gMD=None
-    nC=0 # counts cpu runs
     #...  collect data
     for i in range(N):
         for j in range(nT):
             expN='cg%dq_%s'%(nqV[i],runLabs[j])
-            if j==0: expN+='_r0.4'
+            if j!=1: expN+='_r0.4'
             nq,runt,xMD=readOne(expN,args.inpPath,i+j==0)
-            print(i,j,expN,nq)
+            #print(i,j,expN,nq)
             if nq==0: continue # no data was found
             if mdT[j]==None: mdT[j]=xMD
-            if j==0: nqV[i]=nq
-            if j==1 : nC+=1
+            if j==2: nqV[i]=nq  # it will be adj-gpu
+            cntT[j]+=1
             runtV[i,j]=runt
             shotsV[i,j]=xMD['num_shots']
-    print('M: got jobs CPU:%d,  GPU:%d'%(nC,N)) 
+    print('M: got jobs:',cntT) 
     expD={}
     expD['num_qubit']=nqV
     expD['run_time_1circ']=runtV
     expD['shots']=shotsV
 
-    expMD={'run_label': runLabs,'num_cpu_runs':nC}
+    expMD={'run_label': runLabs,'run_count':cntT}
     xMD=mdT[0]
     for xx in ['date','hash','num_circ','num_cx','num_gate']: #,'gpu_info']:
         expMD[xx]=xMD[xx]
-    '''
-    pprint(cMD)
-    xx='cpu_info'
-    expMD[xx]=cMD[xx]
-    '''
+        
     expMD['run_day']=expMD['date'].split('_')[0]
     expMD['short_name']='gpuSpeed_'+expMD['run_day']
+    expMD['run_label']=runLabs
     pprint(expMD)
 
-    post_process(expMD,expD)
+    #1post_process(expMD,expD)
     
     # ----  just plotting
     args.prjName=expMD['short_name']
