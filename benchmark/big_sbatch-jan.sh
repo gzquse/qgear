@@ -3,12 +3,12 @@ set -u ;  # exit  if you try to use an uninitialized variable
 #set -x ;  # print out the statements as they are being executed
 set -e ;  #  bash exits if any statement returns a non-true return value
 
-ACCT=nstaff
+ACCT=nintern
 # runs in PM login node, bere-OS
 k=0
 #for nq in 16  ; do
-for nq in {20..28}; do	    
-	for trg in par-cpu par-gpu  adj-gpu ; do
+for nq in 28; do	    
+	for trg in adj-gpu ; do
 	    k=$[ $k +1 ]
 	    expN=cg${nq}q
  	    echo $k  expN:$expN   trg:$trg 

@@ -9,7 +9,7 @@ import cudaq
 from time import time
 # qubit_count = 5
 # We can set a larger `qubit_count` if running on a GPU backend.
-qubit_count = 35
+qubit_count = 34
 cudaq.mpi.initialize()
 cudaq.set_target("nvidia-mgpu")
 
@@ -25,9 +25,9 @@ def kernel(qubit_count: int):
     qvector = cudaq.qvector(qubit_count)
     h(qvector)
     for j in range(50):
-        ry(0.1, 0)
-        rz(0.2, 1)
         for qubit in range(qubit_count - 1):
+            ry(0.1, qvector[qubit])
+            rz(0.2, qvector[qubit+1])
             x.ctrl(qvector[qubit], qvector[qubit + 1])
     mz(qvector)
 
