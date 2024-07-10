@@ -38,15 +38,27 @@ salloc  -C cpu --exclusive --cpus-per-task=32 --ntasks-per-node=4 -N1  -t 4:00:0
   ./batchPodman.slr  cg18q par-cpu
 
 
-*** GPU  interactive
+*** GPU   parallel interactive
 salloc  -C gpu   --gpus-per-task=4 --ntasks=1 -N1  -t 4:00:00 -q interactive -A nstaff
 
-GPUs  parallel , tag par-gpu
 ./batchPodman.slr  cg18q  par-gpu
 
 
-***GPU  interactive
+***GPU adjoined,  interactive
 salloc  -C gpu   --gpus-per-task=4 --ntasks=1 -N1  -t 4:00:00 -q interactive -A nstaff
-GPUs  adjoined, tag adj-gpu
 
   ./batchPodman.slr  cg18q  adj-gpu
+
+  
+= = = =
+  cd prjs/2024_martin_gradient-dev/benchmark
+salloc  -C gpu   --gpus-per-task=4 --ntasks=1 -N1  -t 4:00:00 -q interactive -A nstaff
+xterm&  
+
+export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_common/
+IMG=gzquse/cudaquanmpi-qiskit:p6
+podman-hpc run   --privileged -it --gpu --volume `pwd`:/wrk  --workdir /wrk    -e OMPI_ALLOW_RUN_AS_ROOT=1    -e OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1   -e UCX_WARN_UNUSED_ENV_VARS=n  $IMG bash
+
+source ./distributed/activate_custom_mpi.sh
+# use 4 GPU
+mpirun -np 4 python3 -u ./simple_ghz50_cudaq.py 
