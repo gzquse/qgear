@@ -49,6 +49,8 @@ salloc  -C gpu   --gpus-per-task=4 --ntasks=1 -N1  -t 4:00:00 -q interactive -A 
 
   ./batchPodman.slr  cg18q  adj-gpu
 
+TRY:
+ salloc  -C gpu  gpu-bind=none --gpus-per-task=4 --ntasks=1 -N1  -t 4:00:00 -q interactive -A nstaff 
   
 = = = =
   cd prjs/2024_martin_gradient-dev/benchmark

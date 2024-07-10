@@ -34,7 +34,6 @@ echo S: head:`hostname` N=$N  T=$T  G=$G
 #.....  define Podman image, later is the default
 export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_common/
 IMG=gzquse/cudaquanmpi-qiskit:p6
-IMG=gzquse/cudaquanmpi-qiskit:p4
 # export PODMANHPC_ADDITIONAL_STORES=/global/cfs/cdirs/nstaff/balewski/podman_common/
 # IMG=balewski/cudaquanmpi-qiskit:p7
 echo S: head:`hostname`  use image $IMG
@@ -65,12 +64,12 @@ cd $wrkPath
 # CPU version uses srun  for mutiple tasks
 CMD=" python3 -u  ./run_gateList.py  --expName $expN --backend $backend   --numShots $shots  --basePath /myData  "
 
-# if [ "$trg" == "adj-gpu" ]; then
-#     CMD=" mpiexec -np 4 "$CMD
-# fi
+if [ "$trg" == "adj-gpu" ]; then
+     CMD=" mpiexec -np 4 "$CMD
+fi
 
-#CMD="mpirun -np 4 python3 -u  ./simple_ghz50_cudaq.py  "
-#CMD=" python3 -u  ./simple_ghz50_cudaq.py  "
+#CMD="mpirun -np 4 python3 -u  simple_ghzV2_cudaq.py -q 30 -r 40 "
+
 # spare: 
 
 echo S: CMD=$CMD
@@ -79,7 +78,7 @@ echo S: CMD=$CMD
 #nvidia-smi
 
 #..... fire the task ....
-srun -l -n 4 ./wrapPodman.sh $IMG " $CMD " $wrkPath  $BASE_PATH
+srun -l -n $G ./wrapPodman.sh $IMG " $CMD " $wrkPath  $BASE_PATH
 echo S:done ; date 
 
 #Cancel all my jobs:
