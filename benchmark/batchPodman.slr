@@ -68,7 +68,7 @@ CMD=" python3 -u  ./run_gateList.py  --expName $expN --backend $backend   --numS
 #     CMD=" mpiexec -np 4 "$CMD
 # fi
 
-#CMD="mpirun -np 4 python3 -u  ./cuquantum_backends.py  "
+#CMD="mpirun -np 4 python3 -u  ./simple_ghz50_cudaq.py  "
 # spare: 
 
 echo S: CMD=$CMD
