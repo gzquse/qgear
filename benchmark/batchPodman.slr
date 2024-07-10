@@ -1,16 +1,19 @@
 #!/bin/bash 
 #SBATCH  -C gpu -N 1 -A nintern
 # SBATCH --ntasks-per-node=4
-# SBATCH  --time=28:00 -q debug
-#SBATCH --time 23:58:00  -q regular 
+#SBATCH  --time=28:00 -q debug
+# SBATCH --time 23:58:00  -q regular 
 #SBATCH --output=out/%j.out
 #SBATCH  --licenses=scratch
 # - - - E N D    O F    SLURM    C O M M A N D S
 
 set -u ;  # exit  if you try to use an uninitialized variable
 
-expN=${1:-mar34q}
-trg=${2:-adjGPU}
+module load cudatoolkit
+export MPICH_GPU_SUPPORT_ENABLED=1
+
+expN=${1:-cg24q}
+trg=${2:-adj-gpu}
 shots=${3:-10240}
 if [ "$trg" == "par-cpu" ]; then
     backend='qiskit-cpu'
@@ -29,10 +32,10 @@ G=$(( T * N ))
 echo S: head:`hostname` N=$N  T=$T  G=$G
 
 #.....  define Podman image, later is the default
-#export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_common/
-#IMG=gzquse/cudaquanmpi-qiskit:p6
-export PODMANHPC_ADDITIONAL_STORES=/global/cfs/cdirs/nstaff/balewski/podman_common/
-IMG=balewski/cudaquanmpi-qiskit:p7
+export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_common/
+IMG=gzquse/cudaquanmpi-qiskit:p6
+# export PODMANHPC_ADDITIONAL_STORES=/global/cfs/cdirs/nstaff/balewski/podman_common/
+# IMG=balewski/cudaquanmpi-qiskit:p7
 echo S: head:`hostname`  use image $IMG
 
 #..... input data:
@@ -44,7 +47,7 @@ if [ "$USER" == "balewski" ]; then  #Jan
 elif [ "$USER" == "gzquse" ]; then    # Martin
     CFSH=/pscratch/sd/g/gzquse
     # remember to change this line
-    BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_July4
+    BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_July8
     DATA_SRC=${CFSH}/GRADIENT_IMAGE
 fi
 
@@ -61,11 +64,9 @@ cd $wrkPath
 # CPU version uses srun  for mutiple tasks
 CMD=" python3 -u  ./run_gateList.py  --expName $expN --backend $backend   --numShots $shots  --basePath /myData  "
 
-if [ "$trg" == "adj-gpu" ]; then
-    CMD=" mpirun -np 4 "$CMD
-    # drop it after image is updated:
-    #CMD=" pip3 install --user mpi4py; "$CMD
-fi
+# if [ "$trg" == "adj-gpu" ]; then
+#     CMD=" mpiexec -np 4 "$CMD
+# fi
 
 #CMD="mpirun -np 4 python3 -u  ./cuquantum_backends.py  "
 # spare: 
@@ -76,7 +77,7 @@ echo S: CMD=$CMD
 #nvidia-smi
 
 #..... fire the task ....
-srun -l --mpi=pmix -n $G ./wrapPodman.sh $IMG " $CMD " $wrkPath  $BASE_PATH
+srun -l -n 4 ./wrapPodman.sh $IMG " $CMD " $wrkPath  $BASE_PATH
 echo S:done ; date 
 
 #Cancel all my jobs:

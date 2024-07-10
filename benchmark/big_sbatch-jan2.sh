@@ -7,12 +7,13 @@ ACCT=nintern
 # runs in PM login node, bere-OS
 k=0
 #for nq in 16  ; do
-for nq in 28; do	    
-	for trg in adj-gpu ; do
-	    k=$[ $k +1 ]
-	    expN=cg${nq}q
- 	    echo $k  expN:$expN   trg:$trg 
-	    SCMD="  ./batchPodman.slr  $expN $trg  "
+for nq in {20..28}; do
+    echo nq=nq
+    for trg in par-cpu par-gpu  adj-gpu ; do
+	k=$[ $k +1 ]
+	expN=cg${nq}q
+ 	echo $k  expN:$expN   trg:$trg 
+	SCMD="  ./batchPodman.slr  $expN $trg  "
 	    
 	# Slurm incantation depends on GPU vs. CPU
 	if [ "$trg" == "par-cpu" ]; then

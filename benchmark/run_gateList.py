@@ -45,6 +45,8 @@ def get_parser():
         args.inpPath=os.path.join(args.basePath,'circ') 
         args.outPath=os.path.join(args.basePath,'meas') 
 
+    
+
     # this is complex logic of fetching rank either from srun or mpich
     if args.backend=='qiskit-cpu':  # use srun ranks
         args.myRank  = int(os.environ['SLURM_PROCID'])
@@ -52,10 +54,9 @@ def get_parser():
     if args.backend=='nvidia-mqpu':  # let Cudaq to manage ranks
         args.myRank,  args.numRank = 0,1
     if args.backend=='nvidia-mgpu':  # use `mpich -np 4` executed inside podman
-        from mpi4py import MPI  # for 'nvidia-mgpu'
-        comm= MPI.COMM_WORLD
-        args.myRank = comm.Get_rank()
-        args.numRank = comm.Get_size()
+        cudaq.mpi.initialize()
+        args.myRank = cudaq.mpi.rank()
+        args.numRank = cudaq.mpi.num_ranks()
        
                 
     if args.myRank==0:
@@ -200,10 +201,9 @@ if __name__ == "__main__":
             if i >10: break
     
     if target=='nvidia-mgpu':
-        print('M:Comm.Finalize(), myRank:%d of %d'%(args.myRank,  args.numRank ))
+        print('myRank:%d of %d'%(args.myRank,  args.numRank ))
         # for this case all ranks carry the same information, quit all be rank0
         if args.myRank>0:
-            #MPI.Finalize()
             exit(0)
  
     #...... WRITE  OUTPUT .........
@@ -216,6 +216,6 @@ if __name__ == "__main__":
         else:  MD.pop('gpu_info')
         pprint(MD)
    
-    #if target=='nvidia-mgpu':
-    #    MPI.Finalize()
+    if target == 'nvidia-mgpu':
+        cudaq.mpi.finalize()
   
