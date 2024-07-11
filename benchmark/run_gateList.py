@@ -17,7 +17,7 @@ from toolbox.Util_H5io4 import  read4_data_hdf5
 from toolbox.Util_IOfunc import  write_yaml, dateT2Str,  get_gpu_info, get_cpu_info
 import psutil # for w-load
 import os
-from time import time
+from time import time, sleep
 from pprint import pprint
 from toolbox.Util_Qiskit import qiskit_circ_gateList
 from qiskit_aer import AerSimulator
@@ -45,14 +45,11 @@ def get_parser():
         args.inpPath=os.path.join(args.basePath,'circ') 
         args.outPath=os.path.join(args.basePath,'meas') 
 
-    
-
     # this is complex logic of fetching rank either from srun or mpich
+    args.myRank,  args.numRank = 0,1
     if args.backend=='qiskit-cpu':  # use srun ranks
         args.myRank  = int(os.environ['SLURM_PROCID'])
         args.numRank = int(os.environ['SLURM_NTASKS'])
-    if args.backend=='nvidia-mqpu':  # let Cudaq to manage ranks
-        args.myRank,  args.numRank = 0,1
     if args.backend=='nvidia-mgpu':  # use `mpich -np 4` executed inside podman
         cudaq.mpi.initialize()
         args.myRank = cudaq.mpi.rank()
@@ -77,10 +74,10 @@ def run_qiskit_aer(shots):
     return probsBL
 
 #...!...!....................
-def run_cudaq(shots,num_qpus):
+def run_cudaq(shots,num_qpus,nc=1):
     # converter  and run circuits one by one
-    resL=[0]* nCirc # prime the list
-    for i in range(nCirc):
+    resL=[0]* nc # prime the list
+    for i in range(nc):
         # Convert values to Python int and assign to a, b
         num_qubit, num_gate = map(int,gateD['circ_type'][i] )
         # Convert to list of integers
@@ -90,32 +87,21 @@ def run_cudaq(shots,num_qpus):
         prOn= num_qubit<6 and i==0 or args.verb>1
         
         if prOn:   print(cudaq.draw(circ_kernel, num_qubit, num_gate, gate_type, gate_param))    
-        if target == "nvidia-mgpu":    
-            target2='adj-gpu'
+        if target == "nvidia-mgpu"  or  target == "nvidia":  
+            target2='adj-gpu' if target == "nvidia-mgpu" else 'one-gpu'
             results = cudaq.sample(circ_kernel,num_qubit, num_gate, gate_type, gate_param, shots_count=shots)
             resL[i]=results  # store  bistsrings
             
-        elif target == "nvidia-mqpu":  # 4 GPUs parallel
+        elif target == "nvidia-mqpu":  # 4 GPUs parallel OR 1
             target2='par-gpu'
             gpu_id = i % num_qpus
             results = cudaq.sample_async(circ_kernel, num_qubit, num_gate, gate_type, gate_param, shots_count=shots, qpu_id=gpu_id)
             # Retrieve  results - this is where the time is used???
             resL[i]=results.get() # store bistsrings
-            
-            
+                        
     print('RCQ: done',len(resL[0]),target2)
     return resL,target2
 
-''' OLD    
-            resL[i]=results
-        elif target == "nvidia-mqpu":
-            gpu_id = i % num_qpus
-            futures.append(cudaq.sample_async(circ_kernel, num_qubit, num_gate, gate_type, gate_param, shots_count=shots, qpu_id=gpu_id))
-            # Retrieve and print results
-    if target == "nvidia-mqpu":
-        resL = [res.get() for res in futures]
-    return len(resL)
-'''
 
 #...!...!....................
 def input_shard(bigD,args):
@@ -184,9 +170,9 @@ if __name__ == "__main__":
 
     elaT=time()-T0
     load1, _, _ = psutil.getloadavg()
-    resLen=len(resL[0])
     if args.verb: print('M:  %s ended elaT=%.1f sec, numRank=%d end_load1=%.1f\n'%(MD['short_name'],elaT,args.numRank,load1))
-    MD.update({'elapsed_time':elaT,'num_meas_strings':resLen,'target':target,'date':dateT2Str()})
+    MD.update({'elapsed_time':elaT,'target':target,'date':dateT2Str()})
+    MD['num_meas_strings']=[ len(x) for x in resL]
     MD['target2']=target2
     MD['short_name']+='_'+target2
     MD.pop('gate_map')
@@ -204,6 +190,8 @@ if __name__ == "__main__":
         print('myRank:%d of %d'%(args.myRank,  args.numRank ))
         # for this case all ranks carry the same information, quit all be rank0
         if args.myRank>0:
+            cudaq.mpi.finalize()
+            sleep(3)
             exit(0)
  
     #...... WRITE  OUTPUT .........

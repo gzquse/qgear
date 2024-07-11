@@ -64,11 +64,11 @@ if __name__ == "__main__":
         exit(0)
 
     T0=time()
-    result=cudaq.sample(kernel, nq, nRep, shots_count=10)
+    result=cudaq.sample(kernel, nq, nRep, shots_count=shots)
     elaT=time()-T0
 
     if myrank == 0:
         if args.verb>1: print('counts:',result)
-        print('\nelaT= %.1f sec , nq=%d, nRep=%d target=%s, ranks=%d, num output=%d '%(elaT,nq,nRep,target,ranks,len(result)))
+        print('\nelaT= %.1f sec , nq=%d, nRep=%d, shots=%d, target=%s, ranks=%d, numSol=%d '%(elaT,nq,nRep,shots,target,ranks,len(result)))
     
 cudaq.mpi.finalize()

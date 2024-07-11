@@ -24,7 +24,7 @@ def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("-v","--verb",type=int, help="increase debug verbosity", default=1)
 
-    parser.add_argument('-q','--numQubits', default=5, type=int, help='pair: nq_addr nq_data, space separated ')
+    parser.add_argument('-q','--numQubits', default=5, type=int, help='circuit width')
    
     parser.add_argument('-k','--numCX', default=4, type=int, help='num of CX gates')
     parser.add_argument('-i','--numCirc', default=2, type=int, help='num of circuits  in to the job')
