@@ -1,0 +1,39 @@
+#!/bin/bash
+#SBATCH -C gpu -N 2 -A nintern
+#SBATCH --ntasks-per-node=4
+#SBATCH --gpus-per-task=1
+#SBATCH --time=28:00 -q debug
+#SBATCH --output=out/%j.out
+#SBATCH --licenses=scratch
+
+# - - - E N D    O F    SLURM    C O M M A N D S
+
+set -u  # exit if you try to use an uninitialized variable
+
+module unload cray-mpich
+module unload cray-libsci
+module use /global/common/software/m3169/perlmutter/modulefiles
+module load openmpi
+
+# Define Podman image
+export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_common/
+IMG=gzquse/cudaquan-ompi:p2
+
+CFSH=/pscratch/sd/g/gzquse
+DATA_SRC=${CFSH}/GRADIENT_IMAGE
+
+# Task to be executed by Podman
+CMD="python3 -u ./explore/strawman/simple_ghz50_cudaq.py"
+
+echo "S: CMD=$CMD"
+
+# Fire the task
+srun -l -N 2 -n 8 --gpus-per-task=1 --mpi=pmix podman-hpc run --privileged -i --gpu --openmpi-pmix \
+   --volume $DATA_SRC:/GRADIENT_IMAGE \
+   -e OMPI_ALLOW_RUN_AS_ROOT=1 \
+   -e OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
+   -e UCX_WARN_UNUSED_ENV_VARS=n \
+   --workdir /GRADIENT_IMAGE \
+   $IMG bash -c "$CMD"
+
+echo "S: done" ; date
