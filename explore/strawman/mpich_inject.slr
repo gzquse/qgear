@@ -12,22 +12,21 @@ set -u  # exit if you try to use an uninitialized variable
 
 # Define Podman image
 export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_common/
-IMG=gzquse/cudaquan-cray:p1
+IMG=gzquse/cuquantum-mpich:p1
 
 CFSH=/pscratch/sd/g/gzquse
 DATA_SRC=${CFSH}/GRADIENT_IMAGE/explore/strawman
 
 # Task to be executed by Podman
-CMD="mpiexec -np 8 python3 simple_ghz50_cudaq.py"
+CMD="python3 simple_ghz50_cudaq.py"
 echo "S: CMD=$CMD"
 
 # Fire the task
-srun -N 2 -n 8 podman-hpc run -i --gpu\
+srun -N 2 -n 8 podman-hpc run -i --gpu --cuda-mpi\
    --volume $DATA_SRC:/GRADIENT_IMAGE \
    -e OMPI_ALLOW_RUN_AS_ROOT=1 \
    -e OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
    --workdir /GRADIENT_IMAGE \
-   $IMG <<EOF
-$CMD
-EOF
+   $IMG bash -c "$CMD"
+
 echo "S: done" ; date

@@ -4,6 +4,7 @@
 # export IMG=gzquse/cudaquanmpi-qiskit1:p2.1 
 export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_common/
 IMG=gzquse/cudaquanmpi-qiskit1:p6
+
 #IMG=balewski/cudaquanmpi-qiskit:p4
 #CFSH=/global/cfs/cdirs/mpccc/balewski/
 

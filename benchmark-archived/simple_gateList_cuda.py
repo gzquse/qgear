@@ -114,19 +114,16 @@ def param_kernel(num_qubit: int, num_gate: int, gate_type: list[int], angles: li
 #  M A I N 
 #=================================
 #=================================
+
+circ_typeV,gate_typeV, gate_paramV=generate_random_gateList_np(args)
+print('M:  gen_rand  elaT= %.1f sec '%(time()-T0))
+print('M: shapes circ_typeV,gate_typeV, gate_paramV',circ_typeV.shape,gate_typeV.shape, gate_paramV.shape)
+
 if __name__ == "__main__":
     args=get_parser()
     ranks = cudaq.mpi.num_ranks()
     myrank = cudaq.mpi.rank()
-
-    if myrank == 0:
-        T0=time()
-        circ_typeV,gate_typeV, gate_paramV=generate_random_gateList_np(args)
-        print('M:  gen_rand  elaT= %.1f sec '%(time()-T0))
-        print('M: shapes circ_typeV,gate_typeV, gate_paramV',circ_typeV.shape,gate_typeV.shape, gate_paramV.shape)
-    else:
-        broadcast_me(circ_typeV,gate_typeV, gate_paramV)
-        
+    T0=time()
     target=args.cudaqTarget   
     nc=args.numCirc
     shots=args.numShots
@@ -155,7 +152,7 @@ if __name__ == "__main__":
 
         # .... run kernel on GPUs .....
         T0=time()
-        result=cudaq.sample(param_kernel, nq, num_gate, gate_type, gate_param, shots_count=shots)
+        result=cudaq.sample(ghz_kernel, nq, 50, shots_count=shots)
         elaT=time()-T0
         
         kerTime+=elaT

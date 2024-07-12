@@ -6,7 +6,7 @@ export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_commo
 IMG=gzquse/cudaquanmpi-qiskit1:p6
 # export PODMANHPC_ADDITIONAL_STORES=/global/cfs/cdirs/nstaff/balewski/podman_common/
 # IMG=balewski/cudaquanmpi-qiskit:p7
-#CFSH=/global/cfs/cdirs/mpccc/balewski/
+
 
 
 echo launch image $IMG
