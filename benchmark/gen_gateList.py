@@ -55,7 +55,7 @@ def show_CX_block():
     theta = Parameter('θ')
     phi = Parameter('φ')
    
-    # Create a quantum circuit with one qubit
+    # Create a quantum circuit with two qubits
     qc = QuantumCircuit(2)
    
     # Apply the Ry and Rz gates with parameters
@@ -110,8 +110,6 @@ def generate_random_gateList(args):
 
          gate_param[j,2::3]=0  # CX has no parameter, to make it look nice
          
-         #print(j, 'gate_type:\n',gate_type[j].T)  # type is OK
-         #print(j, 'gate_param:\n',gate_param[j].T)  # type is OK
     outD={'circ_type': circ_type, 'gate_type': gate_type, 'gate_param': gate_param}
     md={'gate_map':m, 'num_cx':args.numCX, 'num_qubit':nq,'num_gate':nGate,'num_circ':nCirc}
     return outD,md 

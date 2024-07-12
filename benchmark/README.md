@@ -6,6 +6,8 @@ IMG=gzquse/cudaquanmpi-qiskit1:p6
 ```
 
 # Prep gate list
+
+[text](./prep_gateList.sh) done in the container
 ```
 basePath=/dataVault2024/dataCudaQ_xxxx
 ```
