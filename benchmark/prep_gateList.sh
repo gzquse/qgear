@@ -5,34 +5,35 @@ set -e ;  #  bash exits if any statement returns a non-true return value
 
 # runs inside IMAGE
 
-basePath=/dataVault2024/dataCudaQ_July4
+basePath=/dataVault2024/dataCudaQ_QEra_July12
 
 if [ ! -d "$basePath" ]; then
     echo create $basePath
     mkdir -p $basePath
     cd $basePath
-    mkdir circ  meas post 
+    mkdir circ meas post 
     cd -
 fi
 
-# testing
-# nq=18 ; ./gen_gateList.py -k 10000 -i 4  --expName  mar${nq}q  -q $nq  --basePath ${basePath} ; exit
-#  ./run_gateList.py  --expName cb18q  -b qiskit-cpu --basePath ${basePath} ; exit
+nCX=(100 10000 20000)  # list of cx-gates
+nCirc=8 # num of circuits
 
-nCX=101000  # num cx-gates
-nCirc=4
-
+# prefix
+N="mar"
 # ......  run jobs .......
 k=0
 
-for nq in {28..35}; do
-#for nq in {16..18}; do  # for testing
-    expN=mar${nq}q
-    k=$[ $k +1 ]
-    echo $k  expN: $expN
-    ./gen_gateList.py -k $nCX -i $nCirc  --expName  $expN  -q $nq  --basePath ${basePath}
-
+for nq in {28..34}; do
+    for cx in ${nCX[@]}; do
+        expN=$N${nq}q${cx}cx
+        k=$[ $k +1 ]
+        echo $k  expN: $expN
+        ./gen_gateList.py -k $cx -i $nCirc  --expName  $expN  -q $nq  --basePath ${basePath}
+    done
 done
 echo done $k jobs
 date
 
+# CMD
+# nq=18 ; ./gen_gateList.py -k 10000 -i 4  --expName  mar${nq}q  -q $nq  --basePath ${basePath} ; exit
+#  ./run_gateList.py  --expName cb18q  -b qiskit-cpu --basePath ${basePath} ; exit

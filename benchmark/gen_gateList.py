@@ -12,10 +12,11 @@ q_1: ─░─┤ Rz(φ) ├┤ X ├─░─
 
 '''
 
-import sys,os,hashlib
+import os,hashlib,sys
 import numpy as np
 from time import time
-from toolbox.Util_H5io4 import  read4_data_hdf5, write4_data_hdf5
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'toolbox')))
+from Util_H5io4 import write4_data_hdf5
 from pprint import pprint
 
 import argparse
@@ -67,7 +68,6 @@ def show_CX_block():
     # Draw the circuit
     print(qc.draw())
 
-
 #...!...!....................
 def random_qubit_pairs(nq, k):
     # draw 2 different elements out of a set     
@@ -79,7 +79,6 @@ def random_qubit_pairs(nq, k):
     pairs = all_pairs[selected_indices]
     
     return pairs
-
     
 #...!...!....................
 def generate_random_gateList(args):
@@ -116,8 +115,6 @@ def generate_random_gateList(args):
     outD={'circ_type': circ_type, 'gate_type': gate_type, 'gate_param': gate_param}
     md={'gate_map':m, 'num_cx':args.numCX, 'num_qubit':nq,'num_gate':nGate,'num_circ':nCirc}
     return outD,md 
-         
-
 
 #=================================
 #=================================
