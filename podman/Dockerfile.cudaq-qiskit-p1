@@ -59,6 +59,13 @@ RUN export OMPI_MCA_opal_cuda_support=true OMPI_MCA_btl='^openib'
 
 # - - - - - - - CUSTOM CODE
 
+# enable cuda-q mpi plugin
+
+# Copy the activation script into the image
+COPY ./distributed/activate_custom_mpi.sh /opt/activate_custom_mpi.sh
+# Source the script to set up the environment for MPI
+RUN bash -c "source /opt/activate_custom_mpi.sh > /dev/null 2>&1"
+
 # is needed by  tzdada which sets sth for tzdata
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=America/Los_Angeles

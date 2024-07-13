@@ -21,7 +21,7 @@ submit_job() {
     fi
 }
 
-for nq in {28..30}; do
+for nq in {28..34}; do
     for cx in "${nCX[@]}"; do
         expN=${N}${nq}q${cx}cx
         for trg in "${targets[@]}"; do

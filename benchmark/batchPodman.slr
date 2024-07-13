@@ -1,7 +1,7 @@
 #!/bin/bash 
-#SBATCH -C cpu -N 1 -A nintern
-#SBATCH --time=28:00 -q debug
-# SBATCH --time 23:58:00  -q regular 
+#SBATCH -C gpu -N 1 -A nintern
+# SBATCH --time=28:00 -q debug
+#SBATCH --time 23:58:00  -q regular 
 #SBATCH --output=out/%j.out
 #SBATCH --licenses=scratch
 
@@ -10,7 +10,7 @@ set -e  # bash exits if any statement returns a non-true return value
 
 # Set default values
 expN=${1:-mar28q100cx}
-trg=${2:-par-cpu}
+trg=${2:-par-gpu}
 shots=${3:-10240}
 
 # Determine backend based on target
@@ -73,10 +73,10 @@ CMD2="mpirun -np 4 python3 ./simple_ghzV2_cudaq.py --numShots 10 --cudaqTarget n
 CMD3="mpirun -np 4 python3 ./simple_ghzV2_cudaq.py --numShots 10200 --cudaqTarget nvidia-mgpu --numRepeat 3600 --numQubits 29"
 
 # Warmup GPUs if not using CPU target
-if [ "$trg" != "par-cpu" ]; then
-    echo S: warmup GPUs with short 4-GPU job
-    ./wrapPodman.sh $IMG "$CMD2" $wrkPath $BASE_PATH
-fi
+# if [ "$trg" != "par-cpu" ]; then
+#     echo S: warmup GPUs with short 4-GPU job
+#     ./wrapPodman.sh $IMG "$CMD2" $wrkPath $BASE_PATH
+# fi
 
 # Execute the main task
 echo "S:..... fire the task ....."
