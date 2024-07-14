@@ -8,12 +8,12 @@ __author__ = "Jan Balewski"
 __email__ = "janstar1122@gmail.com"
 
 import numpy as np
-import  time
-import sys,os
+import os, sys
 from pprint import pprint
-from toolbox.Util_H5io4 import  write4_data_hdf5, read4_data_hdf5
-from toolbox.PlotterBackbone import PlotterBackbone
-from toolbox.Util_IOfunc import  read_yaml
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'toolbox')))
+from Util_H5io4 import  write4_data_hdf5, read4_data_hdf5
+from PlotterBackbone import PlotterBackbone
+from Util_IOfunc import  read_yaml
 import matplotlib.ticker as ticker
 from matplotlib.ticker import MaxNLocator
 
@@ -27,7 +27,7 @@ def get_parser():
     parser.add_argument("-p", "--showPlots",  default='a', nargs='+',help="abc-string listing shown plots")
 
  # IO paths
-    parser.add_argument("--basePath",default='/global/cfs/cdirs/mpccc/balewski/quantDataVault2024/dataCudaQ_July8',help="head path for set of experiments, or 'env'")
+    parser.add_argument("--basePath",default='/pscratch/sd/g/gzquse/quantDataVault2024/dataCudaQ_QEra_July12',help="head path for set of experiments, or 'env'")
     parser.add_argument("--inpPath",default=None,help="input circuits location")
     parser.add_argument("--outPath",default=None,help="all outputs from experiment")
        
@@ -36,7 +36,6 @@ def get_parser():
     if 'env'==args.basePath: args.basePath= os.environ['Cudaq_dataVault']
     if args.inpPath==None: args.inpPath=os.path.join(args.basePath,'meas') 
     if args.outPath==None: args.outPath=os.path.join(args.basePath,'post') 
-
     for arg in vars(args):  print( 'myArg:',arg, getattr(args, arg))
     assert os.path.exists(args.inpPath)
     assert os.path.exists(args.outPath)
@@ -130,10 +129,8 @@ class Plotter(PlotterBackbone):
 def readOne(expN,path,verb):
     assert os.path.exists(path)
     inpF=os.path.join(path,expN+'.yaml')
-    #print('iii',inpF)
     if not os.path.exists(inpF): return 0,0,{}
     xMD=read_yaml(inpF,verb)
-    #print(inpF,xMD['num_qubit'],xMD['elapsed_time'],float(xMD['num_circ']))
     nq=float(xMD['num_qubit'])
     runt=float(xMD['elapsed_time'])/float(xMD['num_circ'])
 
@@ -157,8 +154,7 @@ def post_process(md,bigD):
 if __name__ == '__main__':
     args=get_parser()
 
-    nqL=[i for i in range(20,29) ]
-    #nqL=[20,21]
+    nqL=[i for i in range(28,35) ]
     
     nqV=np.array(nqL)
     N=nqV.shape[0]
@@ -176,7 +172,6 @@ if __name__ == '__main__':
             expN='cg%dq_%s'%(nqV[i],runLabs[j])
             if j!=1: expN+='_r0.4'
             nq,runt,xMD=readOne(expN,args.inpPath,i+j==0)
-            #print(i,j,expN,nq)
             if nq==0: continue # no data was found
             if mdT[j]==None: mdT[j]=xMD
             if j==2: nqV[i]=nq  # it will be adj-gpu

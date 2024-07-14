@@ -5,9 +5,9 @@ set -e  # bash exits if any statement returns a non-true return value
 source ./config.sh  # Source the common configuration script
 
 k=0
-c=32  # cores for CPU
+c=64  # cores for CPU
 #targets=("par-cpu" "par-gpu" "adj-gpu")
-targets=("par-cpu")
+targets=("adj-gpu")
 # Function to submit a job
 submit_job() {
     local expN=$1
