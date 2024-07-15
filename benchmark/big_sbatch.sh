@@ -6,6 +6,7 @@ source ./config.sh  # Source the common configuration script
 
 k=0
 c=64  # cores for CPU
+asd
 #targets=("par-cpu" "par-gpu" "adj-gpu")
 targets=("adj-gpu")
 # Function to submit a job
