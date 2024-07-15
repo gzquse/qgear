@@ -19,8 +19,8 @@ tSleep=$(( SLURM_LOCALID * 2))
 echo W: rank=$myRank tSlep=$tSleep  
 sleep $tSleep
 # it is harmless to use '--gpu' on CPU node, so same script on CPU or GPU node
-echo I:started `date`
-podman-hpc run --privileged -i --gpu \
+
+podman-hpc run --privileged -it --gpu \
    --volume $absDataPath:/myData \
    --volume $wrkPath:/wrk \
    -e HDF5_USE_FILE_LOCKING='FALSE' \
@@ -29,9 +29,12 @@ podman-hpc run --privileged -i --gpu \
    -e OMPI_ALLOW_RUN_AS_ROOT=1 -e OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
    -e UCX_WARN_UNUSED_ENV_VARS=n \
    --workdir /wrk \
-   $IMG bash -c "$CMD"
+   $IMG /bin/bash<<EOF
+   echo I:started `date`
+   $CMD
    echo I:ended
    exit
+EOF
 
 
 echo W:done

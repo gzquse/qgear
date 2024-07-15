@@ -13,4 +13,10 @@
 # SBATCH --gpus-per-node=4
 # SBATCH -C cpu --exclusive  --ntasks-per-node=1 -A nintern
 # nvidia-smi
-echo S:DONE
+podman-hpc run --privileged -it --gpu --volume /pscratch/sd/g/gzquse/quantDataVault2024/dataCudaQ_QEra_July14:/myData \
+--volume /pscratch/sd/g/gzquse/jobs_cudaq/28113072:/wrk -e HDF5_USE_FILE_LOCKING=FALSE -e SLURM_NTASKS=1 -e SLURM_PROCID=0 \
+-e SLURM_CPUS_PER_TASK=0 -e SLURM_NTASKS_PER_NODE=0 -e OMPI_ALLOW_RUN_AS_ROOT=1 -e OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
+-e UCX_WARN_UNUSED_ENV_VARS=n --workdir /wrk gzquse/cudaq-qiskit:v1 /bin/bash<<EOF
+mpiexec -np 4 python3 -u ./run_gateList.py --expName mar28q100cx --backend nvidia-mgpu --numShots 10240 --basePath /myData
+exit
+EOF

@@ -1,7 +1,7 @@
 #!/bin/bash 
 #SBATCH -C gpu -N 1 -A nintern
-#SBATCH --time=28:00 -q debug
-# SBATCH --time 23:58:00  -q regular 
+# SBATCH --time=28:00 -q debug
+#SBATCH --time 23:58:00  -q regular 
 #SBATCH --output=out/%j.out
 #SBATCH --licenses=scratch
 
