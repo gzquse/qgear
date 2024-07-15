@@ -50,6 +50,8 @@ def get_parser():
     if args.backend=='qiskit-cpu':  # use srun ranks
         args.myRank  = int(os.environ['SLURM_PROCID'])
         args.numRank = int(os.environ['SLURM_NTASKS'])
+        args.cores = int(os.environ['SLURM_CPUS_PER_TASK'])
+        args.tasks_per_node = int(os.environ['SLURM_NTASKS_PER_NODE'])
     if args.backend=='nvidia-mgpu':  # use `mpich -np 4` executed inside podman
         cudaq.mpi.initialize()
         args.myRank = cudaq.mpi.rank()
@@ -134,7 +136,9 @@ if __name__ == "__main__":
         shardSize=input_shard(gateD,args)
         MD['num_circ']=shardSize
         MD['my_rank']=args.myRank
-        MD['num_rank']=args.numRank        
+        MD['num_rank']=args.numRank
+        MD['cores']=args.cores
+        MD['tasks_per_node']=args.tasks_per_node      
         
     nCirc=MD['num_circ']    
     if args.verb>=2:
@@ -175,11 +179,13 @@ if __name__ == "__main__":
     MD['num_meas_strings']=[ len(x) for x in resL]
     MD['target2']=target2
     MD['short_name']+='_'+target2
+    # add postfix for cpu tasks
+    if target2 == 'par-cpu':
+        MD['short_name']+='_c'+str(MD['cores'])+'_tp'+str(MD['tasks_per_node'])
     MD.pop('gate_map')
     MD['cpu_1min_load']=load1
     MD['num_shots']=shots
     if args.numRank>1: MD['short_name']+='_r%d.%d'%(args.myRank,args.numRank)
-
     if args.myRank==0:  # dump some bitstrings
         res0=resL[0]
         for i,bstr in enumerate(res0):

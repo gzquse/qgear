@@ -23,6 +23,7 @@ def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("-v","--verbosity",type=int,choices=[0, 1, 2],help="increase output verbosity", default=1, dest='verb')
     parser.add_argument( "-Y","--noXterm", dest='noXterm',  action='store_false', default=True, help="enables X-term for interactive mode")
+    parser.add_argument( "-t","--drawType", default='all_in_one', help="choose how to draw")
 
     parser.add_argument("-p", "--showPlots",  default='a', nargs='+',help="abc-string listing shown plots")
 
@@ -170,7 +171,10 @@ if __name__ == '__main__':
     
     nqV=np.array(nqL)
     N=nqV.shape[0]
+    # all in one
     runLabs=['par-cpu', 'par-gpu', 'adj-gpu']
+    # cpu draw
+    runLabs=['par-cpu']
     cxL=(100, 10000, 20000)
     nT=len(runLabs)
     nCx=len(cxL)
