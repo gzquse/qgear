@@ -8,229 +8,280 @@ __author__ = "Jan Balewski"
 __email__ = "janstar1122@gmail.com"
 
 import numpy as np
-import os, sys
+import os
+import sys
 from pprint import pprint
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'toolbox')))
-from Util_H5io4 import  write4_data_hdf5, read4_data_hdf5
-from PlotterBackbone import PlotterBackbone
-from Util_IOfunc import  read_yaml
-import matplotlib.ticker as ticker
-from matplotlib.ticker import MaxNLocator
-
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator, FormatStrFormatter
 import argparse
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'toolbox')))
+from Util_H5io4 import write4_data_hdf5, read4_data_hdf5
+from PlotterBackbone import PlotterBackbone
+from Util_IOfunc import read_yaml
+
 
 def get_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-v","--verbosity",type=int,choices=[0, 1, 2],help="increase output verbosity", default=1, dest='verb')
-    parser.add_argument( "-Y","--noXterm", dest='noXterm',  action='store_false', default=True, help="enables X-term for interactive mode")
-    parser.add_argument( "-t","--drawType", default='all_in_one', help="choose how to draw")
+    parser.add_argument("-v", "--verbosity", type=int, choices=[0, 1, 2], help="increase output verbosity", default=1, dest='verb')
+    parser.add_argument("-Y", "--noXterm", dest='noXterm', action='store_false', default=True, help="enables X-term for interactive mode")
+    parser.add_argument("-t", "--drawType", default='par-cpu', choices=["par-cpu", "par-gpu", "adj-gpu", "all"], help="choose how to draw")
+    parser.add_argument("-p", "--showPlots", default='a', nargs='+', help="abc-string listing shown plots")
 
-    parser.add_argument("-p", "--showPlots",  default='a', nargs='+',help="abc-string listing shown plots")
+    parser.add_argument("--basePath", default='/pscratch/sd/g/gzquse/quantDataVault2024/dataCudaQ_QEra_July12', help="head path for set of experiments, or 'env'")
+    parser.add_argument("--inpPath", default=None, help="input circuits location")
+    parser.add_argument("--outPath", default=None, help="all outputs from experiment")
 
- # IO paths
-    parser.add_argument("--basePath",default='/pscratch/sd/g/gzquse/quantDataVault2024/dataCudaQ_QEra_July12',help="head path for set of experiments, or 'env'")
-    parser.add_argument("--inpPath",default=None,help="input circuits location")
-    parser.add_argument("--outPath",default=None,help="all outputs from experiment")
-       
     args = parser.parse_args()
-    # make arguments  more flexible
-    if 'env'==args.basePath: args.basePath= os.environ['Cudaq_dataVault']
-    if args.inpPath==None: args.inpPath=os.path.join(args.basePath,'meas') 
-    if args.outPath==None: args.outPath=os.path.join(args.basePath,'post') 
-    for arg in vars(args):  print( 'myArg:',arg, getattr(args, arg))
+    if 'env' == args.basePath:
+        args.basePath = os.environ['Cudaq_dataVault']
+    if args.inpPath is None:
+        args.inpPath = os.path.join(args.basePath, 'meas')
+    if args.outPath is None:
+        args.outPath = os.path.join(args.basePath, 'post')
+    for arg in vars(args):
+        print('myArg:', arg, getattr(args, arg))
     assert os.path.exists(args.inpPath)
     assert os.path.exists(args.outPath)
-    args.showPlots=''.join(args.showPlots)
+    args.showPlots = ''.join(args.showPlots)
 
     return args
 
 
-#............................
-#............................
-#............................
 class Plotter(PlotterBackbone):
     def __init__(self, args):
-        PlotterBackbone.__init__(self,args)
-        
-#...!...!....................
-    def _make_2_canvas(self,figId):
-        nrow,ncol=2,1       
-        figId=self.smart_append(figId)
-        fig=self.plt.figure(figId,facecolor='white', figsize=(5.5,7))        
-        # Create subplots within the specified figure
-        ax1, ax2 = fig.subplots(nrow,ncol, gridspec_kw={'height_ratios': [2, 1]})
-        return ax1, ax2
+        PlotterBackbone.__init__(self, args)
 
-#...!...!....................
-    def _add_stateSize_axis(self,ax):
-        # Create a twin x-axis on the top for state-vector size
+    def _make_canvas(self, figId):
+        figId = self.smart_append(figId)
+        fig, ax = self.plt.subplots(facecolor='white', figsize=(7, 5.5))  # Increase the figure size
+        fig.tight_layout(pad=3.0)  # Adjust layout
+        return ax
+
+    def _add_stateSize_axis(self, ax):
         ax_top = ax.twiny()
         ax_top.set_xlim(ax.get_xlim())
-        
-        # Define specific ticks and labels
-        ticks = [28, 29, 30, 31, 32]
+        ticks = [28, 32, 36, 40]
         tick_labels = [f'{2**n:.1e}' for n in ticks]
-       
         ax_top.set_xticks(ticks)
         ax_top.set_xticklabels(tick_labels)
         ax_top.set_xlabel('state-vector size', color='green')
         ax_top.tick_params(axis='x', colors='green')
 
-#...!...!....................
-    def compute_time(self,md,bigD,figId=1):
-        ax1,ax2=self._make_2_canvas(figId)
-        
-        nqV=bigD['num_qubit']
-        # three dimension
-        runtV=bigD['run_time_1circ']/60.
-        dLab=md['run_label']
-        dCnt=md['run_count']
-        details=md['details']
-        nT=len(dLab)
-        nqR=(nqV[0]-0.5,nqV[-1]+1.5)
-        
-        #tit='Compute state-vector, %dk CX-gates, PM: %s'%(md['num_cx']/1000,md['run_day'])
-        tit='Compute state-vector: %s'%(md['details'][0]['run_day'])
-        ax1.set(xlabel='num qubits',ylabel='compute end-state (minutes)')
-        ax1.set_title(tit, pad=20)  # Adjust the pad value as needed
-        
-        #....  time vs. nq
+    def compute_time_par_cpu(self, md, bigD, figId=1):
+        ax = self._make_canvas(figId)
+        nqV = bigD['num_qubit']
+        runtV = bigD['run_time_1circ'] / 60.0
+        dLab = md['run_label']
+        dCnt = md['run_count']
+        details = md['details']
+        nT = len(dLab)
+        # nqR = (nqV[0] - 0.5, nqV[-1] + 1.5)
+        # max hit for x axis
+        nqR = (nqV[0] - 0.5, 40)
+        tit = 'Compute state-vector'
+        ax.set(xlabel='num qubits', ylabel='compute end-state (minutes)')
+        ax.set_title(tit, pad=20)
+
         for j in range(nT):
             for i in range(len(details)):
-                k=dCnt[j]
-                ax1.plot(nqV[:k],runtV[:k,j,i],label=dLab[j]+' ,cx:'+str(details[i]['num_cx']), marker='*', linestyle='-')
-        ax1.set_yscale('log')
-        # Set y-axis formatter
-        ax1.yaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
-        ax2.set_ylim(0.2,1900)
-        ax1.set_xlim(nqR)
-        ax1.grid()
-        ax1.legend(loc='lower right')#, title=lgTit,bbox_to_anchor=(0.5, 1.18), ncol=3)
+                k = dCnt[j]
+                valid_indices = ~np.isnan(runtV[:k, j, i])
+                if valid_indices.any():
+                    ax.plot(nqV[:k][valid_indices], runtV[:k, j, i][valid_indices], label=dLab[j] + ' ,cx:' + str(details[i]['num_cx']), marker='*', linestyle='-',  markersize=10)
+                    # Linear extension based on the last 4 valid points
+                    if sum(valid_indices) > 1:
+                        x1, x2 = nqV[:k][valid_indices][-2:]
+                        y1, y2 = np.log(runtV[:k, j, i][valid_indices][-2:])
+                        log_slope = (y2 - y1) / (x2 - x1)
+                        x_extend = np.arange(x2, 40 + 1)
+                        log_y_extend = y2 + log_slope * (x_extend - x2)
+                        y_extend = np.exp(log_y_extend)
+                        
+                        # Limit y_extend to 24 hours (1440 minutes)
+                        below_timeout = y_extend <= 1440
+                        x_extend = x_extend[below_timeout]
+                        y_extend = y_extend[below_timeout]
+                        
+                        ax.plot(x_extend, y_extend, linestyle='-.', color=ax.get_lines()[-1].get_color())
+        # Adding legend for dashed lines
+        lines = [plt.Line2D([0], [0], color='black', linestyle='-'),
+                 plt.Line2D([0], [0], color='black', linestyle='-.')]
+        labels = ['actual data', 'linear extension']
+        legend = plt.legend(lines, labels, loc='lower right', bbox_to_anchor=(1, 0.5), fontsize=12)
+        
+        ax.set_yscale('log')
+        ax.yaxis.set_major_formatter(FormatStrFormatter('%d'))
+        ax.set_xlim(nqR)
+        ax.grid()
+        ax.legend(loc='upper right', bbox_to_anchor=(1, 0.3))
+        plt.gca().add_artist(legend)
+        ax.axhline(1440, ls='--', lw=2, c='m')
+        ax.text(36.5, 1000, '24h time-out', c='m')
 
-        #... draw limiting lines
-        ax1.axhline(1440,ls='--',lw=2,c='m')
-        ax1.text(20,600,'24h time-out',c='m')
+        ax.axvline(32, ls='--', lw=2, c='firebrick')
+        ax.text(32.1, 1, 'One A100 RAM limit', c='firebrick', rotation=90)
 
-        ax1.axvline(32.5,ls='--',lw=2,c='firebrick')
-        ax1.text(31.5,1,'A100 RAM limit',c='firebrick', rotation=90)
-        self._add_stateSize_axis(ax1)
+        ax.axvline(34, ls='--', lw=2, c='firebrick')
+        ax.text(34.1, 1, 'Four A100s RAM limit', c='firebrick', rotation=90)
+        self._add_stateSize_axis(ax)
 
-        #....  gain factor
-        nC=md['num_cpu_runs']
-        gainV=bigD['runt_spedup']
-        # based on cnot settings
-        for i in range(len(gainV[0])):
-            ax2.plot(nqV[:nC],gainV.T[i], label='number of cx:'+str(details[i]['num_cx']), marker='*', linestyle='-')
-        ax2.set(xlabel='num qubits',ylabel='GPU/CPU speed-up')
-        # deal with time out
-        # Replace 0.0 values with NaN (Not a Number)
-        gainV[gainV == np.inf] = np.nan
-        # Find the maximum value ignoring NaNs
-        yMX=np.nanmax(gainV)*1.2
-        # Replace NaN values with the maximum value
-        gainV[np.isnan(gainV)] = yMX
-        ax2.set_ylim(0,yMX)
-        ax2.set_xlim(nqR)
-        ax2.grid()
-        ax2.legend(loc='upper right')
-        ax2.yaxis.set_major_locator(MaxNLocator(4))
-        return    
+        return
 
+    def compute_time_par_gpu(self, md, bigD, figId=1):
+            ax = self._make_canvas(figId)
+            nqV = bigD['num_qubit']
+            runtV = bigD['run_time_1circ'] / 60.0
+            dLab = md['run_label']
+            dCnt = md['run_count']
+            details = md['details']
+            nT = len(dLab)
+            # nqR = (nqV[0] - 0.5, nqV[-1] + 1.5)
+            nqR = (nqV[0] - 0.5, 40)
+            tit = 'Compute state-vector'
+            ax.set(xlabel='num qubits', ylabel='compute end-state (minutes)')
+            ax.set_title(tit, pad=20)
 
-#...!...!....................
-def readOne(expN,path,verb):
+            for j in range(nT):
+                for i in range(len(details)):
+                    k = dCnt[j]
+                    valid_indices = ~np.isnan(runtV[:k, j, i])
+                    if valid_indices.any():
+                        ax.plot(nqV[:k][valid_indices], runtV[:k, j, i][valid_indices], label=dLab[j] + ' ,cx:' + str(details[i]['num_cx']), marker='*', linestyle='-',  markersize=10)
+
+            ax.yaxis.set_major_formatter(FormatStrFormatter('%d'))
+            ax.set_xlim(nqR)
+            ax.grid()
+            ax.legend(loc='upper right', bbox_to_anchor=(1, 0.3))
+
+            ax.axhline(6, ls='--', lw=2, c='m')
+            ax.text(36.5, 980, '24h time-out', c='m')
+
+            ax.axvline(32, ls='--', lw=2, c='firebrick')
+            ax.text(32.1, 1, 'One A100 RAM limit', c='firebrick', rotation=90)
+
+            ax.axvline(34, ls='--', lw=2, c='firebrick')
+            ax.text(34.1, 1, 'Four A100s RAM limit', c='firebrick', rotation=90)
+            #self._add_stateSize_axis(ax)
+
+            return
+
+    def compute_time_adj_gpu(self, md, bigD, figId=1):
+            ax = self._make_canvas(figId)
+            nqV = bigD['num_qubit']
+            runtV = bigD['run_time_1circ'] / 60.0
+            dLab = md['run_label']
+            dCnt = md['run_count']
+            details = md['details']
+            nT = len(dLab)
+            # nqR = (nqV[0] - 0.5, nqV[-1] + 1.5)
+            nqR = (nqV[0] - 0.5, 40)
+            tit = 'Compute state-vector'
+            ax.set(xlabel='num qubits', ylabel='compute end-state (minutes)')
+            ax.set_title(tit, pad=20)
+
+            for j in range(nT):
+                for i in range(len(details)):
+                    k = dCnt[j]
+                    valid_indices = ~np.isnan(runtV[:k, j, i]) & (runtV[:k, j, i] > 0)
+                    if valid_indices.any():
+                        ax.plot(nqV[:k][valid_indices], runtV[:k, j, i][valid_indices], label=dLab[j] + ' ,cx:' + str(details[i]['num_cx']), marker='*', linestyle='-', markersize=10)
+
+            ax.yaxis.set_major_formatter(FormatStrFormatter('%d'))
+            ax.set_xlim(nqR)
+            ax.grid()
+            ax.legend(loc='upper right', bbox_to_anchor=(1, 0.3))
+            ax.axhline(5, ls='--', lw=2, c='m')
+            ax.text(36.5, 900, '24h time-out', c='m')
+
+            ax.axvline(32, ls='--', lw=2, c='firebrick')
+            ax.text(32.1, 1, 'One A100 RAM limit', c='firebrick', rotation=90)
+
+            ax.axvline(34, ls='--', lw=2, c='firebrick')
+            ax.text(34.1, 1, 'Four A100s RAM limit', c='firebrick', rotation=90)
+            #self._add_stateSize_axis(ax)
+
+            return
+
+def readOne(expN, path, verb):
     assert os.path.exists(path)
-    inpF=os.path.join(path,expN+'.yaml')
-    if not os.path.exists(inpF): return 0,0,{}
-    xMD=read_yaml(inpF,verb)
-    nq=float(xMD['num_qubit'])
-    runt=float(xMD['elapsed_time'])/float(xMD['num_circ'])
+    inpF = os.path.join(path, expN + '.yaml')
+    if not os.path.exists(inpF):
+        return 0, 0, {}
+    xMD = read_yaml(inpF, verb)
+    nq = float(xMD['num_qubit'])
+    runt = float(xMD['elapsed_time']) / float(xMD['num_circ'])
+    return nq, runt, xMD
 
-    return nq,runt,xMD
 
-#...!...!....................
-def post_process(md,bigD):
-    nC=md['num_cpu_runs']
-    runtV=bigD['run_time_1circ']
-    
-    #... compute par gpu to par cpu speed up
-    gainV=runtV[:nC,0]/runtV[:nC,1]       
-    #... store 2ndary data
-    # if did not get the result the result should be 0 so divide 0 is inf
-    bigD['runt_spedup']=gainV
+def post_process(md, bigD):
+    nC = md['num_cpu_runs']
+    runtV = bigD['run_time_1circ']
+    gainV = runtV[:nC, 0] / runtV[:nC, 1]
+    bigD['runt_spedup'] = gainV
 
-#=================================
-#=================================
-#  M A I N 
-#=================================
-#=================================
+
 if __name__ == '__main__':
-    args=get_parser()
+    args = get_parser()
+    nqL = [i for i in range(28, 35)]
+    nqV = np.array(nqL)
+    N = nqV.shape[0]
+    t = args.drawType
+    runLabs = []
+    if t == 'par-cpu':
+        runLabs.append('par-cpu')
+    if t == 'par-gpu':
+        runLabs.append('par-gpu')
+    if t == 'adj-gpu':
+        runLabs.append('adj-gpu')
+    if t == 'all':
+        runLabs = ['par-cpu', 'par-gpu', 'adj-gpu']
+    cxL = (100, 10000, 20000)
+    nT = len(runLabs)
+    nCx = len(cxL)
+    cntT = [0] * nT
+    mdT = [[None for i in range(nCx)] for j in range(nT)]
+    runtV = np.zeros(shape=(N, nT, nCx))
+    runtV[:] = np.nan
+    shotsV = np.zeros(shape=(N, nT, nCx))
 
-    nqL=[i for i in range(28,33)]
-    
-    nqV=np.array(nqL)
-    N=nqV.shape[0]
-    # all in one
-    runLabs=['par-cpu', 'par-gpu', 'adj-gpu']
-    # cpu draw
-    runLabs=['par-cpu']
-    cxL=(100, 10000, 20000)
-    nT=len(runLabs)
-    nCx=len(cxL)
-    cntT=[0]*nT  # capture number of finished runs of each target
-    mdT=[[None for i in range(nT)] for j in range(nCx)]
-    runtV=np.zeros(shape=(N,nT,nCx))
-    shotsV=np.zeros(shape=(N,nT,nCx)) 
-    
-    # prefix of file
-    prefix="mar"
-
-    #...  collect data
+    prefix = "mar"
     for i in range(N):
         for j in range(nT):
             for k in range(nCx):
-                expN=prefix+'%dq%dcx_%s'%(nqV[i],cxL[k],runLabs[j])
-                # get cpu first task result from all four tasks
-                if j!=1: expN+='_r0.4'
-                nq,runt,xMD=readOne(expN,args.inpPath,i+j==0)
-                if nq==0: continue # no data was found
-                if mdT[j][k]==None: mdT[j][k]=xMD
-                if j==2: nqV[i]=nq  # it will be adj-gpu
-                runtV[i,j,k]=runt
-                shotsV[i,j,k]=xMD['num_shots']
-            cntT[j]+=1
-    print('M: got jobs:',cntT) 
-    expD={}
-    expD['num_qubit']=nqV
-    expD['run_time_1circ']=runtV
-    expD['shots']=shotsV
-
-    expMD={'run_label': runLabs,'run_count':cntT}
-    # get first target first cx setting's meta data
-    # Since every target enjoys same cnot gate set up so we only get just one target which is enough
-    xMD=mdT[0]
-    # mdT details: [{'date','hash','num_circ','num_cx','num_gate'}]
-    expMD['details']=xMD
-    
+                expN = prefix + '%dq%dcx_%s' % (nqV[i], cxL[k], runLabs[j])
+                if t != 'par-gpu':
+                    expN += '_r0.4'
+                nq, runt, xMD = readOne(expN, args.inpPath, i + j == 0)
+                if nq == 0:
+                    continue
+                if mdT[j][k] is None:
+                    mdT[j][k] = xMD
+                if j == 2:
+                    nqV[i] = nq
+                runtV[i, j, k] = runt
+                shotsV[i, j, k] = xMD['num_shots']
+            cntT[j] += 1
+    print('M: got jobs:', cntT)
+    expD = {'num_qubit': nqV, 'run_time_1circ': runtV, 'shots': shotsV}
+    expMD = {'run_label': runLabs, 'run_count': cntT}
+    xMD = mdT[0]
+    expMD['details'] = xMD
     for entry in expMD['details']:
         entry['run_day'] = entry['date'].split('_')[0]
-
-    expMD['short_name']='gpuSpeed_'+expMD['details'][0]['run_day']
-
-    expMD['run_label']=runLabs
+    expMD['short_name'] = t + expMD['details'][0]['run_day']
+    expMD['run_label'] = runLabs
     pprint(expMD)
-    expMD['num_cpu_runs']=cntT[0]
-    post_process(expMD,expD)
-    
-    # ----  just plotting
-    args.prjName=expMD['short_name']
-    plot=Plotter(args)
-    if 'a' in args.showPlots:
-        plot.compute_time(expMD,expD,figId=1)
-    if 'b' in args.showPlots:
-        plot.sample_time(expMD,expD,figId=2)
-        
+    expMD['num_cpu_runs'] = cntT[0]
 
+    args.prjName = expMD['short_name']
+    plot = Plotter(args)
+    if 'a' in args.showPlots and t == 'par-cpu':
+        plot.compute_time_par_cpu(expMD, expD, figId=1)
+    if 'a' in args.showPlots and t == 'par-gpu':
+        plot.compute_time_par_gpu(expMD, expD, figId=1)
+    if 'a' in args.showPlots and t == 'adj-gpu':
+        plot.compute_time_adj_gpu(expMD, expD, figId=1)
+    if 'b' in args.showPlots:
+        plot.sample_plot(expMD, expD, figId=2)
+        
     plot.display_all(png=1)
-    

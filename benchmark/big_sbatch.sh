@@ -6,7 +6,7 @@ source ./config.sh  # Source the common configuration script
 
 k=0
 c=64  # cores for CPU
-n=1   # ntasks per node
+n=4   # ntasks per node
 #targets=("par-cpu" "par-gpu" "adj-gpu")
 targets=("par-cpu")
 # Function to submit a job
