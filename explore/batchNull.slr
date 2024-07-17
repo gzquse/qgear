@@ -1,0 +1,22 @@
+#!/bin/bash 
+# 1/4 of CPU-node
+# SBATCH  -q shared -C cpu  --cpus-per-task=64  --ntasks=1  -N1  -t 0:10:00 -A nstaff
+# 1/4 of GPU-node
+# SBATCH  -q shared -C gpu --gpus-per-task 1 --cpus-per-task=32  --ntasks=1  -N 1  -t 0:10:00 -A nstaff
+#SBATCH  -C gpu --gpus-per-task 8   --ntasks=1  -N 2  -t 0:10:00 -A nintern
+
+# SBATCH  -N 1  -C gpu  -A nintern --ntasks-per-node=1
+# SBATCH  --time=28:00 -q debug
+# SBATCH --time 23:58:00  -q regular 
+# SBATCH --output=out/%j.out
+# SBATCH  --licenses=scratch
+# SBATCH --gpus-per-node=4
+# SBATCH -C cpu --exclusive  --ntasks-per-node=1 -A nintern
+# nvidia-smi
+podman-hpc run --privileged -it --gpu --volume /pscratch/sd/g/gzquse/quantDataVault2024/dataCudaQ_QEra_July14:/myData \
+--volume /pscratch/sd/g/gzquse/jobs_cudaq/28113072:/wrk -e HDF5_USE_FILE_LOCKING=FALSE -e SLURM_NTASKS=1 -e SLURM_PROCID=0 \
+-e SLURM_CPUS_PER_TASK=0 -e SLURM_NTASKS_PER_NODE=0 -e OMPI_ALLOW_RUN_AS_ROOT=1 -e OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
+-e UCX_WARN_UNUSED_ENV_VARS=n --workdir /wrk gzquse/cudaq-qiskit:v1 /bin/bash<<EOF
+mpiexec -np 4 python3 -u ./run_gateList.py --expName mar28q100cx --backend nvidia-mgpu --numShots 10240 --basePath /myData
+exit
+EOF

@@ -1,0 +1,198 @@
+ Workflow to benchamrk various methods of running large quantum circuit
+
+Input & output are saved at
+myArg: inpPath /dataVault2024/dataCudaq_tmp/circ
+myArg: outPath /dataVault2024/dataCudaq_tmp/meas
+
+
+A)= = = =  Generate big circuit in gateList-format
+
+./gen_gateList.py -k 201000 -i2  --expName  mac17q  -q17
+
+2 images
+17 qubits
+CX count : 201k
+
+
+B) = = = = =  Execute circuit on CPU using Qiskit, one rank
+
+on CPU using qiskit
+numactl --cpunodebind=0 --membind=0   ./run_gateList.py  --expName mac18q -b qiskit-cpu
+
+Example output:
+
+M:  gen_circ  elaT= 28.6 sec 
+job started, nCirc=2  nq=18  shots/circ=101000 at AerSimulator('aer_simulator') ...
+M:  ended elaT=177.5 sec, end_load1=6.6
+
+C) = = = = =  Execute circuit on 1 GPU using cudaq
+
+ ./run_gateList.py  --expName mac18q -t nvidia
+
+job started, nCirc=2  nq=18  shots/circ=101000  on target=nvidia ...
+M:  ended elaT=7.5 sec, end_load1=0.9
+
+  closed  yaml: /data_tmp/meas/mac18q_gpu1.yaml  size=0.3 kB   elaT=0.0 sec
+M:done qiskit mac18q_gpu1  elaT 7.5
+{'cpu_1min_load': 0.9287109375,
+ 'date': '20240628_190457_PDT',
+ 'elapsed_time': 7.482309818267822,
+ 'gpu_info': {0: {'gpu_model': 'NVIDIA A100-SXM4-80GB',
+                  'pci_bus_id': '0000:03:00.0',
+                  'tot_mem_gb': 81.9}},
+ 'hash': 'c358a4',
+ 'num_circ': 2,
+ 'num_cx': 201000,
+ 'num_gate': 603000,
+ 'num_gpu': 1,
+ 'num_meas_strings': 72836,
+ 'num_qubit': 18,
+ 'short_name': 'mac18q_gpu1',
+ 'target': 'nvidia'}
+
+D = = = = =  Execute circuit on 4 GPU using cudaq with target=nvidia-mqpu 
+
+*  get GPU node on PM
+ssh pm
+#salloc -q interactive -C gpu -t 4:00:00 -A nstaff   --gpus-per-task=1 --ntasks  4  --gpu-bind=none --module=cuda-mpich
+salloc -q interactive -C gpu -t 4:00:00 -A nstaff -N 1
+ ./run_gateList.py  --expName mac21q -t nvidia-mqpu
+*start image
+export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nstaff/balewski/podman_common/
+IMG=balewski/cudaquanmpi-qiskit:p4
+
+*check you see 4 GPUs
+nvidia-smi |grep SXM
+|   0  NVIDIA A100-SXM...  Off  | 00000000:03:00.0 Off |                    100 |
+|   1  NVIDIA A100-SXM...  Off  | 00000000:41:00.0 Off |                    100 |
+|   2  NVIDIA A100-SXM...  Off  | 00000000:82:00.0 Off |                    100 |
+|   3  NVIDIA A100-SXM...  Off  | 00000000:C1:00.0 Off |                    100 |
+
+* generate gateList.h5 for 8 circuits
+cd benchmark
+./gen_gateList.py  -i 8 -q 20
+
+* test1 you can run on 1 GPU
+./run_gateList.py  --expName rcirc_1dc177  -b nvidia
+
+* test2 it runs few times faster on 4 GPUs
+./run_gateList.py  --expName rcirc_1dc177  -b nvidia-mqpu 
+
+The 20-qubit circuit is too small and runs too fast to show the advantage
+
+* test3 : generate  8 large circuits, each should take 1 minute on 1 GPU
+./gen_gateList.py  -i 8 -q 24 -k 101000
+
+ 'num_circ': 8,
+ 'num_cx': 101000,
+ 'num_gate': 303000,
+ 'num_meas_strings': 8,
+ 'num_qpus': 1,
+ 'num_qubit': 24,
+
+Now compare:
+time     ./run_gateList.py  --expName rcirc_f1e83d  -b nvidia    # 1 GPU
+ elaT=339.8 sec,  vs.
+time     ./run_gateList.py  --expName rcirc_f1e83d  -b nvidia-mqpu   # all GPUs parallel
+ elaT=88.3 sec
+Now speedup is x3.85
+
+* test4 : allocate 2 nodes and show it runs ~8x faster than on a single GPU
+salloc -q interactive -C gpu -t 4:00:00 -A nstaff   --gpus-per-task=1 --ntasks  4  --gpu-bind=none --module=cuda-mpich -N2
+Problem:
+  how to start   ./run_gateList.py  to see
+  M: use 8 of 8 seen qpus
+???
+
+
+F) = = = = =  Execute circuit on CPU using Qiskit, mutiple ranks, on mutipl enodes
+e.g.: sbatch -C cpu --exclusive  --ntasks-per-node=4 -N 3   ./batchPodman.slr 
+# sbatch -C cpu --exclusive  --ntasks-per-node=4 -N 3  -A nintern ./batchPodman.slr
+F.0) Prepare large enough list of circuits, must be divisible total ranks
+
+E.g.:
+salloc ...
+podman-hpc run -it ...
+basePath=/dataVault2024/dataCudaQ_june30
+ nq=18 ; ./gen_gateList.py -k 30000 -i 24  --expName  mar${nq}q  -q $nq  --basePath ${basePath}
+ It will generate those circuits:
+ {'gate_map': {'cx': 4, 'h': 1, 'measure': 5, 'ry': 2, 'rz': 3},
+ 'hash': '079ae3',
+ 'num_circ': 24,
+ 'num_cx': 30000,
+ 'num_gate': 90000,
+ 'num_qubit': 18,
+ 'short_name': 'mar20q'}
+
+F.1) Baseline1 : single task full node
+  sbatch -C cpu --exclusive  --ntasks-per-node=1 -N 1   ./batchPodman.slr mar18q cpu
+
+M:  gen_circ  elaT= 34.2 sec 
+job mar18q started, nCirc=24  nq=18  shots/circ=101000  on target=qiskit-cpu ...
+M:  mar18q_cpu ended elaT=237.9 sec, numRank=1 end_load1=219.5
+It is overestimate, code runs inefficiently
+
+F.1b) Baseline2 : single task 1/4 node
+ sbatch  -q shared -C cpu  --cpus-per-task=64  --ntasks=1 --ntasks-per-node=1   ./batchPodman.slr mar18q cpu
+ 
+M:  gen_circ  elaT= 38.8 sec 
+M: job mar18q started, nCirc=24  nq=18  shots/circ=10000  on target=qiskit-cpu ...
+M:  mar18q_cpu ended elaT=126.7 sec, numRank=1 end_load1=181.6
+
+
+F.2) 2 ranks on same node
+ sbatch -C cpu --exclusive  --cpus-per-task=32 --ntasks-per-node=2  -N 1   ./batchPodman.slr mar18q cpu
+
+
+M:  gen_circ  elaT= 17.4 sec 
+M: job mar18q started, nCirc=12  nq=18  shots/circ=10240  on target=qiskit-cpu ...
+M:  mar18q_cpu ended elaT=48.9 sec, numRank=2 end_load1=45.6
+
+
+F.3) 4 ranks on same node
+ sbatch -C cpu --exclusive  --cpus-per-task=32 --ntasks-per-node=4 -N 1   ./batchPodman.slr mar18q cpu
+
+M:  gen_circ  elaT= 8.4 sec
+M: job mar18q started, nCirc=6  nq=18  shots/circ=10240  on target=qiskit-cpu ...
+M:  mar18q_cpu ended elaT=24.4 sec, numRank=4 end_load1=41.9
+
+
+F.4) 8 ranks on 2 nodes
+ sbatch -C cpu --exclusive  --cpus-per-task=32 --ntasks-per-node=4 -N 2   ./batchPodman.slr mar18q cpu
+Submitted batch job 27495947
+
+M:  gen_circ  elaT= 4.1 sec
+M: job mar18q started, nCirc=3  nq=18  shots/circ=10240  on target=qiskit-cpu ...
+M:  mar18q_cpu ended elaT=12.3 sec, numRank=8 end_load1=44.0
+
+
+********************************************
+********************************************
+********************************************
+Jobs submisison setup consists of 2 steps
+See: https://docs.google.com/document/d/1h3uAJkMN5p8XzHfkwPkrQVbIfP8894H1A9alSbFEBaw/edit?usp=sharing
+
+***Step1***
+ ./prep_circ_gateList.sh   (executed inside image)
+
+Objective: generate circuits files according to following specs:
+nCX=101000  # num cx-gates
+nCirc=2
+for nq in {22..33}; do
+    expN=ck${nq}q
+    ./gen_gateList.py -k $nCX -i $nCirc  --expName  $expN  -q $nq  --basePath ${basePath}
+
+***Step2***
+./big_sbatch.sh  (executed on bare OS, login node)
+       using :  wrapPodman.sh batchPodman.slr
+
+Objective: submit a list  slurm job for all circuits for:
+
+for nq in {22..33}; do
+    for trg in  gpu cpu  ; do
+	for shots in 10000 1001000 ; do
+	    expN=ck${nq}q
+	    sbatch   -C $trg  ./batchPodman.slr  $expN $trg $shots
+	done
+    done
+done

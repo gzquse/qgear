@@ -1,4 +1,9 @@
+#--------------------------------------
 # MacOS: time podman build -f Dockerfile.cudaq-qiskit -t balewski/cudaq-qiskit:p1  .
+# it takes real	8m20.969s
+# on PM public image:  ./podman-hpc-build.sh  -f Dockerfile.cudaq-qiskit -t cudaquanmpi-qiskit:p4 -p
+# # it takes real	15m57s
+#--------------------------------------
 
 FROM ubuntu:22.04
 ARG arch=x86_64
@@ -36,6 +41,7 @@ RUN python3 -m pip install numpy matplotlib
 RUN OMPI_CC="/opt/nvidia/cudaq/bin/clang" OMPI_CXX="/opt/nvidia/cudaq/bin/clang++" \
   python3 -m pip install mpi4py
 
+RUN export OMPI_MCA_opal_cuda_support=true OMPI_MCA_btl='^openib'
 # - - - - - - - CUSTOM CODE
 
 # is needed by  tzdada which sets sth for tzdata
@@ -57,8 +63,6 @@ RUN echo 2b-AAAAAAAAAAAAAAAAAAAAAAAAAAAAA   Qiskit 1.0 libs  && \
 RUN echo 2c-AAAAAAAAAAAAAAAAAAAAAAAAAAAAA   ML+QML  libs  && \
     pip3 install scikit-learn pandas seaborn[stats]  networkx[default] optuna
 
-# pylatexenc  ??
-
 RUN echo 2d-AAAAAAAAAAAAAAAAAAAAAAAAAAAAA   python libs  && \
     pip3 install --upgrade pip && \
     pip3 install matplotlib h5py   scipy    jupyter notebook  bitstring coloredlogs
@@ -70,6 +74,14 @@ RUN echo 2e-AAAAAAAAAAAAAAAAAAAAAAAAAAAAA   python libs  && \
 
 # notes: cupy for gpu operations
 RUN echo 2f-AAAAAAAAAAAAAAAAAAAAAAAAAAAAA   python libs  && \   
-    pip3 install cupy-cuda12x fitz
+    pip3 install cupy-cuda12x fitz nvidia-ml-py3
+
+#.... Jan: add software to fix affiniy for CPU-only running
+RUN echo 2d-AAAAAAAAAAAAAAAAAAAAAAAAAAAAA  afinity and monitoring tools  && \
+    apt-get update
+RUN apt-get install numactl  && \
+    apt-get clean all    
+# use case for CPUs on PM: numactl --cpunodebind=0 --membind=0   ./run_gateList.py  --expName mac18q
+
 #WORKDIR /root/cuda_quantum
-#hENTRYPOINT ["bash", "-l"]
+#ENTRYPOINT ["bash", "-l"]

@@ -1,5 +1,4 @@
 import cudaq
-import traceback
 import numpy as np
 
 # Function to reverse the keys
@@ -164,7 +163,5 @@ def qiskit_to_gateList(qcL):
         circ_type[j]=[nq,k]  # remember number of gates per circuit
     
     return {'circ_type': circ_type, 'gate_type': gate_type, 'gate_param': gate_param},{'gate_map':m}
-
-
 
 

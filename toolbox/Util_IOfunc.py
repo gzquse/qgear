@@ -3,24 +3,21 @@ __email__ = "janstar1122@gmail.com"
 
 import numpy as np
 import time, os
-#import ruamel.yaml  as yaml
 import yaml
-#import warnings
-#warnings.simplefilter('ignore', yaml.error.MantissaNoDotYAML1_1Warning)
 
 from pprint import pprint
 import csv
 
 #...!...!..................
 def read_yaml(ymlFn,verb=1):
-        if verb: print('  read  yaml:',ymlFn,end='')
+        if verb: print('  read  yaml:',ymlFn)
         start = time.time()
         ymlFd = open(ymlFn, 'r')
         bulk=yaml.load( ymlFd, Loader=yaml.CLoader)
 
         ymlFd.close()
         if verb>1: print(' done  elaT=%.1f sec'%(time.time() - start))
-        else: print()
+        
         return bulk
 
 #...!...!..................
@@ -96,7 +93,8 @@ or delT is already in seconds
 '''
 
 #...!...!..................
-def dateT2Str(xT):  # --> string
+def dateT2Str(xT=None):  # --> string
+    if xT==None: xT=time.localtime(time.time()) # use time now
     nowStr=time.strftime("%Y%m%d_%H%M%S_%Z",xT)
     return nowStr
 
@@ -104,4 +102,89 @@ def dateT2Str(xT):  # --> string
 def dateStr2T(xS):  #  --> datetime
     yT = time.strptime(xS,"%Y%m%d_%H%M%S_%Z")
     return yT
+
+
+#...!...!..................
+def get_cpu_model():
+    import subprocess
+    try:
+        # Run lscpu to get detailed CPU information
+        result = subprocess.run(['lscpu'], capture_output=True, text=True)
+        for line in result.stdout.splitlines():
+            if "Model name:" in line:
+                return line.split(":")[1].strip()
+    except Exception as e:
+        return "Unknown"
+
+#...!...!..................
+def get_cpu_info(verb=1):
+    import platform
+    import psutil  # for CPU processor
+
+    # Get CPU information
+    cpu_type = platform.processor()
+    cpu_model = get_cpu_model()
+    logical_cpus = psutil.cpu_count(logical=True)
+    physical_cores = psutil.cpu_count(logical=False)
+
+    # Number of sockets (assuming one CPU per socket)
+    num_sockets = logical_cpus // physical_cores
+
+    # Get RAM information
+    memory_info = psutil.virtual_memory()
+    total_memory = memory_info.total / (1024 ** 2)  # Convert bytes to MB
+    used_memory = memory_info.used / (1024 ** 2)    # Convert bytes to MB
+    free_memory = memory_info.available / (1024 ** 2)  # Convert bytes to MB
+
+    memGB=float( '%.1f'%(total_memory/1000.))
+    md={'phys_cores':physical_cores,'logic_cpus':logical_cpus,'tot_mem_gb': memGB,'cpu_type':cpu_type,'cpu_model':cpu_model,'num_sockets':num_sockets}
+    
+    if verb>0:
+        print(f"CPU Type: {cpu_type}")
+        print(f"CPU Model: {cpu_model}")
+        print(f"Number of Logical CPUs: {logical_cpus}")
+        print(f"Number of Physical Cores: {physical_cores}")
+        print(f"Number of Sockets: {num_sockets}")
+        print(f"Total RAM: {total_memory:.2f} MB")
+        print(f"Used RAM: {used_memory:.2f} MB")
+        print(f"Free RAM: {free_memory:.2f} MB")
+    return md
+
+
+#...!...!..................
+def get_gpu_info(verb=1):
+    import pynvml  # for inpection of GPUs
+    pynvml.nvmlInit()
+    device_count = pynvml.nvmlDeviceGetCount()
+    
+    for i in range(device_count):
+        handle = pynvml.nvmlDeviceGetHandleByIndex(i)
+        
+        # Get PCI bus ID (similar to nvidia-smi format)
+        pci_bus_id = pynvml.nvmlDeviceGetPciInfo(handle).busId.decode('utf-8')
+        
+        # Get GPU model name
+        model_name = pynvml.nvmlDeviceGetName(handle).decode('utf-8')
+        
+        # Get GPU memory information
+        memory_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
+        total_memory = memory_info.total / (1024 ** 2)  # Convert bytes to MB
+        used_memory = memory_info.used / (1024 ** 2)    # Convert bytes to MB
+        free_memory = memory_info.free / (1024 ** 2)    # Convert bytes to MB
+
+        memGB=float( '%.1f'%(total_memory/1000.))
+        
+        if i==0:
+                md={'gpu_model':model_name, 'tot_mem_gb': memGB, 'pci_bus':[pci_bus_id] }
+        else:  md['pci_bus'].append(pci_bus_id)
+        if verb>1:
+            print(f"{i}  {model_name}   bus_id: {pci_bus_id} ")
+            print(f"Total Memory: {total_memory:.2f} MB")
+            print(f"Used Memory: {used_memory:.2f} MB")
+            print(f"Free Memory: {free_memory:.2f} MB")
+            print()
+    md['device_count']=device_count
+
+    pynvml.nvmlShutdown()
+    return md
 

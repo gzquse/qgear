@@ -97,7 +97,7 @@ fi
 
 #... common
 echo IMG=$imageName 
-echo 'podman-hpc run -it  -e DISPLAY  -v $HOME:$HOME -e HOME  $IMG  bash     # start the image'
+echo 'podman-hpc run -it --gpu -e DISPLAY  -v $HOME:$HOME -e HOME  $IMG  bash     # start the image'
 echo
 
 exit 0

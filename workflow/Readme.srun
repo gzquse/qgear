@@ -1,0 +1,9 @@
+ssh pm
+
+salloc ...
+
+Simple test of 1 task:
+./wrap_test2.sh
+
+1 task using srun
+srun -l -n1 -G 4 ./wrap_test2.sh

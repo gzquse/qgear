@@ -27,7 +27,6 @@ RUN cudaq_version=`python3 -c "import cudaq; print(cudaq.__version__)" | grep -o
 RUN py_cudaq_dir="$(python3 -m pip show cuda-quantum | grep -e 'Location: .*$' | cut -d ' ' -f2)" && \
   CXX=/opt/nvidia/cudaq/bin/nvq++ bash "$py_cudaq_dir/distributed_interfaces/activate_custom_mpi.sh"
 
-
 # Additional tools for development
 RUN apt-get install -y --no-install-recommends vim jq libpython3-dev
 RUN python3 -m pip install numpy matplotlib
