@@ -51,9 +51,9 @@ class Plotter(PlotterBackbone):
     def __init__(self, args):
         PlotterBackbone.__init__(self, args)
 
-    def _make_canvas(self, figId):
+    def _make_canvas(self, figId,yIn=5.5):
         figId = self.smart_append(figId)
-        fig, ax = self.plt.subplots(facecolor='white', figsize=(7, 5.5))  # Increase the figure size
+        fig, ax = self.plt.subplots(facecolor='white', figsize=(5, yIn))  # Increase the figure size
         fig.tight_layout(pad=3.0)  # Adjust layout
         return ax
 
@@ -68,7 +68,7 @@ class Plotter(PlotterBackbone):
         ax_top.tick_params(axis='x', colors='green')
 
     def compute_time_par_cpu(self, md, bigD, figId=1):
-        ax = self._make_canvas(figId)
+        ax = self._make_canvas(figId,8.5)
         nqV = bigD['num_qubit']
         runtV = bigD['run_time_1circ'] / 60.0
         dLab = md['run_label']
@@ -111,7 +111,9 @@ class Plotter(PlotterBackbone):
         
         ax.set_yscale('log')
         ax.yaxis.set_major_formatter(FormatStrFormatter('%d'))
-        ax.set_xlim(nqR)
+        #ax.set_xlim(nqR)
+        ax.set_ylim(md['tLH'])
+        ax.set_xlim(md['nqLH'])
         ax.grid()
         ax.legend(loc='upper right', bbox_to_anchor=(1, 0.3))
         plt.gca().add_artist(legend)
@@ -128,7 +130,7 @@ class Plotter(PlotterBackbone):
         return
 
     def compute_time_par_gpu(self, md, bigD, figId=1):
-            ax = self._make_canvas(figId)
+            ax = self._make_canvas(figId,8.5)
             nqV = bigD['num_qubit']
             runtV = bigD['run_time_1circ'] / 60.0
             dLab = md['run_label']
@@ -136,7 +138,7 @@ class Plotter(PlotterBackbone):
             details = md['details']
             nT = len(dLab)
             # nqR = (nqV[0] - 0.5, nqV[-1] + 1.5)
-            nqR = (nqV[0] - 0.5, 40)
+            nqR = (nqV[0] - 0.5, 38)
             tit = 'Compute state-vector'
             ax.set(xlabel='num qubits', ylabel='compute end-state (minutes)')
             ax.set_title(tit, pad=20)
@@ -147,26 +149,27 @@ class Plotter(PlotterBackbone):
                     valid_indices = ~np.isnan(runtV[:k, j, i])
                     if valid_indices.any():
                         ax.plot(nqV[:k][valid_indices], runtV[:k, j, i][valid_indices], label=dLab[j] + ' ,cx:' + str(details[i]['num_cx']), marker='*', linestyle='-',  markersize=10)
-
-            ax.yaxis.set_major_formatter(FormatStrFormatter('%d'))
-            ax.set_xlim(nqR)
+            ax.set_yscale('log')
+            ax.yaxis.set_major_formatter(FormatStrFormatter('%.1g'))
+            ax.set_ylim(md['tLH'])
+            ax.set_xlim(md['nqLH'])
             ax.grid()
             ax.legend(loc='upper right', bbox_to_anchor=(1, 0.3))
-
-            ax.axhline(6, ls='--', lw=2, c='m')
-            ax.text(36.5, 980, '24h time-out', c='m')
+            
+            #ax.axhline(6, ls='--', lw=2, c='m')
+            #ax.text(36.5, 980, '24h time-out', c='m')
 
             ax.axvline(32, ls='--', lw=2, c='firebrick')
-            ax.text(32.1, 1, 'One A100 RAM limit', c='firebrick', rotation=90)
+            #ax.text(32.1, 1, 'One A100 RAM limit', c='firebrick', rotation=90)
 
-            ax.axvline(34, ls='--', lw=2, c='firebrick')
-            ax.text(34.1, 1, 'Four A100s RAM limit', c='firebrick', rotation=90)
+            #ax.axvline(34, ls='--', lw=2, c='firebrick')
+            #ax.text(34.1, 1, 'Four A100s RAM limit', c='firebrick', rotation=90)
             #self._add_stateSize_axis(ax)
 
             return
 
     def compute_time_adj_gpu(self, md, bigD, figId=1):
-            ax = self._make_canvas(figId)
+            ax = self._make_canvas(figId,8.5)
             nqV = bigD['num_qubit']
             runtV = bigD['run_time_1circ'] / 60.0
             dLab = md['run_label']
@@ -186,18 +189,21 @@ class Plotter(PlotterBackbone):
                     if valid_indices.any():
                         ax.plot(nqV[:k][valid_indices], runtV[:k, j, i][valid_indices], label=dLab[j] + ' ,cx:' + str(details[i]['num_cx']), marker='*', linestyle='-', markersize=10)
 
-            ax.yaxis.set_major_formatter(FormatStrFormatter('%d'))
-            ax.set_xlim(nqR)
+            ax.set_yscale('log')
+            ax.yaxis.set_major_formatter(FormatStrFormatter('%.1g'))
+            #ax.set_ylim(2e-3,8)
+            ax.set_ylim(md['tLH'])
+            ax.set_xlim(md['nqLH'])
             ax.grid()
-            ax.legend(loc='upper right', bbox_to_anchor=(1, 0.3))
+            ax.legend(bbox_to_anchor=(0.4, 0.7))
             ax.axhline(5, ls='--', lw=2, c='m')
-            ax.text(36.5, 900, '24h time-out', c='m')
+            #ax.text(36.5, 900, '24h time-out', c='m')
 
             ax.axvline(32, ls='--', lw=2, c='firebrick')
-            ax.text(32.1, 1, 'One A100 RAM limit', c='firebrick', rotation=90)
+           # ax.text(32.1, 1, 'One A100 RAM limit', c='firebrick', rotation=90)
 
             ax.axvline(34, ls='--', lw=2, c='firebrick')
-            ax.text(34.1, 1, 'Four A100s RAM limit', c='firebrick', rotation=90)
+           # ax.text(34.1, 1, 'Four A100s RAM limit', c='firebrick', rotation=90)
             #self._add_stateSize_axis(ax)
 
             return
@@ -274,6 +280,8 @@ if __name__ == '__main__':
     expMD['num_cpu_runs'] = cntT[0]
 
     args.prjName = expMD['short_name']
+    expMD['nqLH']=(27.5,36.5)
+    expMD['tLH']=(1e-3,2e3)
     plot = Plotter(args)
     if 'a' in args.showPlots and t == 'par-cpu':
         plot.compute_time_par_cpu(expMD, expD, figId=1)
