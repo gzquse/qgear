@@ -273,8 +273,6 @@ def qiskit_circ_gateList(gateD,md):
                 qc.cx(q0,q1)
             
         qc.measure_all()
-        # Draw the circuit
-        if j==0 and nq<6 and nGate<13: print(qc.draw())
         qcL[j]=qc
     return qcL
 
