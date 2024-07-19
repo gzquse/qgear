@@ -6,7 +6,8 @@
 # https://docs.nersc.gov/systems/perlmutter/running-jobs/#1-node-4-tasks-4-gpus-all-gpus-visible-to-all-tasks
 
 export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_common/
-IMG=gzquse/cudaquanmpi-qiskit:p6
+IMG=gzquse/cudaq-qiskit:v1
+#IMG=gzquse/cudaquanmpi-qiskit:p6
 
 #export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nstaff/balewski/podman_common/
 #IMG=balewski/cudaquanmpi-qiskit:p4
