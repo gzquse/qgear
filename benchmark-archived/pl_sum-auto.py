@@ -60,7 +60,7 @@ class Plotter(PlotterBackbone):
                 nqV=dataE['nq']
                 runtV=dataE['runt']
                 dLab='%s-%s'%(tag2,tag3)
-                nqV, runtV = map(list, zip(*sorted(zip(nqV, runtV), key=lambda x: x[0])))
+               
                 ax.plot(nqV,runtV,"*-",label=dLab)
         
         tit='Compute state-vector'
@@ -69,7 +69,7 @@ class Plotter(PlotterBackbone):
         ax.set_title(tit, pad=20)  # Adjust the pad value as needed
         ax.set_yscale('log')
         ax.grid()
-        ax.legend(loc='lower right')#, title=lgTit,bbox_to_anchor=(0.5, 1.18), ncol=3)
+        ax.legend(loc='lower right')
 
 #...!...!....................
 def readOne(inpF,dataD,verb=1):
@@ -113,7 +113,7 @@ def find_yaml_files(directory_path, vetoL=None):
     """
     if vetoL is None:
         vetoL = []
-    #print('ddd',directory_path)
+   
     h5_files = []
     for root, dirs, files in os.walk(directory_path):
         for file in files:
@@ -122,21 +122,56 @@ def find_yaml_files(directory_path, vetoL=None):
     return h5_files
 
 #...!...!....................
-def print_all_keys(d, parent_key=''):
+def sort_end_listsX(d, parent_key='', sort_key='nq', val_key='runt'):
     """
     Recursively prints all keys in a nested dictionary.
+    once the sort_key is in dict it triggers sorting both keys
 
     Args:
     d (dict): The dictionary to traverse.
     parent_key (str): The base key to use for nested keys (used for recursion).
     """
+    if sort_key in d:
+        #print('bbb', sorted(d))
+        xV=d[sort_key]
+        yV=d[val_key]
+        xU, yU = map(list, zip(*sorted(zip(xV, yV), key=lambda x: x[0])))
+        print(' %s:%d'%(sort_key,len(xU)))
+        return
+        
     for k, v in d.items():
         full_key = f"{parent_key}.{k}" if parent_key else k
+        print(full_key,end='')
+        if isinstance(v, dict):
+            sort_end_lists(v, full_key)
+
+    #print()
+            
+def sort_end_lists(d, parent_key='', sort_key='nq', val_key='runt'):
+    """
+    Recursively prints all keys in a nested dictionary.
+    Once the sort_key is in dict it triggers sorting both keys.
+
+    Args:
+    d (dict): The dictionary to traverse.
+    parent_key (str): The base key to use for nested keys (used for recursion).
+    sort_key (str): The key indicating the list to sort by.
+    val_key (str): The key indicating the list to sort alongside.
+    """
+    if sort_key in d:
+        xV = d[sort_key]
+        yV = d[val_key]
+        xU, yU = map(list, zip(*sorted(zip(xV, yV), key=lambda x: x[0])))
+        print(' %s.%s:%d' % (parent_key, sort_key, len(xU)))
+        d[sort_key]=xU
+        d[val_key]=yU
+        return
+    
+    for k, v in d.items():
+        full_key = '%s.%s' % (parent_key, k) if parent_key else k
         print(full_key)
         if isinstance(v, dict):
-            print_all_keys(v, full_key)
-
-            
+            sort_end_lists(v, full_key, sort_key, val_key)
 
 #=================================
 #=================================
@@ -159,14 +194,12 @@ if __name__ == '__main__':
     assert nInp>0
     print('found %d input files, e.g.: '%(nInp),fileL[0])
 
-
     dataAll={}
     for i,fileN in enumerate(fileL):
         readOne(fileN,dataAll,i==0)
     #pprint(dataAll)
     print('\nM: all tags:')
-    print_all_keys(dataAll)
-    
+    sort_end_lists(dataAll)
     
     # ----  just plotting
     args.prjName='jan23'
