@@ -62,7 +62,7 @@ class Plotter(PlotterBackbone):
                 dLab='%s.%s'%(tag2,tag3)               
                 ax.plot(nqV,runtV,"*-",label=dLab)
         
-        tit='Compute state-vector'
+        tit='Compute state-vector tag1=%s'%tag1
 
         ax.set(xlabel='num qubits',ylabel='compute end-state (minutes)')
         ax.set_title(tit, pad=20)  # Adjust the pad value as needed
@@ -78,7 +78,6 @@ def readOne(inpF,dataD,verb=1):
     #print(inpF,xMD['num_qubit'],xMD['elapsed_time'],float(xMD['num_circ']))
     nq=float(xMD['num_qubit'])
     runt=float(xMD['elapsed_time'])/float(xMD['num_circ'])
-    nCX=xMD['num_cx']
     #pprint(xMD)
 
     if 'cpu_info' in xMD:
@@ -86,9 +85,9 @@ def readOne(inpF,dataD,verb=1):
         tag2='all-cpu'  # this should change to c32 or c64 for your samples
     if 'gpu_info' in xMD:
         tag1='gpu'
-        tag2=xMD[ 'target']
+    tag2=xMD[ 'target']
     if tag1 not in dataD: dataD[tag1]={}
-    tag3='%sCX'%nCX
+    tag3='%sCX'%xMD['num_cx']
     
     if tag2 not in dataD[tag1]: dataD[tag1][tag2]={}
     if tag3 not in dataD[tag1][tag2]: dataD[tag1][tag2][tag3]={'nq':[],'runt':[]}
