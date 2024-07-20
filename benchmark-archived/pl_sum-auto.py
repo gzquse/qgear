@@ -59,8 +59,7 @@ class Plotter(PlotterBackbone):
                 dataE=dataD[tag2][tag3]
                 nqV=dataE['nq']
                 runtV=dataE['runt']
-                dLab='%s-%s'%(tag2,tag3)
-               
+                dLab='%s.%s'%(tag2,tag3)               
                 ax.plot(nqV,runtV,"*-",label=dLab)
         
         tit='Compute state-vector'
@@ -89,12 +88,12 @@ def readOne(inpF,dataD,verb=1):
         tag1='gpu'
         tag2=xMD[ 'target']
     if tag1 not in dataD: dataD[tag1]={}
-
-
+    tag3='%sCX'%nCX
+    
     if tag2 not in dataD[tag1]: dataD[tag1][tag2]={}
-    if nCX not in dataD[tag1][tag2]: dataD[tag1][tag2][nCX]={'nq':[],'runt':[]}
+    if tag3 not in dataD[tag1][tag2]: dataD[tag1][tag2][tag3]={'nq':[],'runt':[]}
 
-    head=dataD[tag1][tag2][nCX]
+    head=dataD[tag1][tag2][tag3]
     head['nq'].append(nq)
     head['runt'].append(runt)
 
@@ -121,32 +120,7 @@ def find_yaml_files(directory_path, vetoL=None):
                 h5_files.append(os.path.join(root, file))
     return h5_files
 
-#...!...!....................
-def sort_end_listsX(d, parent_key='', sort_key='nq', val_key='runt'):
-    """
-    Recursively prints all keys in a nested dictionary.
-    once the sort_key is in dict it triggers sorting both keys
-
-    Args:
-    d (dict): The dictionary to traverse.
-    parent_key (str): The base key to use for nested keys (used for recursion).
-    """
-    if sort_key in d:
-        #print('bbb', sorted(d))
-        xV=d[sort_key]
-        yV=d[val_key]
-        xU, yU = map(list, zip(*sorted(zip(xV, yV), key=lambda x: x[0])))
-        print(' %s:%d'%(sort_key,len(xU)))
-        return
-        
-    for k, v in d.items():
-        full_key = f"{parent_key}.{k}" if parent_key else k
-        print(full_key,end='')
-        if isinstance(v, dict):
-            sort_end_lists(v, full_key)
-
-    #print()
-            
+#...!...!....................            
 def sort_end_lists(d, parent_key='', sort_key='nq', val_key='runt'):
     """
     Recursively prints all keys in a nested dictionary.
