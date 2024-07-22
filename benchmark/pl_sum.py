@@ -25,6 +25,7 @@ def get_parser():
     parser.add_argument( "-Y","--noXterm", dest='noXterm',  action='store_false', default=True, help="enables X-term for interactive mode")
 
     parser.add_argument("-p", "--showPlots",  default='b', nargs='+',help="abc-string listing shown plots")
+    parser.add_argument("-s", "--shift", type=bool, help="whether shift the dots")
 
     parser.add_argument("--outPath",default='out',help="all outputs from experiment")
        
@@ -47,7 +48,7 @@ class Plotter(PlotterBackbone):
 
 
 #...!...!....................
-    def compute_time(self,bigD,tag1,figId=1):
+    def compute_time(self,bigD,tag1,figId=1, shift=False):
         nrow,ncol=1,1       
         figId=self.smart_append(figId)
         fig=self.plt.figure(figId,facecolor='white', figsize=(5.5,7))        
@@ -76,13 +77,14 @@ class Plotter(PlotterBackbone):
                     marker_style = 'o'  # Default to circle
 
                 # Introduce a small random shift to avoid overlap
-                shift_x = np.random.uniform(-0.1, 0.1, size=len(nqV))
-                shift_y = np.random.uniform(-0.1, 0.1, size=len(runtV))
-                nqV_shifted = nqV + shift_x
-                runtV_shifted = runtV + shift_y
-                ax.plot(nqV_shifted, runtV_shifted, marker=marker_style, linestyle='-', markerfacecolor='none', label=dLab)    
-                #ax.plot(nqV,runtV,marker=marker_style, markerfacecolor='none', linestyle='-', label=dLab)
-        
+                if shift:
+                    shift_x = np.random.uniform(-0.1, 0.1, size=len(nqV))
+                    shift_y = np.random.uniform(-0.1, 0.1, size=len(runtV))
+                    nqV_shifted = nqV + shift_x
+                    runtV_shifted = runtV + shift_y
+                    ax.plot(nqV_shifted, runtV_shifted, marker=marker_style, linestyle='-', markerfacecolor='none', label=dLab)    
+                else:
+                    ax.plot(nqV,runtV,marker=marker_style, markerfacecolor='none', linestyle='-', label=dLab)
         tit='Compute state-vector tag1=%s'%tag1
 
         ax.set(xlabel='num qubits',ylabel='compute end-state (minutes)')
@@ -178,7 +180,7 @@ if __name__ == '__main__':
 
     #corePath='/dataVault2024/dataCudaQ_'  # in podman
     corePath='/pscratch/sd/g/gzquse/quantDataVault2024/dataCudaQ_'  # bare metal
-    pathL=['July12']
+    pathL=['July14']
     fileL=[]
     vetoL=['r1.4','r2.4','r3.4', ]
     for path in pathL:
@@ -198,9 +200,9 @@ if __name__ == '__main__':
     args.prjName='jan23'
     plot=Plotter(args)
     if 'a' in args.showPlots:
-        plot.compute_time(dataAll,'cpu',figId=1)
+        plot.compute_time(dataAll,'cpu',figId=1, shift=args.shift)
     if 'b' in args.showPlots:
-        plot.compute_time(dataAll,'gpu',figId=2)
+        plot.compute_time(dataAll,'gpu',figId=2, shift=args.shift)
   
     plot.display_all(png=1)
     

@@ -16,3 +16,7 @@ basePath=/dataVault2024/dataCudaQ_xxxx
 ├── circ
 ├── meas
 └── post
+
+# Plot
+
+./pl_sum.py -p a -Y -s True
