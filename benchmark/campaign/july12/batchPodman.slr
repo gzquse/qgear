@@ -1,0 +1,92 @@
+#!/bin/bash 
+#SBATCH -C gpu -N 1 -A nintern
+# SBATCH --time=28:00 -q debug
+#SBATCH --time 23:58:00  -q regular 
+#SBATCH --output=out/%j.out
+#SBATCH --licenses=scratch
+
+set -u  # exit if you try to use an uninitialized variable
+set -e  # bash exits if any statement returns a non-true return value
+
+# Set default values
+expN=${1:-mar28q100cx}
+trg=${2:-adj-gpu}
+shots=${3:-10240}
+
+# Determine backend based on target
+case "$trg" in
+    par-cpu)
+        backend='qiskit-cpu'
+        ;;
+    par-gpu)
+        backend="nvidia-mqpu"  # all 4 GPUs in parallel
+        ;;
+    adj-gpu)
+        backend="nvidia-mgpu"
+        ;;
+    *)
+        echo "Unknown target: $trg"
+        exit 1
+        ;;
+esac
+
+# Environment setup
+echo S: expN=$expN backend=$backend user=$USER
+N=${SLURM_NNODES:-1}
+T=${SLURM_NTASKS_PER_NODE:-1}
+G=$(( T * N ))
+echo S: head:`hostname` N=$N T=$T G=$G
+
+# Define Podman image
+export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_common/
+IMG=gzquse/cudaq-qiskit:v1
+echo S: head:`hostname` use image $IMG
+
+# Set up base paths
+if [ "$USER" == "balewski" ]; then
+    CFSH=/global/cfs/cdirs/mpccc/balewski
+    BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_July9
+    DATA_SRC=${CFSH}/2024_martin_gradient
+elif [ "$USER" == "gzquse" ]; then
+    CFSH=/pscratch/sd/g/gzquse
+    BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_QEra_July14
+    DATA_SRC=${CFSH}/GRADIENT_IMAGE
+else
+    echo "Unknown user: $USER"
+    exit 1
+fi
+
+# Create working directory
+jobId=${SLURM_JOBID:-27658327}
+wrkPath=$SCRATCH/jobs_cudaq/$jobId
+echo wrkPath=$wrkPath
+mkdir -p $wrkPath
+cp -rp ../toolbox *py wrapPodman.sh batchPodman.slr $wrkPath/
+cd $wrkPath
+
+# Define the command to be executed by Podman
+CMD="python3 -u ./run_gateList.py --expName $expN --backend $backend --numShots $shots --basePath /myData"
+[ "$trg" == "adj-gpu" ] && CMD="mpiexec -np 4 $CMD"
+
+CMD1="python3 -u ./simple_ghzV2_cudaq.py --numShots 10 --cudaqTarget nvidia-mqpu --numRepeat 50 --numQubits 28"
+CMD2="mpirun -np 4 python3 ./simple_ghzV2_cudaq.py --numShots 10 --cudaqTarget nvidia-mgpu --numRepeat 50 --numQubits 30"
+CMD3="mpirun -np 4 python3 ./simple_ghzV2_cudaq.py --numShots 10200 --cudaqTarget nvidia-mgpu --numRepeat 3600 --numQubits 29"
+
+# Warmup GPUs if not using CPU target
+# if [ "$trg" != "par-cpu" ]; then
+#     echo S: warmup GPUs with short 4-GPU job
+#     ./wrapPodman.sh $IMG "$CMD2" $wrkPath $BASE_PATH
+# fi
+
+# Execute the main task
+echo "S:..... fire the task ....."
+echo S: CMD=$CMD
+srun -l --ntasks=$G ./wrapPodman.sh $IMG "$CMD" $wrkPath $BASE_PATH
+echo S: done
+date
+
+#Cancel all my jobs:
+# squeue -u $USER -h | awk '{print $1}' | xargs scancel
+
+# all jobs in the qos
+# squeue --qos=gpu_shared -o "%.7i %.10P %.12j %.8u %.2t %.10M %.6D %R %.20N"
