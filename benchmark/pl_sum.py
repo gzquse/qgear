@@ -13,6 +13,7 @@ import sys,os
 from pprint import pprint
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'toolbox')))
 from PlotterBackbone import PlotterBackbone
+from matplotlib.ticker import MaxNLocator, FormatStrFormatter
 from Util_IOfunc import  read_yaml
 import matplotlib.ticker as ticker
 from matplotlib.ticker import MaxNLocator
@@ -25,7 +26,7 @@ def get_parser():
     parser.add_argument( "-Y","--noXterm", dest='noXterm',  action='store_false', default=True, help="enables X-term for interactive mode")
 
     parser.add_argument("-p", "--showPlots",  default='b', nargs='+',help="abc-string listing shown plots")
-    parser.add_argument("-s", "--shift", type=bool, help="whether shift the dots")
+    parser.add_argument("-s", "--shift", type=bool, default=True, help="whether shift the dots")
 
     parser.add_argument("--outPath",default='out',help="all outputs from experiment")
        
@@ -48,13 +49,14 @@ class Plotter(PlotterBackbone):
 
 
 #...!...!....................
-    def compute_time(self,bigD,tag1,figId=1, shift=False):
+    def compute_time(self,bigD,tag1,figId=1,shift=False):
         nrow,ncol=1,1       
         figId=self.smart_append(figId)
         fig=self.plt.figure(figId,facecolor='white', figsize=(5.5,7))        
         ax = self.plt.subplot(nrow,ncol,1)
-  
+
         dataD=bigD[tag1]
+
         for tag2 in dataD:
             for tag3 in dataD[tag2]:
                 if '20000CX' in tag3:  # Skip lines with 20,000 CX
@@ -62,31 +64,36 @@ class Plotter(PlotterBackbone):
                 print('plot %s %s %s'%(tag1,tag2,tag3))            
                 dataE=dataD[tag2][tag3]
                 nqV=dataE['nq']
-                runtV=dataE['runt']
+                runtV=dataE['runt']/60.0 # convert time to min
+                date=dataE['date']
                 dLab='%s'%(tag3)   
                 # Extract cores and tasks_per_node from tag3
                 cores = tag3.split('_')[1][1:]
                 tasks_per_node = tag3.split('_')[2][2:]
-                
                 # Set marker style based on cores and tasks_per_node
                 if '100CX' in tag3:
                     marker_style = 's'
                 elif '10kCX' in tag3:
                     marker_style = '^'
-                # if cores == '32' and tasks_per_node == '4':
-                #     marker_style = 's'  # Square for 32 cores and 4 tasks
-                # elif cores == '64' and tasks_per_node == '1':
-                #     marker_style = '^'  # Triangle for 32 cores and 8 tasks
-                # else:
-                #     marker_style = 'o'  # Default to circle
+                else:
+                    marker_style = 'o'
 
+                if cores == '32' and tasks_per_node == '4':
+                    dCol='C1'  # Square for 32 cores and 4 tasks
+                elif cores == '64' and tasks_per_node == '1':
+                    marker_style = '^'  # Triangle for 32 cores and 8 tasks
+                    dCol='C2'
+                else:
+                    marker_style = 'o'  # Default to circle
+                    dCol='C3'
                 # Introduce a small random shift to avoid overlap
+                isFilled=None if '10kCX' in tag3 else 'none'
                 if shift:
                     shift_x = np.random.uniform(-0.1, 0.1, size=len(nqV))
                     shift_y = np.random.uniform(-0.1, 0.1, size=len(runtV))
                     nqV_shifted = nqV + shift_x
                     runtV_shifted = runtV + shift_y
-                    ax.plot(nqV_shifted, runtV_shifted, marker=marker_style, linestyle='-', markerfacecolor='none', label=dLab)    
+                    ax.plot(nqV_shifted, runtV_shifted, marker=marker_style, linestyle='-', markerfacecolor=isFilled, color=dCol,label=dLab,markersize=9)    
                 else:
                     ax.plot(nqV,runtV,marker=marker_style, markerfacecolor='none', linestyle='-', label=dLab)
         tit='Compute state-vector tag1=%s'%tag1
@@ -98,9 +105,25 @@ class Plotter(PlotterBackbone):
         ax.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
                 ncol=3, mode="expand", borderaxespad=0., )
 
+
+def extract_date_from_path(file_path):
+    # Split the path into components
+    path_components = file_path.split('/')
+    
+    # Find the component that starts with "dataCudaQ_"
+    for component in path_components:
+        if component.startswith('dataCudaQ_'):
+            # Extract the date part from this component
+            date_part = component[len('dataCudaQ_'):]
+            return date_part
+    
+    # If the component is not found, return None
+    return None
+
 #...!...!....................
 def readOne(inpF,dataD,verb=1):
     assert os.path.exists(inpF)
+    date = extract_date_from_path(inpF)
     xMD=read_yaml(inpF,verb)
     #print(inpF,xMD['num_qubit'],xMD['elapsed_time'],float(xMD['num_circ']))
     nq=float(xMD['num_qubit'])
@@ -118,13 +141,14 @@ def readOne(inpF,dataD,verb=1):
     num_cx_formatted = "10k" if xMD["num_cx"] == 10000 else f'{xMD["num_cx"]}'
     tag3 = f'{num_cx_formatted}CX_c{cores}_tp{tasks_per_node}'
     if tag2 not in dataD[tag1]: dataD[tag1][tag2]={}
-    if tag3 not in dataD[tag1][tag2]: dataD[tag1][tag2][tag3]={'nq':[],'runt':[], 'cores': [], 'tasks_per_node': []}
+    if tag3 not in dataD[tag1][tag2]: dataD[tag1][tag2][tag3]={'nq':[],'runt':[], 'cores': [], 'tasks_per_node': [], 'date': []}
     
     head=dataD[tag1][tag2][tag3]
     head['nq'].append(nq)
     head['runt'].append(runt)
     head['cores'].append(cores)
     head['tasks_per_node'].append(tasks_per_node)
+    head['date'].append(date)
 
 #...!...!....................
 def find_yaml_files(directory_path, vetoL=None):
@@ -166,8 +190,8 @@ def sort_end_lists(d, parent_key='', sort_key='nq', val_key='runt'):
         yV = d[val_key]
         xU, yU = map(list, zip(*sorted(zip(xV, yV), key=lambda x: x[0])))
         print(' %s.%s:%d' % (parent_key, sort_key, len(xU)))
-        d[sort_key]=xU
-        d[val_key]=yU
+        d[sort_key]=np.array(xU)
+        d[val_key]=np.array(yU)
         return
     
     for k, v in d.items():
@@ -186,7 +210,7 @@ if __name__ == '__main__':
 
     #corePath='/dataVault2024/dataCudaQ_'  # in podman
     corePath='/pscratch/sd/g/gzquse/quantDataVault2024/dataCudaQ_'  # bare metal
-    pathL=['July14']
+    pathL=[ 'July14']
     fileL=[]
     vetoL=['r1.4','r2.4','r3.4', ]
     for path in pathL:
@@ -206,7 +230,7 @@ if __name__ == '__main__':
     args.prjName='jan23'
     plot=Plotter(args)
     if 'a' in args.showPlots:
-        plot.compute_time(dataAll,'cpu',figId=1, shift=args.shift)
+        plot.compute_time(dataAll,'cpu', figId=1, shift=args.shift)
     if 'b' in args.showPlots:
         plot.compute_time(dataAll,'gpu',figId=2, shift=args.shift)
   
