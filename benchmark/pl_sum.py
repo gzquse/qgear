@@ -63,18 +63,22 @@ class Plotter(PlotterBackbone):
                 dataE=dataD[tag2][tag3]
                 nqV=dataE['nq']
                 runtV=dataE['runt']
-                dLab='%s.%s'%(tag2,tag3)   
+                dLab='%s'%(tag3)   
                 # Extract cores and tasks_per_node from tag3
                 cores = tag3.split('_')[1][1:]
                 tasks_per_node = tag3.split('_')[2][2:]
                 
                 # Set marker style based on cores and tasks_per_node
-                if cores == '32' and tasks_per_node == '4':
-                    marker_style = 's'  # Square for 32 cores and 4 tasks
-                elif cores == '64' and tasks_per_node == '1':
-                    marker_style = '^'  # Triangle for 32 cores and 8 tasks
-                else:
-                    marker_style = 'o'  # Default to circle
+                if '100CX' in tag3:
+                    marker_style = 's'
+                elif '10kCX' in tag3:
+                    marker_style = '^'
+                # if cores == '32' and tasks_per_node == '4':
+                #     marker_style = 's'  # Square for 32 cores and 4 tasks
+                # elif cores == '64' and tasks_per_node == '1':
+                #     marker_style = '^'  # Triangle for 32 cores and 8 tasks
+                # else:
+                #     marker_style = 'o'  # Default to circle
 
                 # Introduce a small random shift to avoid overlap
                 if shift:
@@ -86,12 +90,13 @@ class Plotter(PlotterBackbone):
                 else:
                     ax.plot(nqV,runtV,marker=marker_style, markerfacecolor='none', linestyle='-', label=dLab)
         tit='Compute state-vector tag1=%s'%tag1
-
+        # Place the title above the legend
         ax.set(xlabel='num qubits',ylabel='compute end-state (minutes)')
-        ax.set_title(tit, pad=20)  # Adjust the pad value as needed
+        ax.set_title(tit, pad=50)  # Adjust the pad value as needed
         ax.set_yscale('log')
         ax.grid()
-        ax.legend(loc='lower right')
+        ax.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
+                ncol=3, mode="expand", borderaxespad=0., )
 
 #...!...!....................
 def readOne(inpF,dataD,verb=1):
@@ -110,7 +115,8 @@ def readOne(inpF,dataD,verb=1):
         tag1='gpu'
     tag2=xMD['target']
     if tag1 not in dataD: dataD[tag1]={}
-    tag3 = f'{xMD["num_cx"]}CX_c{cores}_tp{tasks_per_node}'
+    num_cx_formatted = "10k" if xMD["num_cx"] == 10000 else f'{xMD["num_cx"]}'
+    tag3 = f'{num_cx_formatted}CX_c{cores}_tp{tasks_per_node}'
     if tag2 not in dataD[tag1]: dataD[tag1][tag2]={}
     if tag3 not in dataD[tag1][tag2]: dataD[tag1][tag2][tag3]={'nq':[],'runt':[], 'cores': [], 'tasks_per_node': []}
     
