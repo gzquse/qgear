@@ -68,8 +68,18 @@ class Plotter(PlotterBackbone):
                 date=dataE['date']
                 dLab='%s'%(tag3)   
                 # Extract cores and tasks_per_node from tag3
-                cores = tag3.split('_')[1][1:]
-                tasks_per_node = tag3.split('_')[2][2:]
+                if tag1 == 'cpu':
+                    cores = tag3.split('_')[1][1:]
+                    tasks_per_node = tag3.split('_')[2][2:]
+                    
+                    if cores == '32' and tasks_per_node == '4':
+                        dCol='C1'  # Square for 32 cores and 4 tasks
+                    elif cores == '64' and tasks_per_node == '1':
+                        marker_style = '^'  # Triangle for 32 cores and 8 tasks
+                        dCol='C2'
+                    else:
+                        marker_style = 'o'  # Default to circle
+                        dCol='C3'
                 # Set marker style based on cores and tasks_per_node
                 if '100CX' in tag3:
                     marker_style = 's'
@@ -77,23 +87,21 @@ class Plotter(PlotterBackbone):
                     marker_style = '^'
                 else:
                     marker_style = 'o'
-
-                if cores == '32' and tasks_per_node == '4':
-                    dCol='C1'  # Square for 32 cores and 4 tasks
-                elif cores == '64' and tasks_per_node == '1':
-                    marker_style = '^'  # Triangle for 32 cores and 8 tasks
-                    dCol='C2'
-                else:
-                    marker_style = 'o'  # Default to circle
-                    dCol='C3'
+                
+                
                 # Introduce a small random shift to avoid overlap
                 isFilled=None if '10kCX' in tag3 else 'none'
-                if shift:
+                # Dont shift when plot gpu! cause it is so fast!
+                if shift and tag1 == 'cpu':
                     shift_x = np.random.uniform(-0.1, 0.1, size=len(nqV))
                     shift_y = np.random.uniform(-0.1, 0.1, size=len(runtV))
                     nqV_shifted = nqV + shift_x
                     runtV_shifted = runtV + shift_y
-                    ax.plot(nqV_shifted, runtV_shifted, marker=marker_style, linestyle='-', markerfacecolor=isFilled, color=dCol,label=dLab,markersize=9)    
+                    if tag1 == 'cpu':
+                        ax.plot(nqV_shifted, runtV_shifted, marker=marker_style, linestyle='-', markerfacecolor=isFilled, color=dCol,label=dLab,markersize=9)    
+                    elif tag1 == 'gpu':
+                        ax.plot(nqV_shifted, runtV_shifted, marker=marker_style, linestyle='-', markerfacecolor=isFilled, label=dLab,markersize=9)    
+
                 else:
                     ax.plot(nqV,runtV,marker=marker_style, markerfacecolor='none', linestyle='-', label=dLab)
         tit='Compute state-vector tag1=%s'%tag1
@@ -139,7 +147,11 @@ def readOne(inpF,dataD,verb=1):
     tag2=xMD['target']
     if tag1 not in dataD: dataD[tag1]={}
     num_cx_formatted = "10k" if xMD["num_cx"] == 10000 else f'{xMD["num_cx"]}'
-    tag3 = f'{num_cx_formatted}CX_c{cores}_tp{tasks_per_node}'
+    if tag1=='cpu':
+        tag3 = f'{num_cx_formatted}CX_c{cores}_tp{tasks_per_node}'
+    elif tag1=='gpu':
+        g_tag = tag2.split('-')[1]
+        tag3 = f'{g_tag}.{num_cx_formatted}CX'
     if tag2 not in dataD[tag1]: dataD[tag1][tag2]={}
     if tag3 not in dataD[tag1][tag2]: dataD[tag1][tag2][tag3]={'nq':[],'runt':[], 'cores': [], 'tasks_per_node': [], 'date': []}
     
@@ -210,7 +222,7 @@ if __name__ == '__main__':
 
     #corePath='/dataVault2024/dataCudaQ_'  # in podman
     corePath='/pscratch/sd/g/gzquse/quantDataVault2024/dataCudaQ_'  # bare metal
-    pathL=[ 'July14']
+    pathL=[ 'July12']
     fileL=[]
     vetoL=['r1.4','r2.4','r3.4', ]
     for path in pathL:
@@ -219,7 +231,7 @@ if __name__ == '__main__':
     nInp=len(fileL)
     assert nInp>0
     print('found %d input files, e.g.: '%(nInp),fileL[0])
-
+    print(fileL)
     dataAll={}
     for i,fileN in enumerate(fileL):
         readOne(fileN,dataAll,i==0)
