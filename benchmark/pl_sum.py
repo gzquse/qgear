@@ -80,6 +80,16 @@ class Plotter(PlotterBackbone):
                     else:
                         marker_style = 'o'  # Default to circle
                         dCol='C3'
+                elif tag1 == 'gpu':
+                    print(tag2)
+                    if tag2 == 'nvidia':
+                        dCol='C1'  
+                    elif tag2 == 'nvidia-mgpu':
+                        marker_style = '^'  
+                        dCol='C2'
+                    else:
+                        marker_style = 'o'  
+                        dCol='C3'
                 # Set marker style based on cores and tasks_per_node
                 if '100CX' in tag3:
                     marker_style = 's'
@@ -97,13 +107,10 @@ class Plotter(PlotterBackbone):
                     shift_y = np.random.uniform(-0.1, 0.1, size=len(runtV))
                     nqV_shifted = nqV + shift_x
                     runtV_shifted = runtV + shift_y
-                    if tag1 == 'cpu':
-                        ax.plot(nqV_shifted, runtV_shifted, marker=marker_style, linestyle='-', markerfacecolor=isFilled, color=dCol,label=dLab,markersize=9)    
-                    elif tag1 == 'gpu':
-                        ax.plot(nqV_shifted, runtV_shifted, marker=marker_style, linestyle='-', markerfacecolor=isFilled, label=dLab,markersize=9)    
+                    ax.plot(nqV_shifted, runtV_shifted, marker=marker_style, linestyle='-', markerfacecolor=isFilled, color=dCol,label=dLab,markersize=9)     
 
                 else:
-                    ax.plot(nqV,runtV,marker=marker_style, markerfacecolor='none', linestyle='-', label=dLab)
+                    ax.plot(nqV,runtV,marker=marker_style, markerfacecolor='none', linestyle='-', color=dCol, label=dLab)
         tit='Compute state-vector tag1=%s'%tag1
         # Place the title above the legend
         ax.set(xlabel='num qubits',ylabel='compute end-state (minutes)')
@@ -150,7 +157,11 @@ def readOne(inpF,dataD,verb=1):
     if tag1=='cpu':
         tag3 = f'{num_cx_formatted}CX_c{cores}_tp{tasks_per_node}'
     elif tag1=='gpu':
-        g_tag = tag2.split('-')[1]
+        g_tag = 'gpu' 
+        if '-' in tag2:
+            parts = tag2.split('-')
+            if len(parts) > 1:
+                g_tag = parts[1]
         tag3 = f'{g_tag}.{num_cx_formatted}CX'
     if tag2 not in dataD[tag1]: dataD[tag1][tag2]={}
     if tag3 not in dataD[tag1][tag2]: dataD[tag1][tag2][tag3]={'nq':[],'runt':[], 'cores': [], 'tasks_per_node': [], 'date': []}
@@ -222,7 +233,7 @@ if __name__ == '__main__':
 
     #corePath='/dataVault2024/dataCudaQ_'  # in podman
     corePath='/pscratch/sd/g/gzquse/quantDataVault2024/dataCudaQ_'  # bare metal
-    pathL=[ 'July12']
+    pathL=[ 'July14']
     fileL=[]
     vetoL=['r1.4','r2.4','r3.4', ]
     for path in pathL:
@@ -231,7 +242,6 @@ if __name__ == '__main__':
     nInp=len(fileL)
     assert nInp>0
     print('found %d input files, e.g.: '%(nInp),fileL[0])
-    print(fileL)
     dataAll={}
     for i,fileN in enumerate(fileL):
         readOne(fileN,dataAll,i==0)
