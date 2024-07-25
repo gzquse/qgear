@@ -144,10 +144,15 @@ if __name__ == "__main__":
     if 'qiskit' in target:
         if args.verb: print('M: will run %d circ on CPUs numRank=%d ...'%(nCirc,args.numRank))
         T0=time()
-        qcL=qiskit_circ_gateList(gateD,MD)
+        qcL=qiskit_circ_gateList(gateD,MD,barrier=True)
         if args.verb: print('\nM:  gen_circ  elaT= %.1f sec '%(time()-T0))
         # Draw the circuit
         if args.verb>1:  print(qcL[0].draw())
+        if 0: # Draw the circuit using the latex source
+            from qiskit.visualization import circuit_drawer
+            latex_source = circuit_drawer(qcL[0], output='latex_source',cregbundle=True)
+            print(latex_source); stop12
+
         #....  excution using backRun(.) .....
         backend = AerSimulator()
     else:
