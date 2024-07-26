@@ -72,10 +72,8 @@ class Plotter(PlotterBackbone):
 
 #...!...!....................
 def readOne(inpF,dataD,verb=1):
-    #print('iii',inpF)
     assert os.path.exists(inpF)
     xMD=read_yaml(inpF,verb)
-    #print(inpF,xMD['num_qubit'],xMD['elapsed_time'],float(xMD['num_circ']))
     nq=float(xMD['num_qubit'])
     runt=float(xMD['elapsed_time'])/float(xMD['num_circ'])
     #pprint(xMD)
@@ -135,14 +133,14 @@ def sort_end_lists(d, parent_key='', sort_key='nq', val_key='runt'):
         xV = d[sort_key]
         yV = d[val_key]
         xU, yU = map(list, zip(*sorted(zip(xV, yV), key=lambda x: x[0])))
-        print(' %s.%s:%d' % (parent_key, sort_key, len(xU)))
+        print('%s.%s:%d' % (parent_key, sort_key, len(xU)))
         d[sort_key]=xU
         d[val_key]=yU
         return
     
     for k, v in d.items():
         full_key = '%s.%s' % (parent_key, k) if parent_key else k
-        print(full_key)
+        #print(full_key)
         if isinstance(v, dict):
             sort_end_lists(v, full_key, sort_key, val_key)
 
