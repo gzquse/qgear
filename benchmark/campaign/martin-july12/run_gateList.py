@@ -27,12 +27,11 @@ import cudaq
 import argparse
 def get_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-v","--verbosity",type=int,choices=
-                        [0, 1, 2, 3],  help="increase output verbosity", default=1, dest='verb')
+    parser.add_argument("-v","--verbosity",type=int,choices=[0, 1, 2, 3],  help="increase output verbosity", default=1, dest='verb')
 
     parser.add_argument("-e","--expName",  default='mac10q',help='[.gate_list.h5]  defines list of circuits to run')
     parser.add_argument('-n','--numShots',type=int, default=10240, help="(optional) shots per circuit")
-    parser.add_argument("-b", "--backend", default="nvidia", choices=['qiskit-cpu','tensornet','nvidia-mgpu','nvidia-mqpu','nvidia','qpp-cpu','qiskit-laptop'], help="cudaQ target settings")
+    parser.add_argument("-b", "--backend", default="nvidia", choices=['qiskit-cpu','tensornet','nvidia-mgpu','nvidia-mqpu','nvidia','qpp-cpu'], help="cudaQ target settings")
 
     # IO paths
     parser.add_argument("--basePath",default=None,help="head path for set of experiments, or 'env'")
@@ -51,6 +50,8 @@ def get_parser():
     if args.backend=='qiskit-cpu':  # use srun ranks
         args.myRank  = int(os.environ['SLURM_PROCID'])
         args.numRank = int(os.environ['SLURM_NTASKS'])
+        args.cores = int(os.environ['SLURM_CPUS_PER_TASK'])
+        args.tasks_per_node = int(os.environ['SLURM_NTASKS_PER_NODE'])
     if args.backend=='nvidia-mgpu':  # use `mpich -np 4` executed inside podman
         cudaq.mpi.initialize()
         args.myRank = cudaq.mpi.rank()
@@ -135,7 +136,9 @@ if __name__ == "__main__":
         shardSize=input_shard(gateD,args)
         MD['num_circ']=shardSize
         MD['my_rank']=args.myRank
-        MD['num_rank']=args.numRank        
+        MD['num_rank']=args.numRank
+        MD['cores']=args.cores
+        MD['tasks_per_node']=args.tasks_per_node      
         
     nCirc=MD['num_circ']    
     if args.verb>=2:
@@ -144,15 +147,8 @@ if __name__ == "__main__":
     if 'qiskit' in target:
         if args.verb: print('M: will run %d circ on CPUs numRank=%d ...'%(nCirc,args.numRank))
         T0=time()
-        qcL=qiskit_circ_gateList(gateD,MD,barrier=True)
+        qcL=qiskit_circ_gateList(gateD,MD)
         if args.verb: print('\nM:  gen_circ  elaT= %.1f sec '%(time()-T0))
-        # Draw the circuit
-        if args.verb>1:  print(qcL[0].draw())
-        if 0: # Draw the circuit using the latex source
-            from qiskit.visualization import circuit_drawer
-            latex_source = circuit_drawer(qcL[0], output='latex_source',cregbundle=True)
-            print(latex_source); stop12
-
         #....  excution using backRun(.) .....
         backend = AerSimulator()
     else:
@@ -183,11 +179,13 @@ if __name__ == "__main__":
     MD['num_meas_strings']=[ len(x) for x in resL]
     MD['target2']=target2
     MD['short_name']+='_'+target2
+    # add postfix for cpu tasks
+    if target2 == 'par-cpu':
+        MD['short_name']+='_c'+str(MD['cores'])+'_tp'+str(MD['tasks_per_node'])
     MD.pop('gate_map')
     MD['cpu_1min_load']=load1
     MD['num_shots']=shots
     if args.numRank>1: MD['short_name']+='_r%d.%d'%(args.myRank,args.numRank)
-
     if args.myRank==0:  # dump some bitstrings
         res0=resL[0]
         for i,bstr in enumerate(res0):

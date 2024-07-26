@@ -1,7 +1,7 @@
 #!/bin/bash 
 #SBATCH -C gpu -N 1 -A nintern
-#SBATCH --time=28:00 -q debug
-# SBATCH --time 2:58:00  -q regular 
+# SBATCH --time=28:00 -q debug
+#SBATCH --time 23:58:00  -q regular 
 #SBATCH --output=out/%j.out
 #SBATCH --licenses=scratch
 
@@ -17,9 +17,6 @@ shots=${3:-10240}
 case "$trg" in
     par-cpu)
         backend='qiskit-cpu'
-        ;;
-    gpu)
-        backend="nvidia"  # single gpu backend
         ;;
     par-gpu)
         backend="nvidia-mqpu"  # all 4 GPUs in parallel
@@ -52,7 +49,7 @@ if [ "$USER" == "balewski" ]; then
     DATA_SRC=${CFSH}/2024_martin_gradient
 elif [ "$USER" == "gzquse" ]; then
     CFSH=/pscratch/sd/g/gzquse
-    BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_July14
+    BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_QEra_July14
     DATA_SRC=${CFSH}/GRADIENT_IMAGE
 else
     echo "Unknown user: $USER"
@@ -69,7 +66,7 @@ cd $wrkPath
 
 # Define the command to be executed by Podman
 CMD="python3 -u ./run_gateList.py --expName $expN --backend $backend --numShots $shots --basePath /myData"
-# [ "$trg" == "adj-gpu" ] && CMD="mpiexec -np 4 $CMD"
+[ "$trg" == "adj-gpu" ] && CMD="mpiexec -np 4 $CMD"
 
 CMD1="python3 -u ./simple_ghzV2_cudaq.py --numShots 10 --cudaqTarget nvidia-mqpu --numRepeat 50 --numQubits 28"
 CMD2="mpirun -np 4 python3 ./simple_ghzV2_cudaq.py --numShots 10 --cudaqTarget nvidia-mgpu --numRepeat 50 --numQubits 30"

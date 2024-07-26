@@ -242,9 +242,8 @@ def measL_int2bits(probsIL,nclbit): # converts int(mbits) back to bitstring
     return probsBL
 
 #...!...!....................
-def qiskit_circ_gateList(gateD,md):
+def qiskit_circ_gateList(gateD,md,barrier=True):
     from qiskit import QuantumCircuit
-    from qiskit.circuit import ParameterVector
 
     nCirc=gateD['circ_type'].shape[0]
     #print('md:',md)
@@ -259,9 +258,10 @@ def qiskit_circ_gateList(gateD,md):
         qc = QuantumCircuit(nq)        
         gate_type=gateD['gate_type'][j] # nGate* [gate_type, qubit1, qubit2]
         angles=gateD['gate_param'][j]
+        angles=[float('%.1f'%x )for x in angles] # keep only leading digits
   
         for i in range(nGate):
-            if i%3==0: qc.barrier()
+            if i%3==0 and barrier: qc.barrier()
             gate=m[gate_type[i,0]]
             q0=gate_type[i,1]
             if gate =='ry' :
