@@ -1,7 +1,7 @@
 #!/bin/bash 
 #SBATCH -C gpu -N 1 -A nintern
-# SBATCH --time=28:00 -q debug
-#SBATCH --time 2:58:00  -q regular 
+#SBATCH --time=28:00 -q debug
+# SBATCH --time 2:58:00  -q regular 
 #SBATCH --output=out/%j.out
 #SBATCH --licenses=scratch
 
@@ -69,7 +69,7 @@ cd $wrkPath
 
 # Define the command to be executed by Podman
 CMD="python3 -u ./run_gateList.py --expName $expN --backend $backend --numShots $shots --basePath /myData"
-[ "$trg" == "adj-gpu" ] && CMD="mpiexec -np 4 $CMD"
+# [ "$trg" == "adj-gpu" ] && CMD="mpiexec -np 4 $CMD"
 
 CMD1="python3 -u ./simple_ghzV2_cudaq.py --numShots 10 --cudaqTarget nvidia-mqpu --numRepeat 50 --numQubits 28"
 CMD2="mpirun -np 4 python3 ./simple_ghzV2_cudaq.py --numShots 10 --cudaqTarget nvidia-mgpu --numRepeat 50 --numQubits 30"

@@ -8,7 +8,7 @@ k=0
 c=64  # cores for CPU
 n=4   # ntasks per node
 #targets=("par-cpu" "par-gpu" "adj-gpu")
-targets=("par-gpu")
+targets=("adj-gpu")
 # Function to submit a job
 submit_job() {
     local expN=$1
@@ -18,11 +18,11 @@ submit_job() {
     if [ "$trg" == "par-cpu" ]; then
         sbatch -C cpu --exclusive --cpus-per-task=$c --ntasks-per-node=$n -N1 -A $ACCT $SCMD
     else
-        sbatch -C gpu --gpus-per-task=4 --ntasks=1 -N1 -A $ACCT $SCMD # currently only one node
+        sbatch -C gpu --gpus-per-task=1 --ntasks=1 -N1 -A $ACCT $SCMD # currently only one node
     fi
 }
 
-for nq in {28..34}; do
+for nq in 32; do
     for cx in "${nCX[@]}"; do
         expN=${N}${nq}q${cx}cx
         for trg in "${targets[@]}"; do

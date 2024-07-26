@@ -61,6 +61,8 @@ class Plotter(PlotterBackbone):
             for tag3 in dataD[tag2]:
                 if '20000CX' in tag3:  # Skip lines with 20,000 CX
                     continue
+                # if tag2 == 'nvidia-mqpu':
+                #     continue
                 print('plot %s %s %s'%(tag1,tag2,tag3))            
                 dataE=dataD[tag2][tag3]
                 nqV=dataE['nq']
@@ -110,12 +112,14 @@ class Plotter(PlotterBackbone):
                     ax.plot(nqV_shifted, runtV_shifted, marker=marker_style, linestyle='-', markerfacecolor=isFilled, color=dCol,label=dLab,markersize=9)     
 
                 else:
-                    ax.plot(nqV,runtV,marker=marker_style, markerfacecolor='none', linestyle='-', color=dCol, label=dLab)
+                    ax.plot(nqV,runtV,marker=marker_style, linestyle='-', markerfacecolor=isFilled, color=dCol, label=dLab, markersize=9)
         tit='Compute state-vector tag1=%s'%tag1
         # Place the title above the legend
         ax.set(xlabel='num qubits',ylabel='compute end-state (minutes)')
         ax.set_title(tit, pad=50)  # Adjust the pad value as needed
         ax.set_yscale('log')
+        ax.set_ylim(1e-3, 1e+3)
+        ax.set_xlim(27.5,34.5) 
         ax.grid()
         ax.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
                 ncol=3, mode="expand", borderaxespad=0., )
@@ -233,7 +237,7 @@ if __name__ == '__main__':
 
     #corePath='/dataVault2024/dataCudaQ_'  # in podman
     corePath='/pscratch/sd/g/gzquse/quantDataVault2024/dataCudaQ_'  # bare metal
-    pathL=[ 'July14']
+    pathL=[ 'July12']
     fileL=[]
     vetoL=['r1.4','r2.4','r3.4', ]
     for path in pathL:
