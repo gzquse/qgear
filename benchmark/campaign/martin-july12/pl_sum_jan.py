@@ -11,12 +11,10 @@ import numpy as np
 import  time
 import sys,os
 from pprint import pprint
-
 from toolbox.PlotterBackbone import PlotterBackbone
 from toolbox.Util_IOfunc import  read_yaml
 import matplotlib.ticker as ticker
 from matplotlib.ticker import MaxNLocator, FormatStrFormatter
-
 
 import argparse
 
@@ -25,7 +23,7 @@ def get_parser():
     parser.add_argument("-v","--verbosity",type=int,choices=[0, 1, 2],help="increase output verbosity", default=1, dest='verb')
     parser.add_argument( "-Y","--noXterm", dest='noXterm',  action='store_false', default=True, help="enables X-term for interactive mode")
 
-    parser.add_argument("-p", "--showPlots",  default='b', nargs='+',help="abc-string listing shown plots")
+    parser.add_argument("-p", "--showPlots",  default='abc', nargs='+',help="abc-string listing shown plots")
     parser.add_argument("-s", "--shift", type=bool, default=True, help="whether shift the dots")
 
     parser.add_argument("--outPath",default='out',help="all outputs from experiment")
@@ -239,6 +237,7 @@ if __name__ == '__main__':
 
     #corePath='/dataVault2024/dataCudaQ_'  # in podman
     corePath='/pscratch/sd/g/gzquse/quantDataVault2024/dataCudaQ_'  # bare metal Martin
+    corePath='/global/homes/b/balewski/prjs/quantDataVault2024/dataCudaQ_Martin_' # Jan, CFS
     pathL=[ 'July12']
     fileL=[]
     vetoL=['r1.4','r2.4','r3.4', ]

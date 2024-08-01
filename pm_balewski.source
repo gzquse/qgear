@@ -18,7 +18,7 @@ CFSH=/global/cfs/cdirs/mpccc/balewski/
 echo launch image $IMG
 echo you are launching Podman image ...  remeber to exit
 
-BASE_DIR=2024_martin_gradient-dev2  # here git has home
+BASE_DIR=2024_martin_gradient  # here git has home
 WORK_DIR=$BASE_DIR/benchmark
 DATA_VAULT=${CFSH}/quantDataVault2024
 DATA_DIR=/dataCudaQ_tmp
