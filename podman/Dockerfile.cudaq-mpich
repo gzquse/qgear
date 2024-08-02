@@ -62,3 +62,5 @@ RUN python3 -m pip uninstall -y mpi4py && MPICC=$(which mpicc) python3 -m pip in
 
 # Rebuild CUDA-Q MPI plugin
 RUN rm $CUDA_QUANTUM_PATH/lib/plugins/libcudaq-comm-plugin.so && bash $CUDA_QUANTUM_PATH/distributed_interfaces/activate_custom_mpi.sh
+
+ENTRYPOINT [ "/bin/bash", "-l", "-c" ]
