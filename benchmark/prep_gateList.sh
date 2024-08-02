@@ -7,7 +7,7 @@ source ./config.sh  # Source the common configuration script
 k=0
 
 # Inception!
-basePath=/dataVault2024/dataCudaQ_QEra_July14
+basePath=/dataVault2024/dataCudaQ_Aug1
 
 # Ensure the basePath exists
 if [ ! -d "$basePath" ]; then

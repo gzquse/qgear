@@ -54,8 +54,10 @@ class Plotter(PlotterBackbone):
         figId=self.smart_append(figId)
         fig=self.plt.figure(figId,facecolor='white', figsize=(5.5,7))        
         ax = self.plt.subplot(nrow,ncol,1)
-
-        dataD=bigD[tag1]
+        if 'cpu' not in tag1:
+            dataD=bigD[tag1.split('-')[1]]
+        else:
+            dataD=bigD[tag1]
 
         for tag2 in dataD:
             for tag3 in dataD[tag2]:
@@ -69,6 +71,8 @@ class Plotter(PlotterBackbone):
                 runtV=dataE['runt']/60.0 # convert time to min
                 date=dataE['date']
                 dLab='%s'%(tag3)   
+                # default color
+                dCol='k'
                 # Extract cores and tasks_per_node from tag3
                 if tag1 == 'cpu':
                     cores = tag3.split('_')[1][1:]
@@ -82,16 +86,18 @@ class Plotter(PlotterBackbone):
                     else:
                         marker_style = 'o'  # Default to circle
                         dCol='C3'
-                elif tag1 == 'gpu':
-                    print(tag2)
+                elif tag1 == 'par-gpu':
                     if tag2 == 'nvidia':
                         dCol='C1'  
-                    elif tag2 == 'nvidia-mgpu':
-                        marker_style = '^'  
-                        dCol='C2'
-                    else:
+                    elif tag2 == 'nvidia-mqpu':
                         marker_style = 'o'  
                         dCol='C3'
+                    else: continue 
+                elif tag1 == 'adj-gpu':
+                    if tag2 == 'nvidia-mgpu':
+                        marker_style = '^'  
+                        dCol='C2'
+                    else: continue
                 # Set marker style based on cores and tasks_per_node
                 if '100CX' in tag3:
                     marker_style = 's'
@@ -260,7 +266,8 @@ if __name__ == '__main__':
     if 'a' in args.showPlots:
         plot.compute_time(dataAll,'cpu', figId=1, shift=args.shift)
     if 'b' in args.showPlots:
-        plot.compute_time(dataAll,'gpu',figId=2, shift=args.shift)
-  
+        plot.compute_time(dataAll,'par-gpu',figId=2, shift=args.shift)
+    if 'c' in args.showPlots:
+        plot.compute_time(dataAll,'adj-gpu',figId=3, shift=args.shift)
     plot.display_all(png=1)
     

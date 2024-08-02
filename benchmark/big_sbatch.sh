@@ -10,10 +10,13 @@ n=4   # ntasks per node
 
 #targets=("par-cpu" "par-gpu" "adj-gpu")
 targets=("adj-gpu")
+
 # Function to submit a job
 submit_job() {
     local expN=$1
     local trg=$2
+    local s=$3
+    local qft=$4
     local SCMD="./batchPodman.slr $expN $trg $s $qft"
 
     if [ "$trg" == "par-cpu" ]; then
@@ -26,10 +29,16 @@ submit_job() {
 for nq in 28; do
     for cx in "${nCX[@]}"; do
         for s in "${shots[@]}"; do
-            expN=${N}${nq}q${cx}cx$
+            # Determine expN name based on the value of qft
+            if [ "$qft" -eq 1 ]; then
+                expN="${N}${nq}q_qft${qft}"
+            else
+                expN="${N}${nq}q${cx}cx"
+            fi
+
             for trg in "${targets[@]}"; do
                 k=$((k + 1))
-                echo "$k  expN:$expN trg:$trg shots: $s"
+                echo "$k  expN:$expN trg:$trg shots: $s qft: $qft"
                 submit_job "$expN" "$trg" "$s" "$qft"
             done
         done

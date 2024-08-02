@@ -22,6 +22,7 @@ from pprint import pprint
 from toolbox.Util_Qiskit import qiskit_circ_gateList
 from qiskit_aer import AerSimulator
 from toolbox.Util_CudaQ import circ_kernel, qft_kernel
+import random
 import cudaq
 
 import argparse
@@ -88,7 +89,7 @@ def run_cudaq(shots,num_qpus,qft=0,nc=1):
         gate_param=list(map(float,gateD['gate_param'][i]))
         assert num_gate<=len(gate_param)
         prOn= num_qubit<6 and i==0 or args.verb>1
-        input_state = [0 for i in range(num_qubit)]
+        input_state = [random.choice([0, 1]) for i in range(num_qubit)]
 
         if prOn and not qft:   print(cudaq.draw(circ_kernel, num_qubit, num_gate, gate_type, gate_param))    
         if target == "nvidia-mgpu"  or  target == "nvidia":  
@@ -193,6 +194,8 @@ if __name__ == "__main__":
         MD['short_name']+='_c'+str(MD['cores'])+'_tp'+str(MD['tasks_per_node'])
     elif target2 == 'adj-gpu':
         MD['short_name']+='_s'+str(MD['num_shots'])
+    if args.qft:
+        MD['short_name']+='_qft'+str(MD['qft'])
     MD.pop('gate_map')
     MD['cpu_1min_load']=load1
     if args.numRank>1: MD['short_name']+='_r%d.%d'%(args.myRank,args.numRank)
