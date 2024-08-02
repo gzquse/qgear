@@ -13,8 +13,8 @@ def get_parser():
 
     parser.add_argument('-q','--numQubits', default=28, type=int, help='pair: nq_addr nq_data, space separated ')
 
-    parser.add_argument('-n','--numShots', default=10, type=int, help='num of shots')
-    parser.add_argument('-r','--numRepeat', default=50, type=int, help='num of CX repeats')
+    parser.add_argument('-n','--numShots', default=50000000, type=int, help='num of shots')
+    parser.add_argument('-r','--numRepeat', default=10, type=int, help='num of CX repeats')
     parser.add_argument('-t','--cudaqTarget',default="nvidia-mgpu", choices=['qpp-cpu','nvidia','nvidia-mgpu','nvidia-mqpu'], help="CudaQ target backend")
 
     args = parser.parse_args()

@@ -12,7 +12,7 @@ set -e  # bash exits if any statement returns a non-true return value
 expN=${1:-mar28q100cx}
 trg=${2:-adj-gpu}
 shots=${3:-10240}
-
+qft=${4:-0}
 # Determine backend based on target
 case "$trg" in
     par-cpu)
@@ -52,7 +52,7 @@ if [ "$USER" == "balewski" ]; then
     DATA_SRC=${CFSH}/2024_martin_gradient
 elif [ "$USER" == "gzquse" ]; then
     CFSH=/pscratch/sd/g/gzquse
-    BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_July14
+    BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_Aug1
     DATA_SRC=${CFSH}/GRADIENT_IMAGE
 else
     echo "Unknown user: $USER"
@@ -68,8 +68,9 @@ cp -rp ../toolbox *py wrapPodman.sh batchPodman.slr $wrkPath/
 cd $wrkPath
 
 # Define the command to be executed by Podman
-CMD="python3 -u ./run_gateList.py --expName $expN --backend $backend --numShots $shots --basePath /myData"
-# [ "$trg" == "adj-gpu" ] && CMD="mpiexec -np 4 $CMD"
+CMD="python3 -u ./run_gateList.py --expName $expN --backend $backend --numShots $shots --basePath /myData --qft $qft"
+# disable it if want to test with only one gpu
+[ "$trg" == "adj-gpu" ] && CMD="mpiexec -np 4 $CMD"
 
 CMD1="python3 -u ./simple_ghzV2_cudaq.py --numShots 10 --cudaqTarget nvidia-mqpu --numRepeat 50 --numQubits 28"
 CMD2="mpirun -np 4 python3 ./simple_ghzV2_cudaq.py --numShots 10 --cudaqTarget nvidia-mgpu --numRepeat 50 --numQubits 30"

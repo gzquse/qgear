@@ -79,7 +79,7 @@ def random_qubit_pairs(nq, k):
     pairs = all_pairs[selected_indices]
     
     return pairs
-    
+
 #...!...!....................
 def generate_random_gateList(args):
     nCirc=args.numCirc

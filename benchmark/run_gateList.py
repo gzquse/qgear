@@ -21,7 +21,7 @@ from time import time, sleep
 from pprint import pprint
 from toolbox.Util_Qiskit import qiskit_circ_gateList
 from qiskit_aer import AerSimulator
-from toolbox.Util_CudaQ import circ_kernel
+from toolbox.Util_CudaQ import circ_kernel, qft_kernel
 import cudaq
 
 import argparse
@@ -32,6 +32,7 @@ def get_parser():
     parser.add_argument("-e","--expName",  default='mac10q',help='[.gate_list.h5]  defines list of circuits to run')
     parser.add_argument('-n','--numShots',type=int, default=10240, help="(optional) shots per circuit")
     parser.add_argument("-b", "--backend", default="nvidia", choices=['qiskit-cpu','tensornet','nvidia-mgpu','nvidia-mqpu','nvidia','qpp-cpu'], help="cudaQ target settings")
+    parser.add_argument('-q','--qft',type=int, default=0, help="(optional) enable qft circuit")
 
     # IO paths
     parser.add_argument("--basePath",default=None,help="head path for set of experiments, or 'env'")
@@ -76,7 +77,7 @@ def run_qiskit_aer(shots):
     return probsBL
 
 #...!...!....................
-def run_cudaq(shots,num_qpus,nc=1):
+def run_cudaq(shots,num_qpus,qft=0,nc=1):
     # converter  and run circuits one by one
     resL=[0]* nc # prime the list
     for i in range(nc):
@@ -87,23 +88,29 @@ def run_cudaq(shots,num_qpus,nc=1):
         gate_param=list(map(float,gateD['gate_param'][i]))
         assert num_gate<=len(gate_param)
         prOn= num_qubit<6 and i==0 or args.verb>1
-        
-        if prOn:   print(cudaq.draw(circ_kernel, num_qubit, num_gate, gate_type, gate_param))    
+        input_state = [0 for i in range(num_qubit)]
+
+        if prOn and not qft:   print(cudaq.draw(circ_kernel, num_qubit, num_gate, gate_type, gate_param))    
         if target == "nvidia-mgpu"  or  target == "nvidia":  
             target2='adj-gpu' if target == "nvidia-mgpu" else 'one-gpu'
-            results = cudaq.sample(circ_kernel,num_qubit, num_gate, gate_type, gate_param, shots_count=shots)
+            if qft:
+                results = cudaq.sample(qft_kernel, input_state, shots_count=shots)
+            else:
+                results = cudaq.sample(circ_kernel,num_qubit, num_gate, gate_type, gate_param, shots_count=shots)
             resL[i]=results  # store  bistsrings
             
         elif target == "nvidia-mqpu":  # 4 GPUs parallel OR 1
             target2='par-gpu'
             gpu_id = i % num_qpus
-            results = cudaq.sample_async(circ_kernel, num_qubit, num_gate, gate_type, gate_param, shots_count=shots, qpu_id=gpu_id)
+            if qft:
+                results = cudaq.samsample_asyncple(qft_kernel, input_state, shots_count=shots, qpu_id=gpu_id)
+            else:
+                results = cudaq.sample_async(circ_kernel, num_qubit, num_gate, gate_type, gate_param, shots_count=shots, qpu_id=gpu_id)
             # Retrieve  results - this is where the time is used???
             resL[i]=results.get() # store bistsrings
                         
     print('RCQ: done',len(resL[0]),target2)
     return resL,target2
-
 
 #...!...!....................
 def input_shard(bigD,args):
@@ -138,7 +145,8 @@ if __name__ == "__main__":
         MD['my_rank']=args.myRank
         MD['num_rank']=args.numRank
         MD['cores']=args.cores
-        MD['tasks_per_node']=args.tasks_per_node      
+        MD['tasks_per_node']=args.tasks_per_node 
+        MD['qft']=args.qft     
         
     nCirc=MD['num_circ']    
     if args.verb>=2:
@@ -167,7 +175,7 @@ if __name__ == "__main__":
         MD['cpu_info']=get_cpu_info(verb=0)
         target2='par-cpu'
     else:
-        resL,target2=run_cudaq(shots,num_qpus)
+        resL,target2=run_cudaq(shots,num_qpus,args.qft)
         MD['num_qpus']=num_qpus
         MD['gpu_info']=get_gpu_info(verb=0)
         
@@ -179,12 +187,14 @@ if __name__ == "__main__":
     MD['num_meas_strings']=[ len(x) for x in resL]
     MD['target2']=target2
     MD['short_name']+='_'+target2
+    MD['num_shots']=shots
     # add postfix for cpu tasks
     if target2 == 'par-cpu':
         MD['short_name']+='_c'+str(MD['cores'])+'_tp'+str(MD['tasks_per_node'])
+    elif target2 == 'adj-gpu':
+        MD['short_name']+='_s'+str(MD['num_shots'])
     MD.pop('gate_map')
     MD['cpu_1min_load']=load1
-    MD['num_shots']=shots
     if args.numRank>1: MD['short_name']+='_r%d.%d'%(args.myRank,args.numRank)
     if args.myRank==0:  # dump some bitstrings
         res0=resL[0]

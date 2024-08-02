@@ -1,5 +1,6 @@
 import cudaq
 import numpy as np
+from typing import List
 
 # Function to reverse the keys
 def reverse_key(key):
@@ -112,7 +113,43 @@ def circ_kernel(num_qubit: int, num_gate: int, gate_type: list[int], angles: lis
     
     mz(qvector)
 
+@cudaq.kernel
+def qft(qubits: cudaq.qview):
+    '''Args:
+    qubits (cudaq.qview): specifies the quantum register to which apply the QFT.'''
+    qubit_count = len(qubits)
+    # Apply Hadamard gates and controlled rotation gates.
+    for i in range(qubit_count):
+        h(qubits[i])
+        for j in range(i + 1, qubit_count):
+            angle = (2 * np.pi) / (2**(j - i + 1))
+            cr1(angle, [qubits[j]], qubits[i])
 
+@cudaq.kernel
+def inverse_qft(qubits: cudaq.qview):
+    '''Args:
+    qubits (cudaq.qview): specifies the quantum register to which apply the inverse QFT.'''
+    cudaq.adjoint(qft, qubits)
+
+@cudaq.kernel
+def qft_kernel(input_state: List[int]):
+    '''Args:
+    input_state (list[int]): specifies the input state to be transformed with QFT and the inverse QFT.  '''
+    qubit_count = len(input_state)
+    # Initialize qubits.
+    qubits = cudaq.qvector(qubit_count)
+
+    # Initialize the quantum circuit to the initial state.
+    for i in range(qubit_count):
+        if input_state[i] == 1:
+            x(qubits[i])
+
+    # Apply the quantum Fourier Transform
+    qft(qubits)
+
+    # Apply the inverse quantum Fourier Transform
+    #inverse_qft(qubits)
+    
 #...!...!....................
 def qiskit_to_gateList(qcL):
     nCirc=len(qcL)
