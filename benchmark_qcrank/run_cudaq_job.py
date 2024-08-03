@@ -1,34 +1,29 @@
 #!/usr/bin/env python3
-__author__ = "Jan Balewski"
+__author__ = "Jan Balewski + Martin"
 __email__ = "janstar1122@gmail.com"
 
 '''
 QCrank
 
-Use Qiskit ideal  simulator
-use all-to-all connectivity.
+Use CudaQ  GPU  simulator
+Input is serialized gate list from Util_CudaQ: qiskit_to_gateList()
+
 Run simulations w/o submit/retrieve of the job
 Simulations run locally.
 Records meta-data containing  job_id
 HD5 arrays contain input images
-Dependence: qpixl, qiskit
+Dependence: cudaq
 '''
 
-import time
+from time import time
 import sys,os
 import numpy as np
 from pprint import pprint
-
-from qiskit_aer import AerSimulator
-from qiskit.visualization import circuit_drawer
-from qiskit import  transpile
-from toolbox.Util_ibm import harvest_ibmq_backRun_submitMeta, harvest_backRun_results, harvest_circ_transpMeta
 from toolbox.Util_H5io4 import  write4_data_hdf5, read4_data_hdf5
-from toolbox.Util_Qiskit import  circ_depth_aziz
 
+import cudaq
+from toolbox.Util_CudaQ import circ_kernel
 
-sys.path.append(os.path.abspath("/daan_qcrank/py"))
-from qpixl import qcrank
 import argparse
 
 #...!...!..................
@@ -38,16 +33,14 @@ def get_parser(backName="ibmq_qasm_simulator",provName="local sim",doMathOp=Fals
     parser.add_argument("--basePath",default=None,help="head path for set of experiments, or 'env'")
     parser.add_argument("--inpPath",default='out/',help="input packed image")
     parser.add_argument("--outPath",default='out/',help="raw outputs from experiment")
-    parser.add_argument("--cannedExp",  default='canImg_b2_32_32',help='packed image name')
-    parser.add_argument("--expName",  default=None,help='(optional) replaces IBMQ jobID assigned during submission by users choice')
+    parser.add_argument("--circName",  default=None,help='gate-list file name')
     
     # .... job running
     parser.add_argument('-n','--numShotPerAddr',type=int,default=400, help="shots per address of QCrank, or as-is if negative")
     parser.add_argument( "-E","--executeCircuit", action='store_true', default=False, help="may take long time, test before use ")
-    parser.add_argument( "-G","--exportGateList", action='store_true', default=False, help="exprort gate list for CudaQ executiomn ")
 
     args = parser.parse_args()
-    args.backend='aer'
+    args.backend='device-mgpu'  # not tested
     # make arguments  more flexible
     if args.basePath=='env': args.basePath= os.environ['Cudaq_dataVault']
     if args.basePath!=None:
@@ -92,63 +85,31 @@ def make_qcrank(md, barrier=True):
 #=================================
 if __name__ == "__main__":
     args=get_parser(backName='aer')
-    
-    expD,expMD=canned_qcrank_inp(args)
-        
-    pprint(expMD)
-    numShots=expMD['submit']['num_shots']
-    
-    #... adjust parser settings
-    #1args.outPath=os.path.join(args.basePath,'meas')    
-    #assert os.path.exists(args.outPath)
-    
-    # ------  circuit generation -------
-    qcrankObj=make_qcrank( expMD)
-    qcP=qcrankObj.circuit
-    nqTot=qcP.num_qubits
-    
-    print('M: circuit has %d qubits'%(qcP.num_qubits))
-    circ_depth_aziz(qcP,text='circ_orig')
-    
-    if args.verb>0 and qcP.num_qubits<7 or args.verb>1 :
-        print('M:.... PARAMETRIZED IDEAL CIRCUIT ..............')        
-        print(circuit_drawer(qcP, output='text',cregbundle=True))
 
-    backend = AerSimulator()
+    inpF=args.circName+'.gate_list.h5'
+    expD,expMD=read4_data_hdf5(os.path.join(args.outPath,inpF))
 
-    # transpilation i snot needed fro Aer, but we do it here for convenience for CudaQ
-    qcT=transpile(qcP,backend, basis_gates=['cx','ry','h']) 
-             
-    if  qcP.num_qubits<6:
-        print('M:.... PARAMETRIZED TRANSPILED CIRCUIT .............. for',backend)
-        print(qcT.draw(output='text',idle_wires=False))  # skip ancilla
 
-    harvest_circ_transpMeta(qcT,expMD,args.backend)
-     
-    # -------- bind the data to parametrized circuit  -------
-    f_data=expD['inp_fdata']
-    qcrankObj.bind_data(f_data, max_val=expMD['payload']['qcrank_max_fval'])
+    circ_typeV=expD.pop('circ_type')
+    gate_typeV=expD.pop('gate_type')
+    gate_paramV=expD.pop('gate_param')
     
-    # generate the instantiated circuits
-    qcEL = qcrankObj.instantiate_circuits()
-    nCirc=len(qcEL)
-    print('M: execution-ready %d circuits on %d qubits on %s'%(nCirc,nqTot,backend.name))                        
+    nCirc=circ_typeV.shape[0]  # make it generic, despite only 1 circuit is expected
 
-    if args.exportGateList:
-        from  toolbox.Util_CudaQ import qiskit_to_gateList
-        gateD,mapD=qiskit_to_gateList(qcEL)        
-        expD.update(gateD)
-        expMD.update(mapD)
-        outF=os.path.join(args.outPath,expMD['short_name']+'.gate_list.h5')
-        write4_data_hdf5(expD,outF,expMD)
-        print('   ./run_cudaq_job.py --circName   %s  -n 500 -E   \n'%(expMD['short_name']))
-        exit(0)
- 
-    if not args.executeCircuit:
-        pprint(expMD)
-        print('NO execution of circuit, use -E to execute the job')
-        exit(0)
+    T0=time()
+    for i in range(nCirc):
+        print('\nM:run circ ',i)
 
+        # Convert values to Python int and assign to a, b
+        num_qubit, num_gate = map(int,circ_typeV[i] )
+        # Convert to list of integers
+        gate_type=list(map(int,gate_typeV[i].flatten()))
+        gate_param=list(map(float,gate_paramV[i]))
+        assert num_gate<=len(gate_param)
+        prOn= num_qubit<6 and i==0 or args.verb>1
+        if prOn:   print(cudaq.draw(circ_kernel, num_qubit, num_gate, gate_type, gate_param))
+
+    not_tested_on_GPU
     # ----- submission ----------
     T0=time.time()
     job =  backend.run(qcEL,shots=numShots)

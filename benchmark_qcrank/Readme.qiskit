@@ -1,4 +1,4 @@
-Workflow for image writeing and reading it back using QCrank encoding
+Workflow for image writeing and reading it back using QCrank encoding using Qiskit
 
 INPUT garescale images of various sizes are stored here
 ../input_gray_images/
@@ -48,3 +48,5 @@ Post processing of raw data and plotting is done by
 ./postproc_exp.py --expName   ibm_387aa8 --showPlots b c
 
 OUTPUT plots: out/ibm_387aa8_f2.png , out/ibm_387aa8_f3.png  
+
+

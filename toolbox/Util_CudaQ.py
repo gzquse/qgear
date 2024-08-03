@@ -39,7 +39,7 @@ def counts_cudaq_to_qiskit(resL): # input cudaq results
     return probsBL
 
 #...!...!....................
-def qiskit_to_cudaq(qc):
+def qiskit_to_cudaq(qc):  # Object method, circuit will be very slow
     qregs = qc.qregs[0]
     nq = qc.num_qubits
 
@@ -76,6 +76,7 @@ def qiskit_to_cudaq(qc):
     
     return kernel
 
+#...!...!....................
 def cudaq_run_parallel_qpu(qKerL, shots, qpu_count):
     count_futures = {kernel: [] for kernel in qKerL} 
     # Distribute kernels across available GPUs
@@ -113,6 +114,7 @@ def circ_kernel(num_qubit: int, num_gate: int, gate_type: list[int], angles: lis
     
     mz(qvector)
 
+#...!...!....................
 @cudaq.kernel
 def qft(qubits: cudaq.qview):
     '''Args:
@@ -125,12 +127,14 @@ def qft(qubits: cudaq.qview):
             angle = (2 * np.pi) / (2**(j - i + 1))
             cr1(angle, [qubits[j]], qubits[i])
 
+#...!...!....................
 @cudaq.kernel
 def inverse_qft(qubits: cudaq.qview):
     '''Args:
     qubits (cudaq.qview): specifies the quantum register to which apply the inverse QFT.'''
     cudaq.adjoint(qft, qubits)
 
+#...!...!....................
 @cudaq.kernel
 def qft_kernel(input_state: List[int]):
     '''Args:
@@ -156,7 +160,7 @@ def qiskit_to_gateList(qcL):
     qc=qcL[0]
     
     nGate=len(qc)  # this is overestimate, includes barriers & measurements
-    print('nGate',nGate)
+    print('qiskit_to_gateList: nGate',nGate)
 
     # pre-allocate memory
     circ_type=np.zeros(shape=(nCirc,2),dtype=np.int32) # [num_qubit, num_gate]

@@ -77,40 +77,6 @@ def plot_histogram(ax, res_data):
     ax.xaxis.set_major_locator(ticker.MaxNLocator(4))
 
 
-    
-#...!...!....................
-def label_EscherHands_obs(baseAB,W): # isp=sum or product , bas=z,y,x
-    for isp in range(2):
-        if baseAB[isp]!=None:
-            base=baseAB[isp]
-            break
-    lab='op_undefined'
-    
-    #print('lll',isp,baseAB,W)
-    if base=='z' and isp==0:
-        if W!=0.5: lab='$ %.1f \cdot x_a + %.1f \cdot x_b$'%(W,1-W)
-        else: lab= '$(x_a+x_b)/2$'
-        
-    if base=='z' and isp==1:
-        lab= '$x_a \cdot x_b$'
-
-    if base=='x' and isp==0:
-        if W!=0.5: lab='$ %.2f \cdot (x_a - x_b)$'%(np.sqrt(W*(1-W)))
-        else: lab= '$(x_a-x_b)/2$'
-
-    if base=='x' and isp==1:
-        if W!=0.5: lab='$ %.2f \cdot \sqrt{ 1- x_b^2}$'%(np.sqrt(W))
-        else: lab= ' $  1/\sqrt{2} \cdot \sqrt{ 1- x_b^2}$'
-
-    if base=='y' and isp==0:
-        lab='$  \sqrt{ 1- x_a^2} \cdot  \sqrt{ 1- x_b^2}$'
-
-    if base=='y' and isp==1:
-        if W!=0.5: lab='$- %.2f \cdot  \sqrt{ 1- x_a^2}$'%(np.sqrt(1-W))
-        else: lab= ' $-  1/\sqrt{2} \cdot \sqrt{ 1- x_a^2}$'
-
-    return 'M_%s  %s '%(base,lab)
-
 #...!...!....................
 def sum_column(md):
     pmd=md['payload']
