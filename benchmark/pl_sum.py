@@ -124,13 +124,16 @@ class Plotter(PlotterBackbone):
         ax.set(xlabel='num qubits',ylabel='compute end-state (minutes)')
         ax.set_title(tit, pad=50)  # Adjust the pad value as needed
         ax.set_yscale('log')
-        ax.set_ylim(1e-3, 1e+3)
+        ax.set_ylim(1e-3, 3.5e+3)
         ax.set_xlim(27.5,34.5) 
         ax.grid()
         ax.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
                 ncol=3, mode="expand", borderaxespad=0., )
 
-
+        ax.axhline(1440, ls='--', lw=2, c='m')
+        ax.text(30, 600, '24h time-out', c='m')
+       
+        
 def extract_date_from_path(file_path):
     # Split the path into components
     path_components = file_path.split('/')
