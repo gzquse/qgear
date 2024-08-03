@@ -1,0 +1,50 @@
+Workflow for image writeing and reading it back using QCrank encoding
+
+INPUT garescale images of various sizes are stored here
+../input_gray_images/
+alphabet_x32_y1.png	 e_coli_bacteria_x192_y128.png	micro_germ_x384_y256.png     xray-hand-4y_x128_y192.png
+alphabet_x64_y16.png	 high-heels_x32_y32.png		xray-finger-8y_x64_y80.png   zebra_x192_y128.png
+cameraman_x256_y384.png  igb_facade_x192_y128.png	xray-foot-12y_x192_y128.png  zebra_x384_y256.png
+
+
+TMP:  for now all inputs and outputs are stored in ./out/ dir for simplicity
+
+step 1) - - - - - - - - - - -
+Configur QCrank input, decide how many address qubits to use.
+Note: nPixel= nqData * 2^ nqAddr
+
+Images are labeled with tags, see prep_cannedImage.py: importImage()
+
+E.g. for 1k pixel image 'high-heels_x32_y32'  encoced with nqAddr=9 and nqData=2 do
+
+benchmark_qcrank$ ./prep_cannedImage.py --tag b2 --nqAddr 9
+
+OUTPUT:    out/canImg_b2_32_32.qcrank_inp.h5
+contains fill config of QCrank in meta data, e.g.
+'payload': {'nq_addr': 9,
+             'nq_fdata': 2,
+             'num_clbit': 11,
+             'num_sample': 1,
+             'qcrank_max_fval': 3.141592653589793,
+             'seq_len': 512},
+
+
+step 2) - - - - - - - - - - -
+Generate QCrank Qiskit circuit and run Aer simulator, using 500 shots per address do:
+
+  ./run_aer_job.py --cannedExp   canImg_c1_64_80   -n 500   -E 
+
+OUTPUT:   out/ibm_387aa8.h5
+
+Note1: the Qiskit circuit  is very long: '2q_gate_count': 1024, 'num_qubit': 11,
+If you want to print QCrank circuit use the 32-pixel image:  '--tag a1  --nqAddr 5'
+
+Note2: the number of shots per circuit is  shots_per_address* 2^nqAddr = 0.26M shots
+For reasonable quality you need 300 shots/address, so for 15k pixel image you will need a billion shots
+
+
+step 3) - - - - - - - - - - -
+Post processing of raw data and plotting is done by
+./postproc_exp.py --expName   ibm_387aa8 --showPlots b c
+
+OUTPUT plots: out/ibm_387aa8_f2.png , out/ibm_387aa8_f3.png  
