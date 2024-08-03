@@ -53,34 +53,6 @@ def get_parser(backName="ibmq_qasm_simulator",provName="local sim",doMathOp=Fals
     return args
 
 
-#...!...!..................
-def canned_qcrank_inp(args):
-    inpF=args.cannedExp+'.qcrank_inp.h5'
-    bigD,md=read4_data_hdf5(os.path.join(args.outPath,inpF))
-
-    sd={}
-    sd['num_shots']=args.numShotPerAddr*md['payload']['seq_len']
-    md['submit']=sd
-
-    return bigD,md
-
-#...!...!....................
-def make_qcrank(md, barrier=True):
-    
-    pmd=md['payload']
-    nq_addr=pmd['nq_addr']
-    nq_data=pmd['nq_fdata'] 
-    
-    #.... create parameterized QCrank  circ
-    qcrankObj = qcrank.ParametrizedQCRANK(
-        nq_addr, nq_data,
-        qcrank.QKAtan2DecoderQCRANK,
-            keep_last_cx=True, barrier=barrier,
-        measure=True, statevec=False,
-        reverse_bits=True  # to match Qiskit littleEndian
-    )
-    return  qcrankObj
-
 #=================================
 #=================================
 if __name__ == "__main__":
