@@ -12,7 +12,7 @@ set -e  # bash exits if any statement returns a non-true return value
 expN=${1:-mar28q100cx}
 trg=${2:-adj-gpu}
 shots=${3:-10240}
-qft=${4:-0}
+qft=${4:-1}
 # Determine backend based on target
 case "$trg" in
     par-cpu)
@@ -85,6 +85,7 @@ CMD3="mpirun -np 4 python3 ./simple_ghzV2_cudaq.py --numShots 10200 --cudaqTarge
 # Execute the main task
 echo "S:..... fire the task ....."
 echo S: CMD=$CMD
+echo srun -l --ntasks=$G ./wrapPodman.sh $IMG "$CMD" $wrkPath $BASE_PATH
 srun -l --ntasks=$G ./wrapPodman.sh $IMG "$CMD" $wrkPath $BASE_PATH
 echo S: done
 date

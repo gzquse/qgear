@@ -24,6 +24,7 @@ from qiskit_aer import AerSimulator
 from toolbox.Util_CudaQ import circ_kernel, qft_kernel
 import random
 import cudaq
+import re
 
 import argparse
 def get_parser():
@@ -78,7 +79,7 @@ def run_qiskit_aer(shots):
     return probsBL
 
 #...!...!....................
-def run_cudaq(shots,num_qpus,qft=0,nc=1):
+def run_cudaq(shots,num_qpus,nc=1):
     # converter  and run circuits one by one
     resL=[0]* nc # prime the list
     for i in range(nc):
@@ -89,30 +90,42 @@ def run_cudaq(shots,num_qpus,qft=0,nc=1):
         gate_param=list(map(float,gateD['gate_param'][i]))
         assert num_gate<=len(gate_param)
         prOn= num_qubit<6 and i==0 or args.verb>1
-        input_state = [random.choice([0, 1]) for i in range(num_qubit)]
 
-        if prOn and not qft:   print(cudaq.draw(circ_kernel, num_qubit, num_gate, gate_type, gate_param))    
+        if prOn:   print(cudaq.draw(circ_kernel, num_qubit, num_gate, gate_type, gate_param))    
         if target == "nvidia-mgpu"  or  target == "nvidia":  
             target2='adj-gpu' if target == "nvidia-mgpu" else 'one-gpu'
-            if qft:
-                results = cudaq.sample(qft_kernel, input_state, shots_count=shots)
-            else:
-                results = cudaq.sample(circ_kernel,num_qubit, num_gate, gate_type, gate_param, shots_count=shots)
+            results = cudaq.sample(circ_kernel,num_qubit, num_gate, gate_type, gate_param, shots_count=shots)
             resL[i]=results  # store  bistsrings
             
         elif target == "nvidia-mqpu":  # 4 GPUs parallel OR 1
             target2='par-gpu'
             gpu_id = i % num_qpus
-            if qft:
-                results = cudaq.samsample_asyncple(qft_kernel, input_state, shots_count=shots, qpu_id=gpu_id)
-            else:
-                results = cudaq.sample_async(circ_kernel, num_qubit, num_gate, gate_type, gate_param, shots_count=shots, qpu_id=gpu_id)
+            results = cudaq.sample_async(circ_kernel, num_qubit, num_gate, gate_type, gate_param, shots_count=shots, qpu_id=gpu_id)
             # Retrieve  results - this is where the time is used???
             resL[i]=results.get() # store bistsrings
                         
     print('RCQ: done',len(resL[0]),target2)
     return resL,target2
 
+def run_cudaqft(shots,num_qpus,num_qubit,nc=1):
+    # converter  and run circuits one by one
+    resL=[0]* nc # prime the list
+    for i in range(nc):
+        input_state = [random.choice([0, 1]) for i in range(num_qubit)]
+        if target == "nvidia-mgpu":  
+            target2='adj-gpu' if target == "nvidia-mgpu" else 'one-gpu'
+            results = cudaq.sample(qft_kernel, input_state, shots_count=shots)
+            resL[i]=results  # store  bistsrings
+            
+        elif target == "nvidia-mqpu":  # 4 GPUs parallel OR 1
+            target2='par-gpu'
+            gpu_id = i % num_qpus
+            results = cudaq.samsample_asyncple(qft_kernel, input_state, shots_count=shots, qpu_id=gpu_id)
+            # Retrieve  results - this is where the time is used???
+            resL[i]=results.get() # store bistsrings
+                        
+    print('RCQ: done',len(resL[0]),target2)
+    return resL,target2
 #...!...!....................
 def input_shard(bigD,args):
     if args.verb>0: print('Shard for rank=%d of %d'%(args.myRank,args.numRank))
@@ -138,18 +151,21 @@ if __name__ == "__main__":
     target = args.backend
          
     inpF=args.expName+'.gate_list.h5'
-    gateD,MD=read4_data_hdf5(os.path.join(args.inpPath,inpF),args.verb)
-    
+    if not args.qft:
+        gateD,MD=read4_data_hdf5(os.path.join(args.inpPath,inpF),args.verb)
+    else:
+        gateD={}
+        MD={'short_name': args.expName}
     if target=='qiskit-cpu':  # use srun ranks
         shardSize=input_shard(gateD,args)
         MD['num_circ']=shardSize
         MD['my_rank']=args.myRank
         MD['num_rank']=args.numRank
         MD['cores']=args.cores
-        MD['tasks_per_node']=args.tasks_per_node 
-        MD['qft']=args.qft     
-        
-    nCirc=MD['num_circ']    
+        MD['tasks_per_node']=args.tasks_per_node    
+    nCirc=1
+    if not args.qft:
+        nCirc=MD['num_circ']    
     if args.verb>=2:
         print('M:pre MD:');  pprint(MD)
        
@@ -164,19 +180,32 @@ if __name__ == "__main__":
         cudaq.set_target(target)
         # only get qpus not gpus
         num_qpus = cudaq.get_target().num_qpus()
+        num_gpus = cudaq.num_available_gpus()
         used_qpus=num_qpus if  target == "nvidia-mqpu" else 1
+        used_qgus=num_gpus if  target == "nvidia-mgpu" else 1
         if args.verb: print('M: use %d of  %d seen qpus'%(used_qpus,num_qpus))
+        if args.verb: print('M: use %d of  %d seen gpus'%(used_qpus,num_gpus))
                 
     shots=args.numShots
-    if args.verb: print('M: job %s started, nCirc=%d  nq=%d  shots/circ=%d  on target=%s ...'%(MD['short_name'],nCirc,MD['num_qubit'],shots,target))
+    # hardcode
+    match = re.search(r'mar(\d+)q', args.expName)
+    if match:
+        MD['num_qubit'] = int(match.group(1))
+    else:
+        print("No match found.")
+    if args.verb: print('M: job %s started, nCirc=%d  nq=%d  shots/circ=%d  on target=%s ...'%(args.expName,nCirc,MD['num_qubit'],shots,target))
         
     T0=time()
     if 'qiskit' in target:
         resL=run_qiskit_aer(shots)
         MD['cpu_info']=get_cpu_info(verb=0)
         target2='par-cpu'
+    elif args.qft:
+        resL,target2=run_cudaqft(shots,num_gpus,MD['num_qubit'])
+        MD['num_gpus']=num_gpus
+        MD['gpu_info']=get_gpu_info(verb=0)
     else:
-        resL,target2=run_cudaq(shots,num_qpus,args.qft)
+        resL,target2=run_cudaq(shots,num_qpus)
         MD['num_qpus']=num_qpus
         MD['gpu_info']=get_gpu_info(verb=0)
         
@@ -194,9 +223,8 @@ if __name__ == "__main__":
         MD['short_name']+='_c'+str(MD['cores'])+'_tp'+str(MD['tasks_per_node'])
     elif target2 == 'adj-gpu':
         MD['short_name']+='_s'+str(MD['num_shots'])
-    if args.qft:
-        MD['short_name']+='_qft'+str(MD['qft'])
-    MD.pop('gate_map')
+    if not args.qft:
+        MD.pop('gate_map')
     MD['cpu_1min_load']=load1
     if args.numRank>1: MD['short_name']+='_r%d.%d'%(args.myRank,args.numRank)
     if args.myRank==0:  # dump some bitstrings

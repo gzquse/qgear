@@ -19,7 +19,7 @@ tSleep=$(( SLURM_LOCALID * 2))
 echo W: rank=$myRank tSlep=$tSleep  
 sleep $tSleep
 # it is harmless to use '--gpu' on CPU node, so same script on CPU or GPU node
-
+ 
 podman-hpc run --privileged -it --gpu \
    --volume $absDataPath:/myData \
    --volume $wrkPath:/wrk \

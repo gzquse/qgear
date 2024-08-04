@@ -22,7 +22,7 @@ submit_job() {
     if [ "$trg" == "par-cpu" ]; then
         sbatch -C cpu --exclusive --cpus-per-task=$c --ntasks-per-node=$n -N1 -A $ACCT $SCMD
     else
-        sbatch -C gpu --gpus-per-task=1 --ntasks=1 -N1 -A $ACCT $SCMD # currently only one node
+        sbatch -C gpu --gpus-per-task=4 --ntasks=1 -N1 -A $ACCT $SCMD # currently only one node
     fi
 }
 
