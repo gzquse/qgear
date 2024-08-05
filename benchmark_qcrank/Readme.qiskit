@@ -35,6 +35,10 @@ Generate QCrank Qiskit circuit and run Aer simulator, using 500 shots per addres
   ./run_aer_job.py --cannedExp   canImg_c1_64_80   -n 500   -E 
 
 OUTPUT:   out/ibm_387aa8.h5
+measuremnt is saved in sparse array
+h5-write : raw_nkey (1,) int32
+h5-write : raw_ikey (1, 1301) int32
+
 
 Note1: the Qiskit circuit  is very long: '2q_gate_count': 1024, 'num_qubit': 11,
 If you want to print QCrank circuit use the 32-pixel image:  '--tag a1  --nqAddr 5'
@@ -48,5 +52,14 @@ Post processing of raw data and plotting is done by
 ./postproc_exp.py --expName   ibm_387aa8 --showPlots b c
 
 OUTPUT plots: out/ibm_387aa8_f2.png , out/ibm_387aa8_f3.png  
+
+reco circuit is saved in
+h5-write : rec_udata (1, 1, 1024) float64
+h5-write : rec_norm_image (32, 32) float64
+
+to be comapred with ground  truth in
+h5-write : inp_udata (1, 1, 1024) float32
+h5-write : norm_image (32, 32) float32
+
 
 

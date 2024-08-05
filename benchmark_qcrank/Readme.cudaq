@@ -28,8 +28,15 @@ step 2b) - - - - - - - - - - -
 Execute simulation on adj-GPUs
 ./run_cudaq_job.py --circName canImg_b2_32_32  -v2
 
+measuremnt is saved in sparse array
+h5-write : raw_nkey (1,) int32
+h5-write : raw_ikey (1, 1301) int32
+
+
+
 this code is not completed,
 it only import and prints circuit from cudaq
+
 
 Please add all steps as in ./run_aer_job.py --cannedExp   canImg_c1_64_80   -E 
 
