@@ -15,7 +15,7 @@ Generate QCrank Qiskit circuit and export it as numpy lists using
 Util_CudaQ: qiskit_to_gateList()
 
 Do not need to run Aer, add '-G', skip '-E'
- ./run_aer_job.py --cannedExp   canImg_c1_64_80   -G
+ ./run_aer_job.py --cannedExp   canImg_b2_32_32   -G
 
 OUTPUT:  out/canImg_b2_32_32.gate_list.h5
 It contains serialized circuit onformation needed by CudaQ kernel constructor

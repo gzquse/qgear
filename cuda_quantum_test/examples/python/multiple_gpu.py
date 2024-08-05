@@ -1,10 +1,10 @@
 import cudaq
 from cudaq import spin
 
-cudaq.set_target("nvidia-mqpu")
+cudaq.set_target("nvidia-mgpu")
 
 
-qubit_count = 30
+qubit_count = 35
 term_count = 1000
 
 @cudaq.kernel
@@ -31,7 +31,7 @@ def kernel(qubit_count: int):
 # result = cudaq.observe(kernel, hamiltonian, execution=cudaq.parallel.thread)
 # result.expectation()
 result = cudaq.sample(kernel, qubit_count, shots_count=term_count)
-
+result.dump()
 # Multi-node, multi-GPU.
 # result = cudaq.observe(kernel, hamiltonian, execution=cudaq.parallel.mpi)
 # result.expectation()
