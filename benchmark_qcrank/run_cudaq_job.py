@@ -81,7 +81,7 @@ if __name__ == "__main__":
         prOn= num_qubit<6 and i==0 or args.verb>1
         if prOn:   print(cudaq.draw(circ_kernel, num_qubit, num_gate, gate_type, gate_param))
 
-    not_tested_on_GPU
+        results = cudaq.sample(circ_kernel,num_qubit, num_gate, gate_type, gate_param, shots_count=shots)
     # ----- submission ----------
     T0=time.time()
     job =  backend.run(qcEL,shots=numShots)
