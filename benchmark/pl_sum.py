@@ -52,10 +52,12 @@ class Plotter(PlotterBackbone):
     def compute_time(self,bigD,tag1,figId=1,shift=False):
         nrow,ncol=1,1       
         figId=self.smart_append(figId)
-        fig=self.plt.figure(figId,facecolor='white', figsize=(5.5,7))        
+        fig=self.plt.figure(figId,facecolor='white',figsize=(5.5,7))        
         ax = self.plt.subplot(nrow,ncol,1)
-        if 'cpu' not in tag1:
+        if 'gpu' in tag1:
             dataD=bigD[tag1.split('-')[1]]
+        elif 'qft' in tag1:
+            dataD=bigD[tag1]
         else:
             dataD=bigD[tag1]
 
@@ -95,9 +97,22 @@ class Plotter(PlotterBackbone):
                     else: continue 
                 elif tag1 == 'adj-gpu':
                     if tag2 == 'nvidia-mgpu':
-                        marker_style = '^'  
-                        dCol='C2'
+                        if '10K' in tag3:
+                            marker_style = '^'  
+                            dCol='C2'
+                        elif '1M' in tag3:
+                            marker_style = 'o'  
+                            dCol='C1'
+                        elif '10M' in tag3:
+                            marker_style = '.'  
+                            dCol='C3'
+                        else:
+                            marker_style = '1'  
+                            dCol='C4'
                     else: continue
+                elif tag1 == qft:
+                    marker_style = '1'  
+                    dCol='C4'
                 # Set marker style based on cores and tasks_per_node
                 if '100CX' in tag3:
                     marker_style = 's'
@@ -127,8 +142,9 @@ class Plotter(PlotterBackbone):
         ax.set_ylim(1e-3, 3.5e+3)
         ax.set_xlim(27.5,34.5) 
         ax.grid()
+        # adjustable
         ax.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
-                ncol=3, mode="expand", borderaxespad=0., )
+                ncol=3, mode="expand", borderaxespad=0., fontsize=8.5)
 
         ax.axhline(1440, ls='--', lw=2, c='m')
         ax.text(30, 600, '24h time-out', c='m')
@@ -146,6 +162,18 @@ def extract_date_from_path(file_path):
             return date_part
     
     # If the component is not found, return None
+    return None
+
+def extract_qft_from_filename(filename):
+    # Split the filename into components
+    components = filename.split('_')
+    
+    # Iterate through the components to find "qft1"
+    for component in components:
+        if component == "qft1":
+            return component
+    
+    # If "qft1" is not found, return None
     return None
 
 #...!...!....................
@@ -167,6 +195,17 @@ def readOne(inpF,dataD,verb=1):
     tag2=xMD['target']
     if tag1 not in dataD: dataD[tag1]={}
     num_cx_formatted = "10k" if xMD["num_cx"] == 10000 else f'{xMD["num_cx"]}'
+    if xMD["num_shots"] == 10000:
+        num_shots_formatted = "10K"
+    elif xMD["num_shots"] == 1000000:
+        num_shots_formatted = "1M"
+    elif xMD["num_shots"] == 10000000:
+        num_shots_formatted = "10M"
+    elif xMD["num_shots"] == 100000000:
+        num_shots_formatted = "100M"
+    else:
+        # previous setup is 10240
+        num_shots_formatted = None
     if tag1=='cpu':
         tag3 = f'{num_cx_formatted}CX_c{cores}_tp{tasks_per_node}'
     elif tag1=='gpu':
@@ -175,7 +214,7 @@ def readOne(inpF,dataD,verb=1):
             parts = tag2.split('-')
             if len(parts) > 1:
                 g_tag = parts[1]
-        tag3 = f'{g_tag}.{num_cx_formatted}CX'
+        tag3 = f'{g_tag}.{num_cx_formatted}CX.{num_shots_formatted}S'
     if tag2 not in dataD[tag1]: dataD[tag1][tag2]={}
     if tag3 not in dataD[tag1][tag2]: dataD[tag1][tag2][tag3]={'nq':[],'runt':[], 'cores': [], 'tasks_per_node': [], 'date': []}
     
@@ -184,6 +223,35 @@ def readOne(inpF,dataD,verb=1):
     head['runt'].append(runt)
     head['cores'].append(cores)
     head['tasks_per_node'].append(tasks_per_node)
+    head['date'].append(date)
+
+def readOneQFT(inpF,dataD,qft,verb=1):
+    assert os.path.exists(inpF)
+    date = extract_date_from_path(inpF)
+    xMD=read_yaml(inpF,verb)
+    #print(inpF,xMD['num_qubit'],xMD['elapsed_time'],float(xMD['num_circ']))
+    nq=float(xMD['num_qubit'])
+    runt=float(xMD['elapsed_time'])
+    #pprint(xMD)
+    tag1=qft
+    tag2=xMD['target']
+    if tag1 not in dataD: dataD[tag1]={}
+    # save for future compare
+    # num_cx_formatted = "10k" if xMD["num_cx"] == 10000 else f'{xMD["num_cx"]}'
+    num_shots_formatted = "10k" if xMD["num_shots"] == 10000 else None
+    shots = xMD['num_shots']
+    g_tag = 'gpu' 
+    if '-' in tag2:
+        parts = tag2.split('-')
+        if len(parts) > 1:
+            g_tag = parts[1]
+    tag3 = f'{qft}.{g_tag}.{num_shots_formatted}S'
+    if tag2 not in dataD[tag1]: dataD[tag1][tag2]={}
+    if tag3 not in dataD[tag1][tag2]: dataD[tag1][tag2][tag3]={'nq':[],'runt':[], 'shots':[],'date': []}
+    head=dataD[tag1][tag2][tag3]
+    head['nq'].append(nq)
+    head['runt'].append(runt)
+    head['shots'].append(shots)
     head['date'].append(date)
 
 #...!...!....................
@@ -248,21 +316,28 @@ if __name__ == '__main__':
 
     #corePath='/dataVault2024/dataCudaQ_'  # in podman
     corePath='/pscratch/sd/g/gzquse/quantDataVault2024/dataCudaQ_'  # bare metal Martin
-    pathL=[ 'July12']
+    pathL=['Aug1']
     fileL=[]
     vetoL=['r1.4','r2.4','r3.4', ]
     for path in pathL:
         path2='%s%s/meas'%(corePath,path)
-        fileL+=find_yaml_files( path2, vetoL)
+        fileL+=find_yaml_files(path2, vetoL)
     nInp=len(fileL)
     assert nInp>0
     print('found %d input files, e.g.: '%(nInp),fileL[0])
     dataAll={}
+    dataQFT={}
     for i,fileN in enumerate(fileL):
-        readOne(fileN,dataAll,i==0)
+        qft = extract_qft_from_filename(fileN)
+        if not qft:
+            readOne(fileN,dataAll,i==0)
+        else:
+            readOneQFT(fileN,dataQFT,qft,i==0)
+    
     #pprint(dataAll)
     print('\nM: all tags:')
     sort_end_lists(dataAll)
+    sort_end_lists(dataQFT)
     # ----  just plotting
     args.prjName='jan23'
     plot=Plotter(args)
@@ -272,5 +347,7 @@ if __name__ == '__main__':
         plot.compute_time(dataAll,'par-gpu',figId=2, shift=args.shift)
     if 'c' in args.showPlots:
         plot.compute_time(dataAll,'adj-gpu',figId=3, shift=args.shift)
+    if 'd' in args.showPlots:
+        plot.compute_time(dataQFT,qft,figId=4, shift=args.shift)
     plot.display_all(png=1)
     
