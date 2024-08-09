@@ -1,5 +1,4 @@
 
-
 *=================              ideal_qcrank.py
 Basic test of QCrank
 .... PARAMETRIZED CIRCUIT .............. n_pix=8,  qcrank_opt=True, cx-depth=4
@@ -15,7 +14,10 @@ Basic test of QCrank
         └───┘ ░                                                                                              ░  ║  ║  ║ └╥┘
 meas: 4/════════════════════════════════════════════════════════════════════════════════════════════════════════╩══╩══╩══╩═
                                                                                                                 0  1  2  3 
+'-e' will save circuit in QPY format
+Saved circ1: out/qcrank_nqa2_nqd2.qpy
 
+see ./toy_IO_qpyCirc.py to read it back and assign params
 
 *=================    ./toy_ghz_backAer.py
 Exercise Aer

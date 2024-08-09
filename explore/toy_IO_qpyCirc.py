@@ -86,10 +86,10 @@ if __name__ == "__main__":
     backend = AerSimulator()
 
     #.... pick one 
-    qc = ghzCirc(args.numQubits)
+    #qc = ghzCirc(args.numQubits)
     #qc = strangeCirc(args.numQubits)
     #qc = rndCirc(args.numQubits)
-    #qc,angle,theta = paramCirc()
+    qc,angle,theta = paramCirc()
 
     print('meta:',qc.metadata)
     if args.numQubits<6:  print(qc)
