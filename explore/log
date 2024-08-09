@@ -1,0 +1,150 @@
+LSB Version:	n/a
+Distributor ID:	SUSE
+Description:	SUSE Linux Enterprise Server 15 SP4
+Release:	15.4
+Codename:	n/a
+Linux login36 5.14.21-150400.24.81_12.0.87-cray_shasta_c #1 SMP Thu Jan 11 20:03:21 UTC 2024 (e30c7c1) x86_64 x86_64 x86_64 GNU/Linux
+MemTotal:       527578560 kB
+MemFree:        129968904 kB
+MemAvailable:   239504720 kB
+Buffers:           80520 kB
+Cached:         95825664 kB
+SwapCached:          108 kB
+Active:         18724648 kB
+Inactive:       224714344 kB
+Active(anon):    7138092 kB
+Inactive(anon): 168994308 kB
+Active(file):   11586556 kB
+Inactive(file): 55720036 kB
+Unevictable:    23901716 kB
+Mlocked:        19067196 kB
+SwapTotal:       9765620 kB
+SwapFree:        9752308 kB
+Dirty:                 4 kB
+Writeback:             0 kB
+AnonPages:      171401460 kB
+Mapped:          5670616 kB
+Shmem:          23782024 kB
+KReclaimable:   54802588 kB
+Slab:           117874340 kB
+SReclaimable:   54802588 kB
+SUnreclaim:     63071752 kB
+KernelStack:      173936 kB
+PageTables:       639520 kB
+NFS_Unstable:          0 kB
+Bounce:                0 kB
+WritebackTmp:          0 kB
+CommitLimit:    273554900 kB
+Committed_AS:   267706284 kB
+VmallocTotal:   34359738367 kB
+VmallocUsed:     3837664 kB
+VmallocChunk:          0 kB
+Percpu:          3121152 kB
+HardwareCorrupted:     0 kB
+AnonHugePages:  17020928 kB
+ShmemHugePages:        0 kB
+ShmemPmdMapped:        0 kB
+FileHugePages:         0 kB
+FilePmdMapped:         0 kB
+CmaTotal:              0 kB
+CmaFree:               0 kB
+HugePages_Total:       0
+HugePages_Free:        0
+HugePages_Rsvd:        0
+HugePages_Surp:        0
+Hugepagesize:       2048 kB
+Hugetlb:               0 kB
+DirectMap4k:    78199732 kB
+DirectMap2M:    153262080 kB
+DirectMap1G:    305135616 kB
+bash: inxi: command not found
+NAME        MAJ:MIN RM   SIZE RO TYPE MOUNTPOINTS
+loop0         7:0    0   4.6G  0 loop /.rootfs_lower_ro
+loop1         7:1    0   2.4G  1 loop /var/opt/cray/pe/pe_images/base-23.12
+loop2         7:2    0 123.3M  1 loop /var/opt/cray/pe/pe_images/nvidia-23.12
+loop3         7:3    0 117.5M  1 loop /var/opt/cray/pe/pe_images/aocc-23.12
+loop4         7:4    0 114.3M  1 loop /var/opt/cray/pe/pe_images/intel-23.12
+loop5         7:5    0   3.1G  1 loop /var/opt/cray/pe/pe_images/base-23.03
+loop6         7:6    0 135.8M  1 loop /var/opt/cray/pe/pe_images/nvidia-23.03
+loop7         7:7    0 127.8M  1 loop /var/opt/cray/pe/pe_images/aocc-23.03
+loop8         7:8    0 128.5M  1 loop /var/opt/cray/pe/pe_images/intel-23.03
+loop9         7:9    0   3.1G  1 loop /var/opt/cray/pe/pe_images/base-23.02
+loop10        7:10   0 135.8M  1 loop /var/opt/cray/pe/pe_images/nvidia-23.02
+loop11        7:11   0 127.7M  1 loop /var/opt/cray/pe/pe_images/aocc-23.02
+loop12        7:12   0 128.4M  1 loop /var/opt/cray/pe/pe_images/intel-23.02
+loop13        7:13   0   3.3G  1 loop /var/opt/cray/pe/pe_images/base-23.09
+loop14        7:14   0 138.9M  1 loop /var/opt/cray/pe/pe_images/nvidia-23.09
+loop15        7:15   0 131.1M  1 loop /var/opt/cray/pe/pe_images/aocc-23.09
+loop16        7:16   0 129.8M  1 loop /var/opt/cray/pe/pe_images/intel-23.09
+loop17        7:17   0   3.3G  1 loop /var/opt/cray/pe/pe_images/base-23.05
+loop18        7:18   0 138.4M  1 loop /var/opt/cray/pe/pe_images/nvidia-23.05
+loop19        7:19   0 130.4M  1 loop /var/opt/cray/pe/pe_images/aocc-23.05
+loop20        7:20   0 131.1M  1 loop /var/opt/cray/pe/pe_images/intel-23.05
+loop21        7:21   0  21.2G  1 loop /var/opt/cray/pe/pe_images/nvhpc
+loop22        7:22   0   3.2G  1 loop /var/opt/cray/pe/pe_images/aocc
+loop23        7:23   0  17.3G  1 loop /var/opt/cray/pe/pe_images/intel
+loop24        7:24   0 946.3M  1 loop /etc/opt/cray/analytics/admin-analytics
+                                      /opt/cray/chapel/1.30.0
+                                      /opt/cray/analytics/bin
+                                      /var/opt/cray/analytics/analytics_image/base
+loop25        7:25   0 670.7M  1 loop 
+loop26        7:26   0   3.9G  1 loop 
+loop27        7:27   0   9.9G  1 loop 
+loop28        7:28   0 144.6M  1 loop 
+loop29        7:29   0  17.3G  1 loop 
+loop30        7:30   0     0B  1 loop 
+loop31        7:31   0     0B  1 loop 
+loop32        7:32   0     0B  1 loop 
+sda           8:0    0 447.1G  0 disk 
+├─sda1        8:1    0 223.6G  0 part 
+└─sda2        8:2    0 223.6G  0 part 
+sdb           8:16   0 447.1G  0 disk 
+├─sdb1        8:17   0 223.6G  0 part /swap
+└─sdb2        8:18   0 223.6G  0 part /scratch
+nvme0n1     259:0    0   2.9T  0 disk 
+└─nvme0n1p1 259:1    0   2.9T  0 part /images
+                                      /images
+[3:0:0:0]    disk    ATA      VK000480GXAWK    HPG0  /dev/sdb    480GB
+[7:0:0:0]    disk    ATA      VK000480GXAWK    HPG0  /dev/sda    480GB
+++ '[' -z '' ']'
+++ case "$-" in
+++ __lmod_sh_dbg=x
+++ '[' -n x ']'
+++ set +x
+Shell debugging temporarily silenced: export LMOD_SH_DBG_ON=1 for Lmod's output
+
+Currently Loaded Modules:
+  1) craype-x86-milan                        9) craype/2.7.30
+  2) libfabric/1.15.2.0                     10) gcc-native/12.3
+  3) craype-network-ofi                     11) perftools-base/23.12.0
+  4) xpmem/2.6.2-2.5_2.38__gd067c3f.shasta  12) cpe/23.12
+  5) PrgEnv-gnu/8.5.0                       13) cudatoolkit/12.2
+  6) cray-dsmml/0.2.2                       14) craype-accel-nvidia80
+  7) cray-libsci/23.12.5                    15) gpu/1.0
+  8) cray-mpich/8.1.28
+
+ 
+
+Shell debugging restarted
+++ unset __lmod_sh_dbg
+++ return 0
+Thu Aug  8 22:01:53 2024       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 525.105.17   Driver Version: 525.105.17   CUDA Version: 12.2     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  NVIDIA A100-PCI...  On   | 00000000:C3:00.0 Off |                    0 |
+| N/A   33C    P0    37W / 250W |   1472MiB / 40960MiB |      0%      Default |
+|                               |                      |             Disabled |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|    0   N/A  N/A    314833      C   ...da/envs/ckconv/bin/python     1470MiB |
++-----------------------------------------------------------------------------+

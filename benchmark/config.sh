@@ -4,7 +4,7 @@
 ACCT=nintern
 
 # List of cx-gates and number of circuits
-nCX=(100 10000)
+nCX=(100)
 
 # this setup only affect the prep_gateList
 nCirc=8

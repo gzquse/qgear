@@ -316,7 +316,7 @@ if __name__ == '__main__':
 
     #corePath='/dataVault2024/dataCudaQ_'  # in podman
     corePath='/pscratch/sd/g/gzquse/quantDataVault2024/dataCudaQ_'  # bare metal Martin
-    pathL=['Aug1']
+    pathL=['Aug4']
     fileL=[]
     vetoL=['r1.4','r2.4','r3.4', ]
     for path in pathL:
