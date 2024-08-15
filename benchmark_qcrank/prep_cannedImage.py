@@ -165,7 +165,8 @@ if __name__=="__main__":
 
     pprint(MD)
 
-    print('local sim:\n time  ./run_aer_job.py --cannedExp   %s   -n 300   -E \n'%(MD['short_name'] ))
+    print('local sim for cpu:\n time  ./run_aer_job.py --cannedExp   %s   -n 300   -E \n'%(MD['short_name'] ))
+    print('cudaq gate lists:\n time  ./run_aer_job.py --cannedExp   %s   -n 300   -G \n'%(MD['short_name'] )) 
     
     print('M:done')
    
