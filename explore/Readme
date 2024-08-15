@@ -1,26 +1,3 @@
-*=================               x0x1_EsherHands_backAer.py
-Basic ONE EsehrHand circuit for 2 arbitrary inputs,
-Output controlled by: --measBasis", choices=['x','y','z']
-Uses Sampler()
-computes  gradient and  average for a pair of real values stored as sqrt(amplitudes) on 2 qubits, w/o using any ancilla.
-
-D2A: xV: [0.3, 0.9]  W: 0.5
-     ┌──────────┐ ░                 ┌─────────┐┌───┐┌────────────┐ ░ ┌─┐   
-q_0: ┤ Ry(θ[0]) ├─░──────────────■──┤ Ry(α/2) ├┤ X ├┤ Ry(-0.5*α) ├─░─┤M├───
-     ├──────────┤ ░ ┌─────────┐┌─┴─┐└─────────┘└─┬─┘└────────────┘ ░ └╥┘┌─┐
-q_1: ┤ Ry(θ[1]) ├─░─┤ Rz(π/2) ├┤ X ├─────────────■─────────────────░──╫─┤M├
-     └──────────┘ ░ └─────────┘└───┘                               ░  ║ └╥┘
-c: 2/═════════════════════════════════════════════════════════════════╩══╩═
-                                                                      0  1 
-
-
-notes for sum:
-https://docs.google.com/document/d/1yiKcocSj7qq2Paa9DiR2W_f5eYqml5IOBfwyC0k7bUc/edit?usp=sharing
-
-notes for difference:
-https://docs.google.com/document/d/17imQIXXlJdt3-nkfXjxYvVlrI5C7f7rBJJO4QI8PToo/edit?usp=sharing
-
-
 
 *=================              ideal_qcrank.py
 Basic test of QCrank
@@ -37,7 +14,10 @@ Basic test of QCrank
         └───┘ ░                                                                                              ░  ║  ║  ║ └╥┘
 meas: 4/════════════════════════════════════════════════════════════════════════════════════════════════════════╩══╩══╩══╩═
                                                                                                                 0  1  2  3 
+'-e' will save circuit in QPY format
+Saved circ1: out/qcrank_nqa2_nqd2.qpy
 
+see ./toy_IO_qpyCirc.py to read it back and assign params
 
 *=================    ./toy_ghz_backAer.py
 Exercise Aer

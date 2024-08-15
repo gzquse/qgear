@@ -276,3 +276,19 @@ def qiskit_circ_gateList(gateD,md,barrier=True):
         qcL[j]=qc
     return qcL
 
+
+#...!...!....................
+def circ_depth_aziz(qc,text='myCirc'):   # from Aziz @ IBMQ    summer 2023
+    len1=qc.depth(filter_function=lambda x: x.operation.num_qubits == 1)
+    len2x=qc.depth(filter_function=lambda x: x.operation.name == 'cx')
+    len2=qc.depth(filter_function=lambda x: x.operation.num_qubits == 2 )
+    len3=qc.depth(filter_function=lambda x: x.operation.num_qubits ==3 )
+    len4=qc.depth(filter_function=lambda x: x.operation.num_qubits > 3 )
+    opsOD=qc.count_ops()  # ordered dict
+    opsD={ k:opsOD[k] for k in opsOD}
+    opsD['qubits']=qc.num_qubits
+
+    depthD={'cx':len2x,'2q':len2,'3q':len3,'4q+':len4,'1q':len1}
+    
+    print('%s depth_aziz:'%text,depthD,', ops:',opsD)
+    return depthD,opsD

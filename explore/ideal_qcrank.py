@@ -24,6 +24,7 @@ def get_parser(backName=None):
     parser.add_argument('-b','--backendName',default=backName,help="backend for computations, always runs against external IBMQ (use fakeSubmit for local comoute)  " )
     parser.add_argument('-n','--numShots', default=800, type=int, help='num of shots')
     parser.add_argument( "-E","--execDecoding", action='store_true', default=False, help="do not decode job output")
+    parser.add_argument( "-e","--exportQPY", action='store_true', default=False, help="exprort parametrized circuit as QPY file")
  
   
     args = parser.parse_args()
@@ -97,6 +98,14 @@ if __name__ == "__main__":
         print(f'.... TRANSPILED PARAMETRIZED CIRCUIT .............. n_pix={n_pix}')
         print(param_qcrank.circuit.draw())
 
+    if args.exportQPY:
+        from qiskit import qpy
+        circF='out/qcrank_nqa%d_nqd%d.qpy'%(nq_addr,nq_data)
+        with open(circF, 'wb') as fd:
+            qpy.dump(qc, fd)
+        print('\nSaved circ1:',circF)
+        exit(0)
+        
     # bind the data
     param_qcrank.bind_data(data, max_val=max_val)
     # generate the instantiated circuits
@@ -113,7 +122,7 @@ if __name__ == "__main__":
     counts = [r.get_counts(c) for r, c in zip(results, data_circs)]
     elaT=time()-T0
     print('M: QCrank simu nqTot=%d  shots=%d  nImg=%d  ended elaT=%.1f sec'%(nqTot,shots,n_img,elaT))
-    
+
     if not args.execDecoding:
         print('NO evaluation of job output, use -E to execute decoding')
         exit(0)

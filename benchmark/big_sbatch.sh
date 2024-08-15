@@ -22,27 +22,32 @@ submit_job() {
     if [ "$trg" == "par-cpu" ]; then
         sbatch -C cpu --exclusive --cpus-per-task=$c --ntasks-per-node=$n -N1 -A $ACCT $SCMD
     else
-        sbatch -C gpu --gpus-per-task=1 --ntasks=1 -N1 -A $ACCT $SCMD # currently only one node
+        sbatch -C "gpu&hbm80g" -N1 --gpus-per-task=4 --ntasks-per-node=1 --gpu-bind=none -A $ACCT $SCMD # currently only one node
     fi
 }
 
-for nq in 28; do
-    for cx in "${nCX[@]}"; do
+for nq in 32; do
+    if [ "$qft" -eq 1 ]; then
+        expN="${N}${nq}q_qft${qft}"
         for s in "${shots[@]}"; do
-            # Determine expN name based on the value of qft
-            if [ "$qft" -eq 1 ]; then
-                expN="${N}${nq}q_qft${qft}"
-            else
-                expN="${N}${nq}q${cx}cx"
-            fi
-
             for trg in "${targets[@]}"; do
                 k=$((k + 1))
                 echo "$k  expN:$expN trg:$trg shots: $s qft: $qft"
                 submit_job "$expN" "$trg" "$s" "$qft"
             done
         done
-    done
+    else
+        for cx in "${nCX[@]}"; do
+            expN="${N}${nq}q${cx}cx"
+            for s in "${shots[@]}"; do
+                for trg in "${targets[@]}"; do
+                    k=$((k + 1))
+                    echo "$k  expN:$expN trg:$trg shots: $s qft: $qft"
+                    submit_job "$expN" "$trg" "$s" "$qft"
+                done
+            done
+        done
+    fi
 done
 
 echo "submitted: $k jobs"
