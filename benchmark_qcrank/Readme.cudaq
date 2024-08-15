@@ -10,40 +10,24 @@ Configur QCrank input  (as for Qiskit)
 OUTPUT:    out/canImg_b2_32_32.qcrank_inp.h5
 
 
-step 2a) - - - - - - - - - - -
+step 2) - - - - - - - - - - -
 Generate QCrank Qiskit circuit and export it as numpy lists using
 Util_CudaQ: qiskit_to_gateList()
-
-Do not need to run Aer, add '-G', skip '-E'
- ./run_aer_job.py --cannedExp   canImg_b2_32_32   -G
 
 OUTPUT:  out/canImg_b2_32_32.gate_list.h5
 It contains serialized circuit onformation needed by CudaQ kernel constructor
  {'circ_type': circ_type, 'gate_type': gate_type, 'gate_param': gate_param},{'gate_map':m}
 
-
-
-step 2b) - - - - - - - - - - -
-
 Execute simulation on adj-GPUs
-./run_cudaq_job.py --circName canImg_b2_32_32  -v2
+./run_cudaq_job.py --circName   canImg_b2_32_32  -n 500
 
 measuremnt is saved in sparse array
 h5-write : raw_nkey (1,) int32
 h5-write : raw_ikey (1, 1301) int32
 
-
-
-this code is not completed,
-it only import and prints circuit from cudaq
-
-
-Please add all steps as in ./run_aer_job.py --cannedExp   canImg_c1_64_80   -E 
-
-
 step 3) - - - - - - - - - - -
-Post processing of raw data and plotting is done by as for Qikit job
-./postproc_exp.py --expName   ibm_387aa8 --showPlots b c
+Post processing of raw data and plotting is done by as for CudaQ job
+./postproc_exp.py --expName   cudaq_32efc0 --showPlots b c
 
 OUTPUT plots: out/ibm_387aa8_f2.png , out/ibm_387aa8_f3.png  
 

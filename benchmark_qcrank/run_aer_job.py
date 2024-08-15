@@ -141,7 +141,7 @@ if __name__ == "__main__":
         expMD.update(mapD)
         outF=os.path.join(args.outPath,expMD['short_name']+'.gate_list.h5')
         write4_data_hdf5(expD,outF,expMD)
-        print('   ./run_cudaq_job.py --circName   %s  -n 500 -E   \n'%(expMD['short_name']))
+        print('   ./run_cudaq_job.py --circName   %s  -n 500   \n'%(expMD['short_name']))
         exit(0)
  
     if not args.executeCircuit:

@@ -81,8 +81,8 @@ def plot_histogram(ax, res_data):
 def sum_column(md):
     pmd=md['payload']
     smd=md['submit']
-    tmd=md['transpile']
     txt=md['short_name']
+    tmd=md['transpile']
     txt+='\nback: %s'%smd['backend']
     txt+='\nshots/addr : %d'%(smd['num_shots']/pmd['seq_len'])
     txt+='\nimages: %d '%(pmd['num_sample'])
