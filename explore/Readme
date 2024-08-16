@@ -71,7 +71,17 @@ M: run cudaq-circuit  on GPU
 
 
 *=================     
+Absolute speed for adj-4GPU
+salloc -N 1 --gpus-per-task=1 --ntasks-per-node=1   -t 4:00:00 -q interactive -A nintern -C gpu  --gpu-bind=none
 
+. pm_balewski.source mpi
+ cd explore
+ mpirun -np 4 python3   RND_ker1.py -q 31 -r 80
+
+ -q 31 -r 80 : 30 sec
+ -q 32 -r 80 : 35 sec
+ -q 33 -r 80 : 67 sec
+ -q 34 -r 80: Too few GPUs for too many qubits.
 
 
 *=================     

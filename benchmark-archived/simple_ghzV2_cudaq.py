@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # mpirun -np 4 --allow-run-as-root python3 cuquantum_backends.py
+# mpirun -np 4 python3 ./simple_ghzV2_cudaq.py --numShots 10 --cudaqTarget nvidia-mgpu --numRepeat 10 --numQubits 33
 
 import cudaq
 from time import time
@@ -18,10 +19,12 @@ def get_parser():
     parser.add_argument('-t','--cudaqTarget',default="nvidia-mgpu", choices=['qpp-cpu','nvidia','nvidia-mgpu','nvidia-mqpu'], help="CudaQ target backend")
 
     args = parser.parse_args()
-    #cudaq.mpi.initialize()
-    # myrank = cudaq.mpi.rank()
-    # if myrank==0:
-    #     for arg in vars(args): print( 'myArgs:',arg, getattr(args, arg))
+    cudaq.set_target(args.cudaqTarget)
+    cudaq.mpi.initialize()
+    args.myrank = cudaq.mpi.rank()
+    args.ranks=cudaq.mpi.num_ranks()
+    if args.myrank==0:
+         for arg in vars(args): print( 'myArgs:',arg, getattr(args, arg))
 
     assert args.numQubits>=2
     return args
@@ -48,16 +51,13 @@ if __name__ == "__main__":
     nq=args.numQubits
     target=args.cudaqTarget
     nRep=args.numRepeat
+    nCX=nRep*(nq-1)
     
-    # ranks = cudaq.mpi.num_ranks()
-    # myrank = cudaq.mpi.rank()
-
-    cudaq.set_target(target)
     shots=args.numShots
     #? print(cudaq.draw(kernel, nq, nRep)) 
-    
-    # if myrank == 0:
-    #     print('\n start nq=%d, target=%s, ranks=%d, aval GPUs=%d nRep=%d shots=%d ... '%(nq,target,ranks,cudaq.num_available_gpus(),nRep,shots))
+
+    if args.myrank==0:
+        print('\n start nq=%d, target=%s, ranks=%d, aval GPUs=%d nRep=%d,  nCX=%d shots=%d ... '%(nq,target,args.ranks,cudaq.num_available_gpus(),nRep,nCX,shots))
         
     if cudaq.num_available_gpus() == 0:
         print("This example requires a GPU to run. No GPU detected.")
@@ -67,8 +67,8 @@ if __name__ == "__main__":
     result=cudaq.sample(kernel, nq, nRep, shots_count=shots)
     elaT=time()-T0
 
-    # if myrank == 0:
-    #     if args.verb>1: print('counts:',result)
-    #     print('\nelaT= %.1f sec , nq=%d, nRep=%d, shots=%d, target=%s, ranks=%d, numSol=%d '%(elaT,nq,nRep,shots,target,ranks,len(result)))
+    if args.myrank==0:
+        if args.verb>1: print('counts:',result)
+        print('\nelaT= %.1f sec , nq=%d, nRep=%d,  nCX=%d  shots=%d, target=%s, ranks=%d, numSol=%d '%(elaT,nq,nRep,nCX,shots,target,args.ranks,len(result)))
     
-# cudaq.mpi.finalize()
+    cudaq.mpi.finalize()
