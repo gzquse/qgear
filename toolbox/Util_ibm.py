@@ -60,12 +60,12 @@ def harvest_backRun_results(job,md,bigD):  # many circuits
 
     try :
         ibmMD=res0.metadata
-        for x in ['num_clbits','device','method','noise','num_clbits']:
+        for x in ['num_clbits','device','method','noise']:
             #print(x,ibmMD[x])
             qa[x]=ibmMD[x]
 
-            qa['shots']=res0.shots
-            qa['time_taken']=res0.time_taken
+        qa['shots']=res0.shots
+        qa['time_taken']=res0.time_taken
     except:
         print('MD1 partially missing')
 

@@ -184,7 +184,7 @@ if __name__ == "__main__":
         used_qpus=num_qpus if  target == "nvidia-mqpu" else 1
         used_qgus=num_gpus if  target == "nvidia-mgpu" else 1
         if args.verb: print('M: use %d of  %d seen qpus'%(used_qpus,num_qpus))
-        if args.verb: print('M: use %d of  %d seen gpus'%(used_qpus,num_gpus))
+        if args.verb: print('M: use %d of  %d seen gpus'%(used_qgus,num_gpus))
                 
     shots=args.numShots
     # hardcode

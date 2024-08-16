@@ -25,9 +25,11 @@ def get_parser():
     parser.add_argument( "-Y","--noXterm", dest='noXterm',  action='store_false', default=True, help="enables X-term for interactive mode")
     parser.add_argument("--basePath",default=None,help="head path for set of experiments, or 'env'")
     parser.add_argument("--inpPath",default='out/',help="raw outputs from experiment")
-    parser.add_argument("--outPath",default='out/',help="post-processed results ")
+    parser.add_argument("--outPath",default='out',help="post-processed results ")
     parser.add_argument('-e',"--expName",  default='exp_62a21daf',help='IBMQ experiment name assigned during submission')
     
+    parser.add_argument('-T',"--type",  default=0, help='Plot CudaQ or IBM results')
+
     args = parser.parse_args()
     # make arguments  more flexible 
     if 'env'==args.basePath: args.basePath= os.environ['EHands_dataVault']

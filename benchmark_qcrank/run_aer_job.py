@@ -141,7 +141,7 @@ if __name__ == "__main__":
         expMD.update(mapD)
         outF=os.path.join(args.outPath,expMD['short_name']+'.gate_list.h5')
         write4_data_hdf5(expD,outF,expMD)
-        print('   ./run_cudaq_job.py --circName   %s  -n 500 -E   \n'%(expMD['short_name']))
+        print('   ./run_cudaq_job.py --circName   %s  -n 500   \n'%(expMD['short_name']))
         exit(0)
  
     if not args.executeCircuit:
@@ -150,23 +150,24 @@ if __name__ == "__main__":
         exit(0)
 
     # ----- submission ----------
-    T0=time.time()
-    job =  backend.run(qcEL,shots=numShots)
-    jid=job.job_id()
+    if args.executeCircuit:
+        T0=time.time()
+        job =  backend.run(qcEL,shots=numShots)
+        jid=job.job_id()
 
-    print('submitted JID=',jid,backend ,'\n do %.2fM shots , wait for execution ...'%(numShots/1e6))
+        print('submitted JID=',jid,backend ,'\n do %.2fM shots , wait for execution ...'%(numShots/1e6))
     
-    harvest_ibmq_backRun_submitMeta(job,expMD,args)
-    T1=time.time()
-    print(' job done, elaT=%.1f min'%((T1-T0)/60.))
+        harvest_ibmq_backRun_submitMeta(job,expMD,args)
+        T1=time.time()
+        print(' job done, elaT=%.1f min'%((T1-T0)/60.))
     
-    print('M: got results')
-    harvest_backRun_results(job,expMD,expD)
+        print('M: got results')
+        harvest_backRun_results(job,expMD,expD)
     
-    outF=os.path.join(args.outPath,expMD['short_name']+'.h5')
-    write4_data_hdf5(expD,outF,expMD)
+        outF=os.path.join(args.outPath,expMD['short_name']+'.h5')
+        write4_data_hdf5(expD,outF,expMD)
 
-    print('   ./postproc_exp.py --expName   %s --showPlots b c   \n'%(expMD['short_name']))
+        print('   ./postproc_exp.py --expName   %s --showPlots b c   \n'%(expMD['short_name']))
  
 
      
