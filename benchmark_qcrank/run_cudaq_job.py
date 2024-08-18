@@ -176,18 +176,11 @@ if __name__ == "__main__":
     print('RCQ: done',len(resL[0]),args.backend,'\n done %.2fM shots'%(numShots/1e6))
 
     harvest_cudaq_backRun_submitMeta(expMD,args)
-    T1=time()
-    print(' job done, elaT=%.1f min'%((T1-T0)/60.))
-    
-    print('M: got results')
-
     countsL=counts_cudaq_to_qiskit(resL)
     pp0 = countsL[0]
-    print("counts size: %d"%len(pp0))
-
-    # collect job performance info
+        # collect job performance info
     qa={}
-
+    T1=time()
     qa['status']='JobStatus.DONE'
     qa['num_circ']=nCirc
 
@@ -200,15 +193,19 @@ if __name__ == "__main__":
         qa['time_taken']=T1-T0
     except:
         print('MD1 partially missing')
-
-    print('job QA'); pprint(qa)
+    
+    if args.myRank == 0:
+        print(' job done, elaT=%.1f min'%((T1-T0)/60.))
+        print('M: got results')
+        print("counts size: %d"%len(pp0))
+        print('job QA'); pprint(qa)
     expMD['job_qa']=qa
     pack_counts_to_numpy(expMD,expD,countsL)
 
     
     outF=os.path.join(args.outPath,expMD['short_name']+'.h5')
     write4_data_hdf5(expD,outF,expMD)
-
+    cudaq.mpi.finalize()
     print('   ./postproc_exp.py --expName   %s --showPlots b c   \n'%(expMD['short_name']))
  
 

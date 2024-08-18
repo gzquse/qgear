@@ -18,8 +18,8 @@ OUTPUT:  out/canImg_b2_32_32.gate_list.h5
 It contains serialized circuit onformation needed by CudaQ kernel constructor
  {'circ_type': circ_type, 'gate_type': gate_type, 'gate_param': gate_param},{'gate_map':m}
 
-Execute simulation on adj-GPUs
-./run_cudaq_job.py --circName   canImg_b2_32_32  -n 500
+Execute simulation on adj-GPUs [single GPU node test]
+mpiexec -np 4 ./run_cudaq_job.py --circName   canImg_b2_32_32  -n 500
 
 measuremnt is saved in sparse array
 h5-write : raw_nkey (1,) int32
