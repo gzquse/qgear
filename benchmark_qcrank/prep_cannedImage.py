@@ -166,6 +166,6 @@ if __name__=="__main__":
     pprint(MD)
 
     print('local sim for cpu:\n time  ./run_aer_job.py --cannedExp   %s   -n 300   -E \n'%(MD['short_name'] ))
-    print('local sim for 4 gpus:\n   ./run_cudaq_job.py --circName   %s   -n 300   \n'%(MD['short_name'] ))
+    print('local sim for 4 gpus:\n mpirun -np 4  ./run_cudaq_job.py --circName   %s   -n 300   \n'%(MD['short_name'] ))
     print('M:done')
    
