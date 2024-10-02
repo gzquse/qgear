@@ -13,3 +13,4 @@ old/
 *.btr
 tmp/
 .vscode/
+.lesshst
