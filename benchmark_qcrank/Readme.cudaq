@@ -1,5 +1,9 @@
 Workflow for image writeing and reading it back using QCrank encoding using CudaQ
 
+Get a GPU node for test
+
+salloc -q interactive -C gpu -t 4:00:00 -A nintern -N 1 
+
 0)- - - - - - - -
 Exercise all steps  from Readme.qiskit
 
