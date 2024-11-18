@@ -27,7 +27,7 @@ submit_job() {
     fi
 }
 
-for nq in {23..27}; do
+for nq in {16..18}; do
     if [ "$qft" -eq 1 ]; then
         expN="${N}${nq}q_qft${qft}"
         for s in "${shots[@]}"; do
