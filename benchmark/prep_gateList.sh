@@ -7,7 +7,7 @@ source ./config.sh  # Source the common configuration script
 k=0
 
 # Inception!
-basePath=/dataVault2024/dataCudaQ_Aug1
+basePath=/dataVault2024/dataCudaQ_Nov15
 
 # Ensure the basePath exists
 if [ ! -d "$basePath" ]; then
@@ -18,7 +18,7 @@ if [ ! -d "$basePath" ]; then
     cd -
 fi
 
-for nq in {28..34}; do
+for nq in {28..29}; do
     for cx in "${nCX[@]}"; do
         expN=${N}${nq}q${cx}cx
         k=$((k + 1))

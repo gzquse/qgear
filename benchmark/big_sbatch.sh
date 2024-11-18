@@ -9,7 +9,7 @@ c=64  # cores for CPU
 n=4   # ntasks per node
 
 #targets=("par-cpu" "par-gpu" "adj-gpu")
-targets=("adj-gpu")
+targets=("gpu")
 
 # Function to submit a job
 submit_job() {
@@ -17,7 +17,8 @@ submit_job() {
     local trg=$2
     local s=$3
     local qft=$4
-    local SCMD="./batchPodman.slr $expN $trg $s $qft"
+    local option=$5
+    local SCMD="./batchPodman.slr $expN $trg $s $qft $option"
 
     if [ "$trg" == "par-cpu" ]; then
         sbatch -C cpu --exclusive --cpus-per-task=$c --ntasks-per-node=$n -N1 -A $ACCT $SCMD
@@ -26,14 +27,14 @@ submit_job() {
     fi
 }
 
-for nq in 32; do
+for nq in {23..27}; do
     if [ "$qft" -eq 1 ]; then
         expN="${N}${nq}q_qft${qft}"
         for s in "${shots[@]}"; do
             for trg in "${targets[@]}"; do
                 k=$((k + 1))
-                echo "$k  expN:$expN trg:$trg shots: $s qft: $qft"
-                submit_job "$expN" "$trg" "$s" "$qft"
+                echo "$k  expN:$expN trg:$trg shots: $s qft: $qft option: $option"
+                submit_job "$expN" "$trg" "$s" "$qft" "$option"
             done
         done
     else
@@ -42,8 +43,8 @@ for nq in 32; do
             for s in "${shots[@]}"; do
                 for trg in "${targets[@]}"; do
                     k=$((k + 1))
-                    echo "$k  expN:$expN trg:$trg shots: $s qft: $qft"
-                    submit_job "$expN" "$trg" "$s" "$qft"
+                    echo "$k  expN:$expN trg:$trg shots: $s qft: $qft option: $option"
+                    submit_job "$expN" "$trg" "$s" "$qft" "$option"
                 done
             done
         done

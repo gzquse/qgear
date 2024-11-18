@@ -35,7 +35,9 @@ def get_parser():
     parser.add_argument('-n','--numShots',type=int, default=10240, help="(optional) shots per circuit")
     parser.add_argument("-b", "--backend", default="nvidia", choices=['qiskit-cpu','tensornet','nvidia-mgpu','nvidia-mqpu','nvidia','qpp-cpu'], help="cudaQ target settings")
     parser.add_argument('-q','--qft',type=int, default=0, help="(optional) enable qft circuit")
-
+    # default uses single float and we assume using all gpus
+    parser.add_argument('-t','--target-option',default='fp32,mgpu',help='target options')
+    
     # IO paths
     parser.add_argument("--basePath",default=None,help="head path for set of experiments, or 'env'")
     parser.add_argument("--inpPath",default='out/',help="input circuits location")
@@ -112,8 +114,10 @@ def run_cudaqft(shots,num_qpus,num_qubit,nc=1):
     resL=[0]* nc # prime the list
     for i in range(nc):
         input_state = [random.choice([0, 1]) for i in range(num_qubit)]
-        if target == "nvidia-mgpu":  
-            target2='adj-gpu' if target == "nvidia-mgpu" else 'one-gpu'
+        if target == "nvidia-mgpu" or target == "nvidia":  
+            # default mgpu
+            #target2='adj-gpu' if target == "nvidia-mgpu" else 'one-gpu'
+            target2='adj-gpu'
             results = cudaq.sample(qft_kernel, input_state, shots_count=shots)
             resL[i]=results  # store  bistsrings
             
@@ -217,6 +221,7 @@ if __name__ == "__main__":
     MD['num_meas_strings']=[ len(x) for x in resL]
     MD['target2']=target2
     MD['short_name']+='_'+target2
+    MD['short_name']+='_'+args.target_option
     MD['num_shots']=shots
     # add postfix for cpu tasks
     if target2 == 'par-cpu':

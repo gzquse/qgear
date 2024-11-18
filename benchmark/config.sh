@@ -11,9 +11,12 @@ nCirc=8
 
 # Shots of sampling
 #shots=(10000 1000000 10000000 100000000)
-shots=(10000)
+shots=(100)
 # Prefix
 # run gate list has a hardcode mar
 N="mar"
 
-qft=0
+qft=1
+
+# nvidia options
+option="fp64,mgpu"
