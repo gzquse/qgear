@@ -9,7 +9,7 @@ IMG=gzquse/cudaquanmpi-qiskit1:p6
 
 [text](./prep_gateList.sh) done in the container
 ```
-basePath=/dataVault2024/dataCudaQ_xxxx
+basePath=/dataVault2024/dataCudaQ_Nov15
 ```
 
 /dataVault2024/dataCudaQ_QEra_July12/

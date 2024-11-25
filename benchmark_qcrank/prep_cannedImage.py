@@ -84,7 +84,7 @@ def buildMeta_CannedImage(args,bigD):
     assert cad['image_pixels']% pd['seq_len']==0
     pd['nq_fdata']= cad['image_pixels']// pd['seq_len']
     pd['num_clbit']=pd['nq_fdata']+pd['nq_addr']  # number of measured qubits
-    assert pd['num_clbit'] <34  # needs GPU's to run, Martin change it to a higher value
+    assert pd['num_clbit'] <=34  # needs GPU's to run, Martin change it to a higher value
     
     pd['qcrank_max_fval']=np.pi # default range for QCrank
     
@@ -166,6 +166,6 @@ if __name__=="__main__":
     pprint(MD)
 
     print('local sim for cpu:\n time  ./run_aer_job.py --cannedExp   %s   -n 300   -E \n'%(MD['short_name'] ))
-    print('local sim for 4 gpus:\n mpirun -np 4  ./run_cudaq_job.py --circName   %s   -n 300   \n'%(MD['short_name'] ))
+    print('cloud sim for two nodes 8 gpus:\n   ./run_cudaq.sh (remember to quit shifter)\n')
     print('M:done')
    

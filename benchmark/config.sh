@@ -19,4 +19,4 @@ N="mar"
 qft=1
 
 # nvidia options
-option="fp64,mgpu"
+option="fp32,mgpu"

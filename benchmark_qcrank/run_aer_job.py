@@ -25,10 +25,10 @@ from qiskit import  transpile
 from toolbox.Util_ibm import harvest_ibmq_backRun_submitMeta, harvest_backRun_results, harvest_circ_transpMeta
 from toolbox.Util_H5io4 import  write4_data_hdf5, read4_data_hdf5
 from toolbox.Util_Qiskit import  circ_depth_aziz
+from toolbox.qpixl import qcrank
 
+# sys.path.append(os.path.abspath("/daan_qcrank/py"))
 
-sys.path.append(os.path.abspath("/daan_qcrank/py"))
-from qpixl import qcrank
 import argparse
 
 #...!...!..................
@@ -169,5 +169,3 @@ if __name__ == "__main__":
 
         print('   ./postproc_exp.py --expName   %s --showPlots b c   \n'%(expMD['short_name']))
  
-
-     

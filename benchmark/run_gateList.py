@@ -57,7 +57,7 @@ def get_parser():
         args.numRank = int(os.environ['SLURM_NTASKS'])
         args.cores = int(os.environ['SLURM_CPUS_PER_TASK'])
         args.tasks_per_node = int(os.environ['SLURM_NTASKS_PER_NODE'])
-    if args.backend=='nvidia-mgpu':  # use `mpich -np 4` executed inside podman
+    if args.backend=='nvidia':  # use `mpich -np 4` executed inside podman
         cudaq.mpi.initialize()
         args.myRank = cudaq.mpi.rank()
         args.numRank = cudaq.mpi.num_ranks()
@@ -95,7 +95,7 @@ def run_cudaq(shots,num_qpus,nc=1):
 
         if prOn:   print(cudaq.draw(circ_kernel, num_qubit, num_gate, gate_type, gate_param))    
         if target == "nvidia-mgpu"  or  target == "nvidia":  
-            target2='adj-gpu' if target == "nvidia-mgpu" else 'one-gpu'
+            target2='adj-gpu'
             results = cudaq.sample(circ_kernel,num_qubit, num_gate, gate_type, gate_param, shots_count=shots)
             resL[i]=results  # store  bistsrings
             
@@ -124,7 +124,7 @@ def run_cudaqft(shots,num_qpus,num_qubit,nc=1):
         elif target == "nvidia-mqpu":  # 4 GPUs parallel OR 1
             target2='par-gpu'
             gpu_id = i % num_qpus
-            results = cudaq.samsample_asyncple(qft_kernel, input_state, shots_count=shots, qpu_id=gpu_id)
+            results = cudaq.sample_async(qft_kernel, input_state, shots_count=shots, qpu_id=gpu_id)
             # Retrieve  results - this is where the time is used???
             resL[i]=results.get() # store bistsrings
                         
@@ -172,7 +172,6 @@ if __name__ == "__main__":
         nCirc=MD['num_circ']    
     if args.verb>=2:
         print('M:pre MD:');  pprint(MD)
-       
     if 'qiskit' in target:
         if args.verb: print('M: will run %d circ on CPUs numRank=%d ...'%(nCirc,args.numRank))
         T0=time()

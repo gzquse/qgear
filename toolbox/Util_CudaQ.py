@@ -202,7 +202,8 @@ def qiskit_to_gateList(qcL):
                 exit(99) 
             k+=1
         circ_type[j]=[nq,k]  # remember number of gates per circuit
-    
-    return {'circ_type': circ_type, 'gate_type': gate_type, 'gate_param': gate_param},{'gate_map':m}
+    outD={'circ_type': circ_type, 'gate_type': gate_type, 'gate_param': gate_param}
+    md={'gate_map':m,'num_qubit':nq,'num_gate':nGate,'num_circ':nCirc}
+    return outD, md
 
 

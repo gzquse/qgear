@@ -111,8 +111,12 @@ class Plotter(PlotterBackbone):
                             dCol='C4'
                     else: continue
                 elif tag1 == qft:
-                    marker_style = '1'  
-                    dCol='C4'
+                    if 'fp32' in tag3:
+                        dCol='C1'
+                        marker_style = '^'
+                    elif 'fp64' in tag3:
+                        dCol='C2'
+                        marker_style = 'o'  
                 # Set marker style based on cores and tasks_per_node
                 if '100CX' in tag3:
                     marker_style = 's'
@@ -133,21 +137,22 @@ class Plotter(PlotterBackbone):
                     ax.plot(nqV_shifted, runtV_shifted, marker=marker_style, linestyle='-', markerfacecolor=isFilled, color=dCol,label=dLab,markersize=9)     
 
                 else:
-                    ax.plot(nqV,runtV,marker=marker_style, linestyle='-', markerfacecolor=isFilled, color=dCol, label=dLab, markersize=9)
+                    ax.plot(nqV, runtV, marker=marker_style, linestyle='-', markerfacecolor=isFilled, color=dCol, label=dLab, markersize=9)
         tit='Compute state-vector tag1=%s'%tag1
         # Place the title above the legend
         ax.set(xlabel='num qubits',ylabel='compute end-state (minutes)')
         ax.set_title(tit, pad=50)  # Adjust the pad value as needed
         ax.set_yscale('log')
-        ax.set_ylim(1e-3, 3.5e+3)
-        ax.set_xlim(27.5,34.5) 
+        # ax.set_ylim(1e-3, 3.5e+3)
+        ax.set_ylim(1e-3, 1e+0)
+        ax.set_xlim(15.5,33.5) 
         ax.grid()
         # adjustable
         ax.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
                 ncol=3, mode="expand", borderaxespad=0., fontsize=8.5)
 
-        ax.axhline(1440, ls='--', lw=2, c='m')
-        ax.text(30, 600, '24h time-out', c='m')
+    #    ax.axhline(1440, ls='--', lw=2, c='m')
+    #    ax.text(30, 600, '24h time-out', c='m')
        
         
 def extract_date_from_path(file_path):
@@ -232,20 +237,21 @@ def readOneQFT(inpF,dataD,qft,verb=1):
     #print(inpF,xMD['num_qubit'],xMD['elapsed_time'],float(xMD['num_circ']))
     nq=float(xMD['num_qubit'])
     runt=float(xMD['elapsed_time'])
-    #pprint(xMD)
     tag1=qft
     tag2=xMD['target']
     if tag1 not in dataD: dataD[tag1]={}
     # save for future compare
     # num_cx_formatted = "10k" if xMD["num_cx"] == 10000 else f'{xMD["num_cx"]}'
-    num_shots_formatted = "10k" if xMD["num_shots"] == 10000 else None
+    num_shots_formatted = "10k" if xMD["num_shots"] == 10000 else 100
+    # one time use hard coded
+    options = inpF.split('/')[-1].split('_')[-2]
     shots = xMD['num_shots']
     g_tag = 'gpu' 
     if '-' in tag2:
         parts = tag2.split('-')
         if len(parts) > 1:
             g_tag = parts[1]
-    tag3 = f'{qft}.{g_tag}.{num_shots_formatted}S'
+    tag3 = f'{qft}.{g_tag}.{options}.{num_shots_formatted}S'
     if tag2 not in dataD[tag1]: dataD[tag1][tag2]={}
     if tag3 not in dataD[tag1][tag2]: dataD[tag1][tag2][tag3]={'nq':[],'runt':[], 'shots':[],'date': []}
     head=dataD[tag1][tag2][tag3]
@@ -316,7 +322,7 @@ if __name__ == '__main__':
 
     #corePath='/dataVault2024/dataCudaQ_'  # in podman
     corePath='/pscratch/sd/g/gzquse/quantDataVault2024/dataCudaQ_'  # bare metal Martin
-    pathL=['Aug4']
+    pathL=['Nov15']
     fileL=[]
     vetoL=['r1.4','r2.4','r3.4', ]
     for path in pathL:

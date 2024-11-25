@@ -134,7 +134,6 @@ if __name__ == "__main__":
     else:
         MD['short_name']=args.expName
 
-    
     #...... WRITE  OUTPUT .........
     outF=os.path.join(args.outPath,MD['short_name']+'.gate_list.h5')
     write4_data_hdf5(outD,outF,MD)

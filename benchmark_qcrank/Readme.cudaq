@@ -2,29 +2,33 @@ Workflow for image writeing and reading it back using QCrank encoding using Cuda
 
 Get a GPU node for test
 
-salloc -q interactive -C gpu -t 4:00:00 -A nintern -N 1 
+# Multiple nodes (interactively test)
+salloc -N 2 --gpus-per-task=1 --ntasks-per-node=4 --gpu-bind=none  -t 4:00:00 -q interactive -A nintern -C gpu --image=docker:nvcr.io/nvidia/nightly/cuda-quantum:latest --module=cuda-mpich
 
 0)- - - - - - - -
-Exercise all steps  from Readme.qiskit
+Exercise all steps  from Readme.cudaq
 
 step 1) - - - - - - - - - - -
 Configur QCrank input  (as for Qiskit)
-./prep_cannedImage.py --tag b2 --nqAddr 9
+./prep_cannedImage.py --tag e1 --nqAddr 15
 
-OUTPUT:    out/canImg_b2_32_32.qcrank_inp.h5
+OUTPUT:    out/canImg_e1_384_256.gate_list.h5
 
+# Go inside the shifter
+shifter --image=docker:nvcr.io/nvidia/nightly/cuda-quantum:latest --module=cuda-mpich /bin/bash
 
 step 2) - - - - - - - - - - -
 Generate QCrank Qiskit circuit and export it as numpy lists using
 Util_CudaQ: qiskit_to_gateList()
 
-OUTPUT:  out/canImg_b2_32_32.gate_list.h5
+OUTPUT:  out/cudaq_5a99eb.h5
 It contains serialized circuit onformation needed by CudaQ kernel constructor
  {'circ_type': circ_type, 'gate_type': gate_type, 'gate_param': gate_param},{'gate_map':m}
 
-Execute simulation on adj-GPUs [single GPU node test]
-mpiexec -np 4 ./run_cudaq_job.py --circName   canImg_b2_32_32  -n 500
+[multiple GPU nodes test]
+mpiexec -np 4 ./run_cudaq_job.py --circName   canImg_d2_192_128  -n 500 (depracated)
 
+./run_cudaq.sh
 measuremnt is saved in sparse array
 h5-write : raw_nkey (1,) int32
 h5-write : raw_ikey (1, 1301) int32
