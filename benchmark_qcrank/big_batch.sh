@@ -1,18 +1,12 @@
 #!/bin/bash
-#SBATCH -N 4
-#SBATCH --gpus-per-task=1
-#SBATCH --ntasks-per-node=4
-#SBATCH --gpu-bind=none
-#SBATCH -t 00:10:00
-#SBATCH -q debug
-#SBATCH -A nintern
-#SBATCH -C gpu
-#SBATCH --image=docker:nvcr.io/nvidia/nightly/cuda-quantum:latest
-#SBATCH --module=cuda-mpich
-#SBATCH --output=out/%j.out
-#SBATCH --licenses=scratch
+set -u  # exit if you try to use an uninitialized variable
+set -e  # bash exits if any statement returns a non-true return value
 
-export CUDAQ_MPI_COMM_LIB=${HOME}/distributed_interfaces/libcudaq_distributed_interface_mpi.so
+trg=gpu
+c=64  # cores for CPU
+n=4   # ntasks per node
+ACCT=nintern
+shots=400
 
 # Read tags from config file, skipping comments and empty lines
 config_file="run_config.txt"
@@ -43,8 +37,13 @@ while read -r tag || [ -n "$tag" ]; do
         *)  echo "Warning: Unknown tag $tag"
             continue ;;
     esac
+    SCMD="./run_job.slr $circName $trg $shots"
+
+    if [ "$trg" == "cpu" ]; then
+        sbatch -N1 -A $ACCT $SCMD
+    else
+        sbatch -C "gpu&hbm80g" -N1 -A $ACCT $SCMD # currently only one node
+    fi
+    sleep 1
     
-    echo "Processing $circName"
-    CMD="./run_cudaq_job.py --circName canImg_e1_384_256 -n 300"
-    srun -N 4 -n 16 shifter bash -l launch.sh ./run_cudaq_job.py -c canImg_b2_32_32 -n 300
 done < "$config_file"

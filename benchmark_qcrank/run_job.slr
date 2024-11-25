@@ -1,0 +1,39 @@
+#!/bin/bash
+#SBATCH -C gpu -N 4 -A nintern
+#SBATCH --time=28:00 -q debug
+# SBATCH --time 3:58:00  -q regular 
+#SBATCH --gpus-per-task=1
+#SBATCH --ntasks-per-node=4
+#SBATCH --gpu-bind=none
+#SBATCH --image=docker:nvcr.io/nvidia/nightly/cuda-quantum:latest
+#SBATCH --module=cuda-mpich
+#SBATCH --output=out/%j.out
+#SBATCH --licenses=scratch
+
+set -u  # exit if you try to use an uninitialized variable
+set -e  # bash exits if any statement returns a non-true return value
+
+export LD_LIBRARY_PATH=$HOME:$LD_LIBRARY_PATH
+export CUDAQ_MPI_COMM_LIB=$HOME/distributed_interfaces/libcudaq_distributed_interface_mpi.so
+export CUDAQ_MPI_COMM_LIB=${HOME}/distributed_interfaces/libcudaq_distributed_interface_mpi.so
+
+# Set default values
+circName=${1:-canImg_e1_384_256}
+trg=${2:-cpu}
+shots=${3:-400}
+
+# N=${SLURM_NNODES:-1}
+# T=${SLURM_NTASKS_PER_NODE:-1}
+# G=$(( T * N ))
+
+if [ "$trg" == "cpu" ]; then
+        CMD="python3 -u ./run_aer_job.py --cannedExp   $circName   -n $shots   -E"
+    else
+        CMD="python3 -u ./run_cudaq_job.py -c $circName -n $shots"
+    fi
+echo "S: Processing $circName"
+echo S: CMD=$CMD
+srun -l shifter bash "$CMD"
+echo S: done
+date
+    
