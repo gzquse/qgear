@@ -42,7 +42,7 @@ def get_parser():
     parser.add_argument("--basePath",default=None,help="head path for set of experiments, or 'env'")
     parser.add_argument("--inpPath",default='out/',help="input packed image")
     parser.add_argument("--outPath",default='out/',help="raw outputs from experiment")
-    parser.add_argument("-c", "--circName",  default='canImg_e1_384_256', help='gate-list file name')
+    parser.add_argument("-c", "--circName",  default='canImg_b2_32_32', help='gate-list file name')
     parser.add_argument("--expName",  default=None,help='(optional) replaces jobID assigned during submission by users choice')
     parser.add_argument('-t','--target-option',default='fp32,mgpu',help='target options')
     # .... job running

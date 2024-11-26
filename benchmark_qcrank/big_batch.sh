@@ -2,7 +2,7 @@
 set -u  # exit if you try to use an uninitialized variable
 set -e  # bash exits if any statement returns a non-true return value
 
-trg=gpu
+trg=cpu
 c=64  # cores for CPU
 n=4   # ntasks per node
 ACCT=nintern
