@@ -23,11 +23,11 @@ submit_job() {
     if [ "$trg" == "par-cpu" ]; then
         sbatch -C cpu --exclusive --cpus-per-task=$c --ntasks-per-node=$n -N1 -A $ACCT $SCMD
     else
-        sbatch -C "gpu&hbm80g" -N1 --gpus-per-task=4 --ntasks-per-node=1 --gpu-bind=none -A $ACCT $SCMD # currently only one node
+        sbatch -C "gpu&hbm80g" -N4 --gpus-per-task=4 --ntasks-per-node=1 --gpu-bind=none -A $ACCT $SCMD # currently only one node
     fi
 }
 
-for nq in {33..34}; do
+for nq in {16}; do
     if [ "$qft" -eq 1 ]; then
         expN="${N}${nq}q_qft${qft}"
         for s in "${shots[@]}"; do
