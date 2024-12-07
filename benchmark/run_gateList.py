@@ -33,7 +33,7 @@ def get_parser():
 
     parser.add_argument("-e","--expName",  default='mac10q',help='[.gate_list.h5]  defines list of circuits to run')
     parser.add_argument('-n','--numShots',type=int, default=10240, help="(optional) shots per circuit")
-    parser.add_argument("-b", "--backend", default="nvidia", choices=['qiskit-cpu','tensornet','nvidia-mgpu','nvidia-mqpu','nvidia','qpp-cpu'], help="cudaQ target settings")
+    parser.add_argument("-b", "--backend", default="nvidia", choices=['qiskit-cpu','tensornet','nvidia-mqpu','nvidia','qpp-cpu'], help="cudaQ target settings")
     parser.add_argument('-q','--qft',type=int, default=0, help="(optional) enable qft circuit")
     # default uses single float and we assume using all gpus
     parser.add_argument('-t','--target-option',default='fp32,mgpu',help='target options')
@@ -94,7 +94,7 @@ def run_cudaq(shots,num_qpus,nc=1):
         prOn= num_qubit<6 and i==0 or args.verb>1
 
         if prOn:   print(cudaq.draw(circ_kernel, num_qubit, num_gate, gate_type, gate_param))    
-        if target == "nvidia-mgpu"  or  target == "nvidia":  
+        if target == "nvidia":  
             target2='adj-gpu'
             results = cudaq.sample(circ_kernel,num_qubit, num_gate, gate_type, gate_param, shots_count=shots)
             resL[i]=results  # store  bistsrings
@@ -114,9 +114,7 @@ def run_cudaqft(shots,num_qpus,num_qubit,nc=1):
     resL=[0]* nc # prime the list
     for i in range(nc):
         input_state = [random.choice([0, 1]) for i in range(num_qubit)]
-        if target == "nvidia-mgpu" or target == "nvidia":  
-            # default mgpu
-            #target2='adj-gpu' if target == "nvidia-mgpu" else 'one-gpu'
+        if target == "nvidia":  
             target2='adj-gpu'
             results = cudaq.sample(qft_kernel, input_state, shots_count=shots)
             resL[i]=results  # store  bistsrings
@@ -184,8 +182,8 @@ if __name__ == "__main__":
         # only get qpus not gpus
         num_qpus = cudaq.get_target().num_qpus()
         num_gpus = cudaq.num_available_gpus()
-        used_qpus=num_qpus if  target == "nvidia-mqpu" else 1
-        used_qgus=num_gpus if  target == "nvidia-mgpu" else 1
+        used_qpus=num_qpus
+        used_qgus=num_gpus
         if args.verb: print('M: use %d of  %d seen qpus'%(used_qpus,num_qpus))
         if args.verb: print('M: use %d of  %d seen gpus'%(used_qgus,num_gpus))
                 
@@ -237,7 +235,7 @@ if __name__ == "__main__":
             print('bstr:',bstr,res0[bstr])
             if i >10: break
     
-    if target=='nvidia-mgpu':
+    if target=='nvidia':
         print('myRank:%d of %d'%(args.myRank,  args.numRank ))
         # for this case all ranks carry the same information, quit all be rank0
         if args.myRank>0:
@@ -255,6 +253,6 @@ if __name__ == "__main__":
         else:  MD.pop('gpu_info')
         pprint(MD)
    
-    if target == 'nvidia-mgpu':
+    if target == 'nvidia':
         cudaq.mpi.finalize()
   

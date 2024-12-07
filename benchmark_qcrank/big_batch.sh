@@ -8,6 +8,8 @@ n=4   # ntasks per node
 ACCT=nintern
 shots=400
 
+export HDF5_USE_FILE_LOCKING=FALSE
+
 # Read tags from config file, skipping comments and empty lines
 config_file="run_config.txt"
 if [ ! -f "$config_file" ]; then
@@ -25,6 +27,8 @@ while read -r tag || [ -n "$tag" ]; do
         "a1") circName="canImg_${tag}_32_1" ;;
         "b1") circName="canImg_${tag}_64_16" ;;
         "b2") circName="canImg_${tag}_32_32" ;;
+        "b3") circName="canImg_${tag}_64_64" ;;
+        "b4") circName="canImg_${tag}_128_128" ;;
         "c1") circName="canImg_${tag}_64_80" ;;
         "d1") circName="canImg_${tag}_192_128" ;;
         "d2") circName="canImg_${tag}_192_128" ;;
@@ -42,7 +46,9 @@ while read -r tag || [ -n "$tag" ]; do
     if [ "$trg" == "cpu" ]; then
         sbatch -N1 -A $ACCT $SCMD
     else
-        sbatch -C "gpu&hbm80g" -N1 -A $ACCT $SCMD # currently only one node
+        echo "launching GPUs"
+        # sbatch -C "gpu&hbm80g" -N4 -A $ACCT $SCMD 
+        sbatch -C "gpu" -N4 -A $ACCT $SCMD 
     fi
     sleep 1
     

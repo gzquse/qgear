@@ -11,7 +11,7 @@ nCirc=8
 
 # Shots of sampling
 #shots=(10000 1000000 10000000 100000000)
-shots=(1)
+shots=(100)
 # Prefix
 # run gate list has a hardcode mar
 N="mar"

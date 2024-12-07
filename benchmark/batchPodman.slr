@@ -44,7 +44,7 @@ echo S: head:`hostname` N=$N T=$T G=$G
 
 # Define Podman image
 export PODMANHPC_ADDITIONAL_STORES=/dvs_ro/cfs/cdirs/nintern/gzquse/podman_common/
-IMG=gzquse/cudaq-qiskit:v1
+IMG=gzquse/cudaq-qiskit:v2
 echo S: head:`hostname` use image $IMG
 
 # Set up base paths

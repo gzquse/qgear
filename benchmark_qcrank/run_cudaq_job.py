@@ -216,5 +216,6 @@ if __name__ == "__main__":
         outF=os.path.join(args.outPath,expMD['short_name']+'.h5')
         write4_data_hdf5(expD,outF,expMD)
     rank_print('   ./postproc_exp.py --expName   %s --showPlots b c   \n'%(expMD['short_name']))
-    cudaq.mpi.finalize()
+    if args.backend=='nvidia': 
+        cudaq.mpi.finalize()
  

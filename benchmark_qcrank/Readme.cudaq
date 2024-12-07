@@ -1,5 +1,10 @@
 Workflow for image writeing and reading it back using QCrank encoding using CudaQ
 
+Install pre-requisites in shifter image
+shifter --image=docker:nvcr.io/nvidia/nightly/cuda-quantum:latest --module=cuda-mpich /bin/bash
+pip3 install qiskit qiskit-ibm-runtime qiskit-machine-learning qiskit_ibm_experiment qiskit-aer
+pip3 install matplotlib h5py   scipy    jupyter notebook  bitstring coloredlogs
+
 Get a GPU node for test
 
 # Multiple nodes (interactively test)

@@ -44,6 +44,8 @@ def importImage(args):
     if tag=='a1':  inpN='alphabet_x32_y1'
     if tag=='b1':  inpN='alphabet_x64_y16' 
     if tag=='b2':  inpN='high-heels_x32_y32' 
+    if tag=='b3':  inpN='high-heels_x64_y64' 
+    if tag=='b4':  inpN='high-heels_x128_y128' 
     if tag=='c1':  inpN='xray-finger-8y_x64_y80' 
     if tag=='d1':  inpN='igb_facade_x192_y128' 
     if tag=='d2':  inpN='zebra_x192_y128' 
