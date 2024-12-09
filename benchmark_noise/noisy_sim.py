@@ -67,14 +67,14 @@ def run_noise_analysis(
         depolar_channel = cudaq.DepolarizationChannel(p)
         bitflip_channel = cudaq.BitFlipChannel(p)
         phaseflip_channel = cudaq.PhaseFlipChannel(p)
-        amp_damp_channel = cudaq.AmplitudeDampingChannel(p)
+        # amp_damp_channel = cudaq.AmplitudeDampingChannel(p)
         
         # Test each noise type separately
         for channel, result_list in [
             (depolar_channel, depolar_expectations),
             (bitflip_channel, bitflip_expectations),
             (phaseflip_channel, phaseflip_expectations),
-            (amp_damp_channel, amp_damp_expectations)
+            # (amp_damp_channel, amp_damp_expectations)
         ]:
             noise_model = cudaq.NoiseModel()
             noise_model.add_channel("x", [0], channel)
@@ -84,7 +84,7 @@ def run_noise_analysis(
             result_list.append(result.expectation())
     
     return (depolar_expectations, bitflip_expectations, 
-            phaseflip_expectations, amp_damp_expectations)
+            phaseflip_expectations)
 
 class Plotter(PlotterBackbone):
     def __init__(self, args):
@@ -96,7 +96,7 @@ class Plotter(PlotterBackbone):
         fig = self.plt.figure(figId, facecolor='white', figsize=(10, 6))
         ax = self.plt.subplot(1, 1, 1)
         
-        labels = ['Depolarization', 'Bit Flip', 'Phase Flip', 'Amplitude Damping']
+        labels = ['Depolarization', 'Bit Flip', 'Phase Flip',]
         colors = ['blue', 'red', 'green', 'purple']
         
         # Plot ideal case

@@ -1,8 +1,7 @@
 #!/bin/bash
-#SBATCH -C gpu -N 4 -A nintern
+#SBATCH -C gpu -N 1 -A nintern
 # SBATCH --time=28:00 -q debug
-#SBATCH --time 58:00  -q regular 
-#SBATCH --gpus-per-task=1
+#SBATCH --time 3:58:00  -q regular 
 #SBATCH --ntasks-per-node=4
 #SBATCH --gpu-bind=none
 #SBATCH --image=docker:nvcr.io/nvidia/nightly/cuda-quantum:latest
@@ -16,8 +15,8 @@ export LD_LIBRARY_PATH=$HOME:$LD_LIBRARY_PATH
 export CUDAQ_MPI_COMM_LIB=${HOME}/distributed_interfaces/libcudaq_distributed_interface_mpi.so
 
 # Set default values
-circName=${1:-canImg_c1_64_80}
-trg=${2:-cpu}
+circName=${1:-canImg_e1_384_256}
+trg=${2:-gpu}
 shots=${3:-400}
 
 # N=${SLURM_NNODES:-1}
@@ -33,7 +32,7 @@ echo "S: Processing $circName"
 echo S: CMD=$CMD
 srun -l shifter bash -l -c "$CMD"
 # test srun in salloc nodes
-#srun -l -N 1 -n 4 shifter bash -l -c "$CMD"
+# srun -l -N 1 -n 4 shifter bash -l -c "$CMD"
 echo S: done
 date
     

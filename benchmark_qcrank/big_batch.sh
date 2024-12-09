@@ -44,11 +44,12 @@ while read -r tag || [ -n "$tag" ]; do
     SCMD="./run_job.slr $circName $trg $shots"
 
     if [ "$trg" == "cpu" ]; then
-        sbatch -N1 -A $ACCT $SCMD
+        echo "launching CPUs"
+        sbatch -C "cpu" -N1 -A $ACCT $SCMD
     else
         echo "launching GPUs"
         # sbatch -C "gpu&hbm80g" -N4 -A $ACCT $SCMD 
-        sbatch -C "gpu" -N4 -A $ACCT $SCMD 
+        sbatch -C "gpu" -N1 -A --gpus-per-task=1 $ACCT $SCMD 
     fi
     sleep 1
     

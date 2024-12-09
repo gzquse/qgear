@@ -8,7 +8,7 @@ pip3 install matplotlib h5py   scipy    jupyter notebook  bitstring coloredlogs
 Get a GPU node for test
 
 # Multiple nodes (interactively test)
-salloc -N 2 --gpus-per-task=1 --ntasks-per-node=4 --gpu-bind=none  -t 4:00:00 -q interactive -A nintern -C gpu --image=docker:nvcr.io/nvidia/nightly/cuda-quantum:latest --module=cuda-mpich
+salloc -N 1 --gpus-per-task=1 --ntasks-per-node=4 --gpu-bind=none  -t 4:00:00 -q interactive -A nintern -C gpu --image=docker:nvcr.io/nvidia/nightly/cuda-quantum:latest --module=cuda-mpich
 
 0)- - - - - - - -
 Exercise all steps  from Readme.cudaq
