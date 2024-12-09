@@ -53,8 +53,8 @@ def compute_correlation_and_draw_line(ax, x_data, y_data,xLR=[]):
     ax.plot(x12, y12, 'r--',lw=1.0)
 
     th=np.arctan(m)
-    txt='correl: %.2f,   theta %.0f deg'%(correlation,th/np.pi*180)
-    ax.text(0.05,0.92,txt,transform=ax.transAxes,color='r')    
+    txt='correl: %.2f, theta %.0f deg'%(correlation,th/np.pi*180)
+    # ax.text(0.05,0.92,txt,transform=ax.transAxes,color='r')    
     
     ax.grid(True)
     return 
@@ -73,7 +73,7 @@ def plot_histogram(ax, res_data):
     se_s=std/np.sqrt(2*(N-1))
     ax.axvline(mean, color='r', linestyle='dashed', linewidth=1)
     txt='Mean: %.3f\nStd: %0.3f +/- %0.3f'%(mean,std,se_s)
-    ax.annotate(txt, xy=(0.05, 0.85),c='r', xycoords='axes fraction')
+    #ax.annotate(txt, xy=(0.05, 0.85),c='r', xycoords='axes fraction')
     ax.xaxis.set_major_locator(ticker.MaxNLocator(4))
 
 
