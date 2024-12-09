@@ -2,7 +2,7 @@
 set -u  # exit if you try to use an uninitialized variable
 set -e  # bash exits if any statement returns a non-true return value
 
-trg=cpu
+trg=gpu
 c=64  # cores for CPU
 n=4   # ntasks per node
 ACCT=nintern
@@ -49,7 +49,7 @@ while read -r tag || [ -n "$tag" ]; do
     else
         echo "launching GPUs"
         # sbatch -C "gpu&hbm80g" -N4 -A $ACCT $SCMD 
-        sbatch -C "gpu" -N1 -A --gpus-per-task=1 $ACCT $SCMD 
+        sbatch -C "gpu" -N1 --gpus-per-task=1 -A $ACCT $SCMD 
     fi
     sleep 1
     

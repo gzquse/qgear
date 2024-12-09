@@ -5,6 +5,9 @@ shifter --image=docker:nvcr.io/nvidia/nightly/cuda-quantum:latest --module=cuda-
 pip3 install qiskit qiskit-ibm-runtime qiskit-machine-learning qiskit_ibm_experiment qiskit-aer
 pip3 install matplotlib h5py   scipy    jupyter notebook  bitstring coloredlogs
 
+Also we can use pre-defined environment
+# shifter ---image=docker:nvcr.io/nvidia/nightly/cuda-quantum:latest --module=cuda-mpich --env PYTHONUSERBASE=$SCRATCH/jan_env
+
 Get a GPU node for test
 
 # Multiple nodes (interactively test)

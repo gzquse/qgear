@@ -86,7 +86,7 @@ def buildMeta_CannedImage(args,bigD):
     assert cad['image_pixels']% pd['seq_len']==0
     pd['nq_fdata']= cad['image_pixels']// pd['seq_len']
     pd['num_clbit']=pd['nq_fdata']+pd['nq_addr']  # number of measured qubits
-    assert pd['num_clbit'] <=34  # needs GPU's to run, Martin change it to a higher value
+    assert pd['num_clbit'] <=42  # needs GPU's to run, Martin change it to a higher value
     
     pd['qcrank_max_fval']=np.pi # default range for QCrank
     
