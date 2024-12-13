@@ -31,8 +31,7 @@ from qiskit_aer import AerSimulator
 import hashlib
 import argparse
 
-# sys.path.append(os.path.abspath("/daan_qcrank/py"))
-from toolbox.qpixl import qcrank
+from qcrank_light.datacircuits import qcrank
 
 #...!...!..................
 def get_parser():

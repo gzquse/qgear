@@ -15,9 +15,9 @@ export LD_LIBRARY_PATH=$HOME:$LD_LIBRARY_PATH
 export CUDAQ_MPI_COMM_LIB=${HOME}/distributed_interfaces/libcudaq_distributed_interface_mpi.so
 
 # Set default values
-circName=${1:-canImg_e1_384_256}
+circName=${1:-canImg_d1_192_128}
 trg=${2:-gpu}
-shots=${3:-400}
+shots=${3:-3000}
 
 # N=${SLURM_NNODES:-1}
 # T=${SLURM_NTASKS_PER_NODE:-1}

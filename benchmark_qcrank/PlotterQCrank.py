@@ -136,7 +136,7 @@ class Plotter(PlotterBackbone):
         ax.set_xlim(xrL,xrR);ax.set_ylim(xrL,xrR)
         x12 = np.array([min(tdata), max(tdata)])
         ax.plot(x12,x12,ls='--',c='k',lw=0.7)           
-        ax.set_title(topTit[0]) 
+        # ax.set_title(topTit[0]) 
         
         
         #..... right column ....
@@ -153,7 +153,7 @@ class Plotter(PlotterBackbone):
 
         ax.set_ylabel('reco-true')
         ax.set(xlabel=xLab,ylabel='reco-true')
-        ax.set_title(topTit[1])
+        # ax.set_title(topTit[1])
         
         ax.set_xlim(xrL,xrR); ax.set_ylim(-resMX,resMX)
         ax.grid()
@@ -161,7 +161,7 @@ class Plotter(PlotterBackbone):
         #..... middle column ....
         ax = self.plt.subplot(nrow,ncol,2) 
         plot_histogram(ax,  res_data)
-        ax.set_title(topTit[2])
+        # ax.set_title(topTit[2])
         xLab= 'reco-true'
         ax.set(xlabel=xLab,ylabel='samples')
         ax.axvline(0.,ls='--',c='k',lw=1.0)
