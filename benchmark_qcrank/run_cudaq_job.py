@@ -32,6 +32,7 @@ import hashlib
 import argparse
 
 from qcrank_light.datacircuits import qcrank
+os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
 #...!...!..................
 def get_parser():

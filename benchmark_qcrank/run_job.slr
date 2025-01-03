@@ -14,9 +14,11 @@ set -e  # bash exits if any statement returns a non-true return value
 export LD_LIBRARY_PATH=$HOME:$LD_LIBRARY_PATH
 export CUDAQ_MPI_COMM_LIB=${HOME}/distributed_interfaces/libcudaq_distributed_interface_mpi.so
 
+export HDF5_USE_FILE_LOCKING=FALSE
+
 # Set default values
-circName=${1:-canImg_d1_192_128}
-trg=${2:-gpu}
+circName=${1:-canImg_c1_64_80}
+trg=${2:-cpu}
 shots=${3:-3000}
 
 # N=${SLURM_NNODES:-1}
@@ -32,7 +34,7 @@ echo "S: Processing $circName"
 echo S: CMD=$CMD
 srun -l shifter bash -l -c "$CMD"
 # test srun in salloc nodes
-# srun -l -N 2 -n 4 shifter bash -l -c "$CMD"
+#srun -l -N 1 -n 4 shifter bash -l -c "$CMD"
 echo S: done
 date
     

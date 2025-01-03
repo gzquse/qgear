@@ -6,9 +6,7 @@ trg=gpu
 c=64  # cores for CPU
 n=4   # ntasks per node
 ACCT=nintern
-shots=400
-
-export HDF5_USE_FILE_LOCKING=FALSE
+shots=3000
 
 # Read tags from config file, skipping comments and empty lines
 config_file="run_config.txt"
@@ -48,8 +46,9 @@ while read -r tag || [ -n "$tag" ]; do
         sbatch -C "cpu" -N1 -A $ACCT $SCMD
     else
         echo "launching GPUs"
+        # four nodes
         # sbatch -C "gpu&hbm80g" -N4 -A $ACCT $SCMD 
-        sbatch -C "gpu" -N1 --gpus-per-task=1 -A $ACCT $SCMD 
+        sbatch -C "gpu&hbm80g" -N4 --gpus-per-task=1 -A $ACCT $SCMD 
     fi
     sleep 1
     

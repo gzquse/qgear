@@ -1,3 +1,7 @@
 # List of tags to run (one per line)
 # Comment lines starting with # will be ignored
+b3
+b4
+c1
+d1
 e1

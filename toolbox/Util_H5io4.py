@@ -14,6 +14,8 @@ import numpy as np
 import h5py, time, os
 import json,time
 from pprint import pprint
+import os
+os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
 #...!...!..................
 def write4_data_hdf5(dataD,outF,metaD=None,verb=1):
@@ -54,28 +56,32 @@ def read4_data_hdf5(inpF,verb=1):
     if verb>0:
             print('read data from hdf5:',inpF)
             start = time.time()
-    h5f = h5py.File(inpF, 'r')
-    objD={}
-    for x in h5f.keys():
-        if verb>1: print('\nitem=',x,type(h5f[x]),h5f[x].shape,h5f[x].dtype)
-        #if x in ['calTag','dataFile','date'] : continue
-        if h5f[x].dtype==object:
-            obj=h5f[x][:]
-            #print('bbb',type(obj),obj.dtype)
-            if verb>0: print('read str:',x,len(obj),type(obj))
-        else:
-            obj=h5f[x][:]
-            if verb>0: print('read obj:',x,obj.shape,obj.dtype)
-        objD[x]=obj
     try:
-        inpMD=json.loads(objD.pop('meta.JSON')[0])
-        if verb>1: print('  recovered meta-data with %d keys'%len(inpMD))
-    except:
-        inpMD=None
-    if verb>0:
-        print(' done h5, num rec:%d  elaT=%.1f sec'%(len(objD),(time.time() - start)))
-    h5f.close()
-    return objD,inpMD
+        with h5py.File(inpF, 'r') as h5f:
+            objD={}
+            for x in h5f.keys():
+                if verb>1: print('\nitem=',x,type(h5f[x]),h5f[x].shape,h5f[x].dtype)
+                #if x in ['calTag','dataFile','date'] : continue
+                if h5f[x].dtype==object:
+                    obj=h5f[x][:]
+                    #print('bbb',type(obj),obj.dtype)
+                    if verb>0: print('read str:',x,len(obj),type(obj))
+                else:
+                    obj=h5f[x][:]
+                    if verb>0: print('read obj:',x,obj.shape,obj.dtype)
+                objD[x]=obj
+            try:
+                inpMD=json.loads(objD.pop('meta.JSON')[0])
+                if verb>1: print('  recovered meta-data with %d keys'%len(inpMD))
+            except:
+                inpMD=None
+            if verb>0:
+                print(' done h5, num rec:%d  elaT=%.1f sec'%(len(objD),(time.time() - start)))
+            h5f.close()
+            return objD,inpMD
+    except OSError as e:
+        print(f"Error: {e}")
+    
 
 
 

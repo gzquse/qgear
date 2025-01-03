@@ -141,6 +141,6 @@ if __name__=="__main__":
     if 'c' in args.showPlots:
         plot.dynamic_range(expD,expMD,figId=3)
     
-    plot.display_all()
+    plot.display_all(png=0)
     print('M:done')
 
