@@ -75,7 +75,7 @@ def plot_perlmutter_circuit_timing():
         plt.plot(qubit_ranges[gpu], times, marker=marker, label=gpu)
 
     # Add title, labels, and legend
-    plt.title("b)", pad=20)
+    plt.title("b)", pad=50)
     plt.xlabel("num qubits")
     plt.ylabel("one circuit simu time (minutes)")
     plt.legend(title="Num GPUs")

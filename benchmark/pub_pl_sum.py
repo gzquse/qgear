@@ -133,17 +133,25 @@ class Plotter(PlotterBackbone):
                     else: continue
                 elif tag1 == qft:
                     if 'fp32' in tag3:
-                        dCol='#2ca02c'  # Cyan
-                        marker_style = '^'
-                        linestyle = '-'  # Solid line for GPU
-                        filled = True
-                        dLab = 'QFT fp32'
+                        if 'pennylane' in tag2:
+                            dCol='#bcbd22'
+                            marker_style = 's'
+                            linestyle = '-'  # Solid line for GPU
+                            filled = True
+                            dLab = 'QFT fp32 Pennylane'
+                        else:
+                            dCol='#ff7f0e'  # Cyan
+                            marker_style = '^'
+                            linestyle = '-'  # Solid line for GPU
+                            filled = True
+                            dLab = 'QFT fp32 Cudaq'
                     elif 'fp64' in tag3:
-                        dCol='#ff7f0e'  # Yellow-green
-                        marker_style = 'o'  
-                        linestyle = '-'  # Solid line for GPU
-                        filled = False
-                        dLab = 'QFT fp64'
+                        # dCol='#ff7f0e'  # Yellow-green
+                        # marker_style = 'o'  
+                        # linestyle = '-'  # Solid line for GPU
+                        # filled = False
+                        # dLab = 'QFT fp64 Cudaq'
+                        continue
                 # Set marker style based on cores and tasks_per_node
                 if '100CX' in tag3:
                     marker_style = 's'
@@ -172,8 +180,8 @@ class Plotter(PlotterBackbone):
         ax.set_title(tit, pad=50)  # Adjust the pad value as needed
         ax.set_yscale('log')
         # ax.set_ylim(1e-3, 3.5e+3)
-        ax.set_ylim(1e-3, 1e+0)
-        ax.set_xlim(27.5,33.5) 
+        ax.set_ylim(1e-3, 1e+1)
+        ax.set_xlim(27.5,34.5) 
         # ax.set_xticks(range(16, 33, 2))  # Integers from 16 to 33
         ax.grid(False)
         # adjustable
@@ -460,7 +468,7 @@ if __name__ == '__main__':
 
     #corePath='/dataVault2024/dataCudaQ_'  # in podman
     corePath='/pscratch/sd/g/gzquse/quantDataVault2024/dataCudaQ_'  # bare metal Martin
-    pathL=['July14']
+    pathL=['Nov15']
     fileL=[]
     vetoL=['r1.4','r2.4','r3.4']
     

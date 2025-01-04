@@ -128,6 +128,7 @@ def run_cudaqft(shots,num_qpus,num_qubit,nc=1):
                         
     print('RCQ: done',len(resL[0]),target2)
     return resL,target2
+
 #...!...!....................
 def input_shard(bigD,args):
     if args.verb>0: print('Shard for rank=%d of %d'%(args.myRank,args.numRank))
