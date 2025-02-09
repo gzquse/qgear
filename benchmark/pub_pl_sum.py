@@ -56,6 +56,7 @@ class Plotter(PlotterBackbone):
         fig=self.plt.figure(figId,facecolor='white',figsize=(5.5,7))        
         ax = self.plt.subplot(nrow,ncol,1)
         if 'gpu' in tag1:
+            print(tag1)
             dataD=bigD[tag1.split('-')[1]]
         elif 'qft' in tag1:
             dataD=bigD[tag1]
@@ -134,17 +135,17 @@ class Plotter(PlotterBackbone):
                 elif tag1 == qft:
                     if 'fp32' in tag3:
                         if 'pennylane' in tag2:
-                            dCol='#bcbd22'
+                            dCol='#4CAF50'
                             marker_style = 's'
                             linestyle = '-'  # Solid line for GPU
                             filled = True
-                            dLab = 'QFT fp32 Pennylane'
+                            dLab = 'QFT Pennylane'
                         else:
                             dCol='#ff7f0e'  # Cyan
                             marker_style = '^'
                             linestyle = '-'  # Solid line for GPU
                             filled = True
-                            dLab = 'QFT fp32 Cudaq'
+                            dLab = 'QFT Cudaq'
                     elif 'fp64' in tag3:
                         # dCol='#ff7f0e'  # Yellow-green
                         # marker_style = 'o'  
@@ -157,9 +158,9 @@ class Plotter(PlotterBackbone):
                     marker_style = 's'
                 elif '10kCX' in tag3:
                     marker_style = '^'
-                else:
-                    marker_style = 'o'
-                
+                # else:
+                    # marker_style = 'o'
+                    
                 
                 # Introduce a small random shift to avoid overlap
                 isFilled=None if '10kCX' in tag3 else 'none'
@@ -172,6 +173,7 @@ class Plotter(PlotterBackbone):
                     ax.plot(nqV_shifted, runtV_shifted, marker=marker_style, linestyle=linestyle, markerfacecolor=isFilled, color=dCol,label=dLab,markersize=9)     
 
                 else:
+                    print(marker_style, linestyle, isFilled, dCol, dLab)
                     ax.plot(nqV, runtV, marker=marker_style, linestyle=linestyle, markerfacecolor=isFilled, color=dCol, label=dLab, markersize=9)
         tit='Compute state-vector tag1=%s'%tag1
         tit='c)'

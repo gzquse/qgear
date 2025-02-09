@@ -1,0 +1,24 @@
+FROM nvidia/cuda:12.0-cudnn8-devel-ubuntu22.04
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    python3-dev \
+    python3-pip \
+    libopenmpi-dev \
+    openmpi-bin 
+
+# Install PennyLane and Lightning-GPU
+RUN pip install pennylane pennylane-lightning[gpu]
+
+# Install cuQuantum SDK 
+RUN pip install cuquantum
+
+# Install mpi4py
+RUN pip install mpi4py
+
+# Set environment variable for cuQuantum SDK 
+ENV CUQUANTUM_SDK /usr/local/cuquantum
+
+# Add MPI library path (adjust if necessary)
+ENV LD_LIBRARY_PATH /usr/lib/x86_64-linux-gnu/openmpi/lib:$LD_LIBRARY_PATH

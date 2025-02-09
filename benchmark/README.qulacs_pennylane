@@ -1,0 +1,5 @@
+shifter --image=pennylaneai/pennylane:latest-lightning-gpu --module=cuda-mpich /bin/bash
+
+shifter --image=docker:nvcr.io/nvidia/nightly/cuda-quantum:latest --module=cuda-mpich /bin/bash
+
+salloc -N 1 --gpus-per-task=1 --ntasks-per-node=4 --gpu-bind=none  -t 4:00:00 -q interactive -A nintern -C gpu --image=pennylaneai/pennylane:latest-lightning-gpu --module=cuda-mpich

@@ -93,11 +93,11 @@ class Plotter(PlotterBackbone):
     def plot_noise_analysis(self, error_probabilities: np.ndarray, results: Tuple[List[float], ...], figId=1):
         """Plot the noise analysis results with shaded error regions"""
         figId = self.smart_append(figId)
-        fig = self.plt.figure(figId, facecolor='white', figsize=(10, 6))
+        fig = self.plt.figure(figId, facecolor='white', figsize=(5.5, 7))
         ax = self.plt.subplot(1, 1, 1)
         
         labels = ['Depolarization', 'Bit Flip', 'Phase Flip',]
-        colors = ['blue', 'red', 'green', 'purple']
+        colors = ['blue', 'red', 'green',]
         
         # Plot ideal case
         ax.axhline(y=-1.0, color='black', linestyle='--', label='Ideal')
@@ -115,10 +115,10 @@ class Plotter(PlotterBackbone):
                           color=color)
         
         ax.set(xlabel='Error Probability',
-               ylabel='Expectation Value',
-               title='Noise Channel Analysis')
+               ylabel='Expectation Value',)
+            #    title='Noise Channel Analysis')
         ax.legend()
-        ax.grid(True)
+        ax.grid(False)
 
 # Run the benchmark
 if __name__ == "__main__":
@@ -127,4 +127,4 @@ if __name__ == "__main__":
     results = run_noise_analysis(error_probabilities)
     plot = Plotter(args)
     plot.plot_noise_analysis(error_probabilities, results)
-    plot.display_all(png=1)
+    plot.display_all(png=0)
