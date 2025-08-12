@@ -35,7 +35,6 @@ done
 
 podman-hpc run --privileged --gpu -it \
    --volume $CFSH/$BASE_DIR:/$BASE_DIR \
-   --volume ${CFSH}/daan_qcrank:/daan_qcrank \
    --volume ${DATA_VAULT}:/dataVault2024 \
    --volume ${DATA_VAULT}/$DATA_DIR:/data_tmp \
    -e Cudaq_dataVault=/data_tmp \
