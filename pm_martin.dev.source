@@ -9,22 +9,14 @@ echo launch image $IMG
 echo you are launching Podman image ...  remeber to exit
 
 JNB_PORT=' '
-BASE_DIR=happy_nbdev  # here git has home
+BASE_DIR=qgear  # here git has home
 WORK_DIR=$BASE_DIR
 CFSH=/pscratch/sd/g/gzquse
-DATA_VAULT=${CFSH}/DataVault2025
-DATA_DIR=/data_Mar
 
 podman-hpc run --privileged -it \
    --volume $CFSH/$BASE_DIR:/$BASE_DIR \
-   --volume ${DATA_VAULT}:/dataVault2025 \
-   --volume ${DATA_VAULT}/$DATA_DIR:/data_tmp \
-   -e dataVault=/data_tmp \
    -e DISPLAY  -v $HOME:$HOME -e HOME  \
    -e HDF5_USE_FILE_LOCKING='FALSE' \
-   -e OMPI_ALLOW_RUN_AS_ROOT=1 \
-   -e OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
-   -e UCX_WARN_UNUSED_ENV_VARS=n \
    --network host \
    --workdir /$BASE_DIR \
    $IMG 
