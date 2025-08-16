@@ -16,8 +16,8 @@ JNB_PORT=' '
 BASE_DIR=GRADIENT_IMAGE  # here git has home
 WORK_DIR=$BASE_DIR
 CFSH=/pscratch/sd/g/gzquse
-DATA_VAULT=${CFSH}/quantDataVault2024
-DATA_DIR=/dataCudaQ_Aug1 
+DATA_VAULT=${CFSH}/quantDataVault2025
+DATA_DIR=/dataCudaQ_Aug16 
 
 
 echo "The number of arguments is: $#"

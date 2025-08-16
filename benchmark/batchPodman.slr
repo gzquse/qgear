@@ -9,11 +9,11 @@ set -u  # exit if you try to use an uninitialized variable
 set -e  # bash exits if any statement returns a non-true return value
 
 # Set default values
-expN=${1:-mar17q_qft1}
-trg=${2:-adj-gpu}
-shots=${3:-100}
-qft=${4:-1}
-option=${5:-fp32,mgpu}
+expN=${1:-mar28q100cx}
+trg=${2:-gpu}
+shots=${3:-1000}
+qft=${4:-0}
+option=${5:-fp32}
 
 # Determine backend based on target
 case "$trg" in
@@ -54,7 +54,7 @@ if [ "$USER" == "balewski" ]; then
     DATA_SRC=${CFSH}/2024_martin_gradient
 elif [ "$USER" == "gzquse" ]; then
     CFSH=/pscratch/sd/g/gzquse
-    BASE_PATH=${CFSH}/quantDataVault2024/dataCudaQ_Nov15
+    BASE_PATH=${CFSH}/quantDataVault2025/dataCudaQ_Aug16
     DATA_SRC=${CFSH}/GRADIENT_IMAGE
 else
     echo "Unknown user: $USER"

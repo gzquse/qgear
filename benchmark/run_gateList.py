@@ -33,10 +33,10 @@ def get_parser():
 
     parser.add_argument("-e","--expName",  default='mac10q',help='[.gate_list.h5]  defines list of circuits to run')
     parser.add_argument('-n','--numShots',type=int, default=10240, help="(optional) shots per circuit")
-    parser.add_argument("-b", "--backend", default="nvidia", choices=['qiskit-cpu','tensornet','nvidia-mqpu','nvidia','qpp-cpu'], help="cudaQ target settings")
+    parser.add_argument("-b", "--backend", default="nvidia", choices=['qiskit-cpu','tensornet','nvidia','qpp-cpu'], help="cudaQ target settings")
     parser.add_argument('-q','--qft',type=int, default=0, help="(optional) enable qft circuit")
     # default uses single float and we assume using all gpus
-    parser.add_argument('-t','--target-option',default='fp32,mgpu',help='target options')
+    parser.add_argument('-t','--target-option',default='fp32',help='target options')
     
     # IO paths
     parser.add_argument("--basePath",default=None,help="head path for set of experiments, or 'env'")
@@ -209,7 +209,7 @@ if __name__ == "__main__":
     else:
         resL,target2=run_cudaq(shots,num_qpus)
         MD['num_qpus']=num_qpus
-        MD['gpu_info']=get_gpu_info(verb=0)
+        # MD['gpu_info']=get_gpu_info(verb=0)
         
 
     elaT=time()-T0
