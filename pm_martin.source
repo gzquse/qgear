@@ -13,7 +13,7 @@ echo launch image $IMG
 echo you are launching Podman image ...  remeber to exit
 
 JNB_PORT=' '
-BASE_DIR=GRADIENT_IMAGE  # here git has home
+BASE_DIR=qgear  # here git has home
 WORK_DIR=$BASE_DIR
 CFSH=/pscratch/sd/g/gzquse
 DATA_VAULT=${CFSH}/quantDataVault2025

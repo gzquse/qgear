@@ -13,10 +13,13 @@ BASE_DIR=qgear  # here git has home
 WORK_DIR=$BASE_DIR
 CFSH=/pscratch/sd/g/gzquse
 
-podman-hpc run --privileged -it \
+podman-hpc run --gpu --privileged -it \
    --volume $CFSH/$BASE_DIR:/$BASE_DIR \
    -e DISPLAY  -v $HOME:$HOME -e HOME  \
    -e HDF5_USE_FILE_LOCKING='FALSE' \
    --network host \
    --workdir /$BASE_DIR \
    $IMG 
+
+
+# jupyter lab --ip 0.0.0.0 --no-browser --allow-root --port 9800

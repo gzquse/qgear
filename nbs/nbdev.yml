@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "qgear"
+  site-url: "https://gzquse.github.io/qgear"
+  description: "Q-Gear"
+  repo-branch: main
+  repo-url: "https://github.com/gzquse/qgear"
