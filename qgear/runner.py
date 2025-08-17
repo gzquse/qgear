@@ -19,7 +19,7 @@ from .toolbox.Util_H5io4 import write4_data_hdf5, read4_data_hdf5
 from .toolbox.Util_IOfunc import dateT2Str, write_yaml
 from .toolbox.Util_CudaQ import circ_kernel, counts_cudaq_to_qiskit, qiskit_to_gateList, qft_kernel
 from .toolbox.Util_Qiskit import pack_counts_to_numpy, circ_depth_aziz
-from .qcrank_light.datacircuits import qcrank
+from .datacircuits import qcrank
 os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
 # %% ../nbs/runner.ipynb 2
