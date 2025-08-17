@@ -6,8 +6,8 @@ from pprint import pprint
 from qiskit.result.utils import marginal_distribution
 import numpy as np
 
-from toolbox.Util_Qiskit import pack_counts_to_numpy
-from toolbox.Util_IOfunc import dateT2Str
+from qgear.toolbox.Util_Qiskit import pack_counts_to_numpy
+from qgear.toolbox.Util_IOfunc import dateT2Str
 
 #...!...!....................
 def harvest_ibmq_backRun_submitMeta(job,md,args):

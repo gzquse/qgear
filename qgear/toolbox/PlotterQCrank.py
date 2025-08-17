@@ -1,7 +1,7 @@
 __author__ = "Jan Balewski"
 __email__ = "janstar1122@gmail.com"
 
-from toolbox.PlotterBackbone import PlotterBackbone
+from qgear.toolbox.PlotterBackbone import PlotterBackbone
 from matplotlib import cm as cmap
 import matplotlib.ticker as ticker
 from pprint import pprint

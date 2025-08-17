@@ -117,7 +117,7 @@ if __name__=="__main__":
     write4_data_hdf5(outD,outF,metaD=metaD,verb=verb)
 
     print('\nM: *****  verify by reading it back from',outF)
-    big,meta2=read4_data_hdf5(outF,verb=verb)
+    big,meta2=read4_data_hdf5(outF,verb=verb) # type: ignore
     from pprint import pprint        
     print(' recovered meta-data'); pprint(meta2)
     print('dump read-in data')
