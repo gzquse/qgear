@@ -116,7 +116,7 @@ def circ_kernel(num_qubit: int, num_gate: int, gate_type: list[int], angles: lis
         elif gateId == 7:  # swap
             swap(q0, qvector[gate_type[j + 2]])
     
-    mz(qvector)
+    # mz(qvector)
 
 #...!...!....................
 @cudaq.kernel
