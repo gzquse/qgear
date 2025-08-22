@@ -51,6 +51,7 @@ https://gzquse.github.io/qgear/examples.html
 #### quantum image encoding
 
 > see appendix F in the paper
+https://gzquse.github.io/qgear/apps.html
 
 ![image.png](index_files/figure-commonmark/efeebc44-1-f37fd8db-fa15-4b4a-989b-df3d7a05f0a5.png)
 
