@@ -7,15 +7,26 @@
 
 ![image.png](index_files/figure-commonmark/05381a41-1-image.png)
 
-## Let’s assume you already have a computational GPU node allocated on HPC
+## Preliminary
 
-## Checking the NVIDIA GPU
+- Let’s assume you already have a computational GPU node allocated on
+  HPC
+- Checking the NVIDIA GPU
+  - `nvidia-smi`
+- Create a env (we do not recommend using default such .local / HOME)
+- Note that more than one GPU support need to enable
+  [MPI](https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html#install-cuda-q)
+  \> the way we choose is high performance lustre file system
 
-`nvidia-smi`
+## 1. Install ENV
 
-## Create a env (we do not recommend using default such .local / HOME)
+clone repo
 
-> the way we choose is high performance lustre file system
+``` bash
+git clone git@github.com:gzquse/qgear.git`
+
+cd qgear
+```
 
 ``` bash
 module load conda
@@ -23,35 +34,37 @@ conda create --prefix=/pscratch/sd/{location}/{username}/qgear -y python=3.11 pi
 conda activate $SCRATCH/qgear
 ```
 
-## Now make a working jupyter kernel
+``` bash
+pip install -u qgear 
+pip install -u ipykernel
+python -m ipykernel install --user --name qgear --display-name qgear
+```
 
-    pip install ipykernel
-    python -m ipykernel install --user --name qgear --display-name qgear
-
-## All in one
-
-    pip install qgear
-
-## Usage
+## 2. Open Jupyter Notebook
 
 ### NERSC jupyter
 
 https://jupyter.nersc.gov/
 
+Select the kernel
+![image.png](index_files/figure-commonmark/efeebc44-3-image.png)
+
+go to nbs/example.ipynb; run example
+![image-2.png](index_files/figure-commonmark/efeebc44-2-image-2.png)
+
 ### Pypi
 
 https://pypi.org/project/qgear/
 
-### Fire up the example by choosing your qgear kernel
+### Demos
 
-#### simple speed up with random circuit and QFT
+#### 1. simple speed up with random circuit and QFT
 
 https://gzquse.github.io/qgear/examples.html
 
-#### quantum image encoding
+#### 2. quantum image encoding
 
-> see appendix F in the paper
-https://gzquse.github.io/qgear/apps.html
+> see appendix F in the paper https://gzquse.github.io/qgear/apps.html
 
 ![image.png](index_files/figure-commonmark/efeebc44-1-f37fd8db-fa15-4b4a-989b-df3d7a05f0a5.png)
 

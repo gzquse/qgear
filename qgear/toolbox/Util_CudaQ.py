@@ -92,30 +92,51 @@ def cudaq_run(qKerL, shots):
 #...!...!....................
 @cudaq.kernel
 def circ_kernel(num_qubit: int, num_gate: int, gate_type: list[int], angles: list[float]):
+    """
+    A CUDA Quantum kernel to construct a circuit from a list of gates and parameters.
+    """
     qvector = cudaq.qvector(num_qubit)
     
     for i in range(num_gate):
+        # Base index 'j' now applies to both gate_type and angles
         j = 3 * i
-        gateId=gate_type[j]
+        gateId = gate_type[j]
+        
+        # Always define the first qubit
         q0 = qvector[gate_type[j+1]]
         
-        if gateId == 1:
+        if gateId == 1: # h
             h(q0)
-        elif gateId == 2:
-            ry(angles[i], q0)
-        elif gateId == 3:
-            rz(angles[i], q0)
-        elif gateId == 4:
+        
+        elif gateId == 2: # ry
+            ry(angles[j], q0)
+            
+        elif gateId == 3: # rz
+            rz(angles[j], q0)
+            
+        elif gateId == 4: # cx
             q1 = qvector[gate_type[j + 2]]
             x.ctrl(q0, q1)
-        elif gateId == 5:
-            #martin_add_measurement
+            
+        elif gateId == 5: # measure
+            # martin_add_measurement
+            # Example: mz(q0)
             continue
-        elif gateId == 6:  # controlled phase
-            cr1(angles[i], [qvector[gate_type[j + 2]]], q0)
+            
+        elif gateId == 6:  # cp (controlled-phase)
+            q1 = qvector[gate_type[j + 2]]
+            r1.ctrl(angles[j], q0, q1)
+            
         elif gateId == 7:  # swap
-            swap(q0, qvector[gate_type[j + 2]])
-    
+            q1 = qvector[gate_type[j + 2]]
+            swap(q0, q1)
+            
+        elif gateId == 8: # u (mapped to u3)
+            theta = angles[j]
+            phi = angles[j+1]
+            lambda_ = angles[j+2]
+            u3(theta, phi, lambda_, q0)
+
     # mz(qvector)
 
 #...!...!....................
@@ -159,59 +180,66 @@ def qft_kernel(input_state: List[int]):
     #inverse_qft(qubits)
     
 #...!...!....................
+import numpy as np
+# Assuming qiskit objects are available for this to run
+
 def qiskit_to_gateList(qcL):
-    nCirc=len(qcL)
-    qc=qcL[0]
+    nCirc = len(qcL)
+    qc = qcL[0]
     
-    nGate=len(qc)  # this is overestimate, includes barriers & measurements
-    print('qiskit_to_gateList: nGate',nGate)
+    nGate = len(qc)  # this is overestimate, includes barriers & measurements
+    print('qiskit_to_gateList: nGate', nGate)
 
-    # pre-allocate memory
-    circ_type=np.zeros(shape=(nCirc,2),dtype=np.int32) # [num_qubit, num_gate]
-    gate_type=np.zeros(shape=(nCirc,nGate,3),dtype=np.int32) # [gate_type, qubit1, qubit2] 
-    gate_param=np.zeros(shape=(nCirc,nGate),dtype=np.float32)
+    # Pre-allocate memory
+    circ_type = np.zeros(shape=(nCirc, 2), dtype=np.int32) # [num_qubit, num_gate]
+    gate_type = np.zeros(shape=(nCirc, nGate, 3), dtype=np.int32) # [gate_type, qubit1, qubit2] 
+    gate_param = np.zeros(shape=(nCirc, nGate, 3), dtype=np.float32)
 
-    m={'h': 1, 'ry': 2,  'rz': 3, 'cx':4, 'measure':5, 'cp': 6, 'swap': 7} # mapping of gates
+    m = {'h': 1, 'ry': 2, 'rz': 3, 'cx': 4, 'measure': 5, 'cp': 6, 'swap': 7, 'u': 8} # mapping of gates
 
-    for j,qc in enumerate(qcL):
+    for j, qc in enumerate(qcL):
         qregs = qc.qregs[0]
         nq = qc.num_qubits
-        assert  nGate>=len(qc)  # to be sure we reserved enough space
+        assert nGate >= len(qc)  # to be sure we reserved enough space
         
         # Construct a dictionary with address:index of the qregs objects
         qregAddrD = {hex(id(obj)): idx for idx, obj in enumerate(qregs)}
-        k=0 # gate counter per circuit
+        k = 0 # gate counter per circuit
         for op in qc:
             gate = op.operation.name
             params = op.operation.params
             qIdxL = [qc.find_bit(q).index for q in op.qubits]
 
             if gate == 'h':
-                gate_type[j,k]= [m[gate],qIdxL[0], 0]
+                gate_type[j, k] = [m[gate], qIdxL[0], 0]
             elif gate == 'ry':
-                gate_param[j,k]=params[0]
-                gate_type[j,k]= [m[gate],qIdxL[0], 0]
+                gate_param[j, k, 0] = params[0]
+                gate_type[j, k] = [m[gate], qIdxL[0], 0]
             elif gate == 'rz':
-                gate_param[j,k]=params[0]
-                gate_type[j,k]= [m[gate],qIdxL[0], 0]
+                gate_param[j, k, 0] = params[0]
+                gate_type[j, k] = [m[gate], qIdxL[0], 0]
             elif gate == 'cx':
-                gate_type[j,k]= [m[gate]]+qIdxL
+                gate_type[j, k] = [m[gate]] + qIdxL
             elif gate == 'cp':
-                gate_param[j,k]=params[0]   
-                gate_type[j,k]= [m[gate]]+qIdxL
+                gate_param[j, k, 0] = params[0]   
+                gate_type[j, k] = [m[gate]] + qIdxL
             elif gate == 'swap':
-                gate_type[j,k]= [m[gate]]+qIdxL
+                gate_type[j, k] = [m[gate]] + qIdxL
+            elif gate == 'u':
+                gate_param[j, k] = params
+                gate_type[j, k] = [m[gate], qIdxL[0], 0]
             elif gate == 'barrier':                
                 continue
-            elif  gate == 'measure':
+            elif gate == 'measure':
                 continue # Martin, ADD ME
             else:
                 print('ABORT; unknown qiskit gate', gate)
                 exit(99) 
-            k+=1
-        circ_type[j]=[nq,k]  # remember number of gates per circuit
-    outD={'circ_type': circ_type, 'gate_type': gate_type, 'gate_param': gate_param}
-    md={'gate_map':m,'num_qubit':nq,'num_gate':nGate,'num_circ':nCirc}
+            k += 1
+        circ_type[j] = [nq, k]  # remember number of gates per circuit
+        
+    outD = {'circ_type': circ_type, 'gate_type': gate_type, 'gate_param': gate_param}
+    md = {'gate_map': m, 'num_qubit': nq, 'num_gate': nGate, 'num_circ': nCirc}
     return outD, md
 
 

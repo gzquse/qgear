@@ -2,7 +2,7 @@
 
 # %% auto 0
 __all__ = ['run_qiskit_aer', 'run_cudaqft', 'input_shard', 'run_gate_job', 'rank_print', 'canned_qcrank_inp', 'make_qcrank',
-           'harvest_cudaq_backRun_submitMeta', 'run_cudaq', 'run_qcrank']
+           'harvest_cudaq_backRun_submitMeta', 'run_cudaq', 'run_qcrank', 'expect_cudaq']
 
 # %% ../nbs/runner.ipynb 1
 import os, re, random, psutil, cudaq
@@ -132,7 +132,7 @@ def run_gate_job(
         for i in range(nCirc):
             num_qubit, num_gate = map(int, gateD['circ_type'][i])
             gate_type = list(map(int, gateD['gate_type'][i].flatten()))
-            gate_param = list(map(float, gateD['gate_param'][i]))
+            gate_param = list(gateD['gate_param'][i].flatten())
             results = cudaq.sample(circ_kernel, num_qubit, num_gate, gate_type, gate_param, shots_count=numshots)
             resL.append(results)
         MD['num_qpus'] = num_qpus
@@ -221,7 +221,7 @@ def run_cudaq(gateD, shots, verb=1, backend="qpp-cpu"):
     for i in range(nc):
         num_qubit, num_gate = map(int, gateD['circ_type'][i])
         gate_type = list(map(int, gateD['gate_type'][i].flatten()))
-        gate_param = list(map(float, gateD['gate_param'][i]))
+        gate_param = list(map(float, gateD['gate_param'][i].flatten()))
         assert num_gate <= len(gate_param)
         prOn = num_qubit < 6 and i == 0 or verb > 1
         
@@ -337,3 +337,44 @@ def run_qcrank(
     write4_data_hdf5(expD, outF, expMD)
 
     return expMD, expD
+
+# %% ../nbs/runner.ipynb 7
+def expect_cudaq(gateD, hamiltonian, verb=1, backend="qpp-cpu"):
+    """
+    Run CUDA-Q simulation for all circuits in gateD and compute expectation values.
+    
+    Parameters
+    ----------
+    gateD : dict
+        Dictionary containing circuit definitions ('circ_type', 'gate_type', 'gate_param').
+    hamiltonian : cudaq.SpinOperator
+        Hamiltonian for expectation value calculation.
+    verb : int
+        Verbosity level. >1 prints all circuits, 1 prints only first small one.
+    backend : str
+        CUDA-Q backend target (e.g., 'qpp-cpu', 'nvidia').
+    
+    Returns
+    -------
+    exp_vals : list of float
+        Expectation values for each circuit.
+    """
+    cudaq.set_target(backend)
+    nc = len(gateD['circ_type'])
+    exp_vals = [0.0] * nc
+
+    for i in range(nc):
+        num_qubit, num_gate = map(int, gateD['circ_type'][i])
+        gate_type = list(map(int, gateD['gate_type'][i].flatten()))
+        gate_param = list(map(float, gateD['gate_param'][i].flatten()))
+        assert num_gate <= len(gate_param)
+
+        prOn = (num_qubit < 6 and i == 0) or verb > 1
+        if prOn:
+            print(cudaq.draw(circ_kernel, num_qubit, num_gate, gate_type, gate_param))
+
+        # Compute expectation value
+        result = cudaq.observe(circ_kernel, hamiltonian, num_qubit, num_gate, gate_type, gate_param)
+        exp_vals[i] = result.expectation()
+
+    return exp_vals
