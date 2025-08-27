@@ -4,7 +4,7 @@
 __all__ = ['TAG_MAP', 'load_builtin_image', 'import_image', 'build_meta_canned_image', 'ehands_input_to_qcrank_input',
            'prep_image_qcrank_input', 'create_img']
 
-# %% ../nbs/image.ipynb 1
+# %% ../nbs/image.ipynb 3
 import numpy as np
 from PIL import Image
 import os
@@ -59,7 +59,7 @@ def import_image(tag, inp_path=None, verb=1):
     img = Image.open(img_file)
     return {"phys_image": np.array(img), "image_name": filename.replace(".png", "")}
 
-# %% ../nbs/image.ipynb 2
+# %% ../nbs/image.ipynb 4
 # ---------------------------------
 # Build metadata
 # ---------------------------------
@@ -128,8 +128,7 @@ def prep_image_qcrank_input(md: dict, bigD: dict, verb: int = 1):
     bigD['inp_udata'] = inp_udata
     bigD['inp_fdata'] = ehands_input_to_qcrank_input(inp_udata)
 
-
-# %% ../nbs/image.ipynb 3
+# %% ../nbs/image.ipynb 5
 def create_img(tag="b2", nq_addr=9, inp_path=None, out_path="out", verb=1):
     """Create QCrank input from a canned image (built-in or external)."""
     os.makedirs(out_path, exist_ok=True)

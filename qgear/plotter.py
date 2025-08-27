@@ -5,7 +5,7 @@ __all__ = ['extract_date_from_path', 'extract_qft_from_filename', 'readOne', 're
            'MetricsPlotter', 'metrics_plot', 'postproc_qcrank', 'restore_canned_image', 'residual_analysis',
            'process_qcrank_experiment']
 
-# %% ../nbs/plotter.ipynb 1
+# %% ../nbs/plotter.ipynb 3
 import os, numpy as np
 from .toolbox.PlotterBackbone import PlotterBackbone
 from .toolbox.Util_IOfunc import read_yaml
@@ -29,7 +29,7 @@ def extract_qft_from_filename(filename):
             return component
     return None
 
-# %% ../nbs/plotter.ipynb 2
+# %% ../nbs/plotter.ipynb 4
 def readOne(inpF, dataD, verb=1):
     "Read one YAML metrics file (non-QFT)"
     assert os.path.exists(inpF)
@@ -60,7 +60,7 @@ def readOne(inpF, dataD, verb=1):
     head['tasks_per_node'].append(tasks_per_node)
     head['date'].append(date)
 
-# %% ../nbs/plotter.ipynb 3
+# %% ../nbs/plotter.ipynb 5
 def readOneQFT(inpF, dataD, qft, verb=1):
     "Read one YAML metrics file for QFT runs"
     assert os.path.exists(inpF)
@@ -86,7 +86,7 @@ def readOneQFT(inpF, dataD, qft, verb=1):
     head['shots'].append(xMD['num_shots'])
     head['date'].append(date)
 
-# %% ../nbs/plotter.ipynb 4
+# %% ../nbs/plotter.ipynb 6
 def find_yaml_files(directory_path, vetoL=None):
     "Find all .yaml files in a directory, excluding files with veto strings"
     if vetoL is None:
@@ -98,7 +98,7 @@ def find_yaml_files(directory_path, vetoL=None):
                 yaml_files.append(os.path.join(root, file))
     return yaml_files
 
-# %% ../nbs/plotter.ipynb 5
+# %% ../nbs/plotter.ipynb 7
 def sort_end_lists(d, sort_key='nq', val_key='runt', parent_key=''):
     "Recursively sort lists in nested dicts by a sort_key"
     if sort_key in d:
@@ -111,7 +111,7 @@ def sort_end_lists(d, sort_key='nq', val_key='runt', parent_key=''):
         if isinstance(v, dict):
             sort_end_lists(v, sort_key, val_key, f"{parent_key}.{k}" if parent_key else k)
 
-# %% ../nbs/plotter.ipynb 6
+# %% ../nbs/plotter.ipynb 8
 class MetricsPlotter(PlotterBackbone):
     "Plotter for concatenated metrics"
     def __init__(self, prjName='metrics', shift=True, outPath='out', noXterm=True, verb=1):
@@ -176,7 +176,7 @@ class MetricsPlotter(PlotterBackbone):
         ax.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
                   ncol=3, mode="expand", borderaxespad=0., fontsize=8.5)
 
-# %% ../nbs/plotter.ipynb 7
+# %% ../nbs/plotter.ipynb 9
 def metrics_plot(
     measPath: str = None,
     pathL=None,
@@ -237,7 +237,7 @@ def metrics_plot(
         plot.compute_time(dataQFT, 'qft', figId=4, shift=shift)
     plot.display_all(png=1)
 
-# %% ../nbs/plotter.ipynb 8
+# %% ../nbs/plotter.ipynb 10
 """
 Post-processing and plotting for QCrank experiments.
 """
@@ -276,7 +276,7 @@ def postproc_qcrank(expD, md, verb=1):
 
     expD['rec_udata'] = rec_udata
 
-# %% ../nbs/plotter.ipynb 9
+# %% ../nbs/plotter.ipynb 11
 # ----------------------------
 def restore_canned_image(expD, md):
     """
@@ -294,7 +294,7 @@ def restore_canned_image(expD, md):
     recA = expD['rec_udata'][0]
     expD['rec_norm_image'] = recA.reshape(pixY, pixX)
 
-# %% ../nbs/plotter.ipynb 10
+# %% ../nbs/plotter.ipynb 12
 # ----------------------------
 def residual_analysis(expD, md):
     """
@@ -320,7 +320,7 @@ def residual_analysis(expD, md):
         'res_SE_s': float(se_s)
     })
 
-# %% ../nbs/plotter.ipynb 11
+# %% ../nbs/plotter.ipynb 13
 import os
 import numpy as np
 from pprint import pprint

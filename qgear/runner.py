@@ -4,7 +4,7 @@
 __all__ = ['run_qiskit_aer', 'run_cudaqft', 'input_shard', 'run_gate_job', 'rank_print', 'canned_qcrank_inp', 'make_qcrank',
            'harvest_cudaq_backRun_submitMeta', 'run_cudaq', 'run_qcrank', 'expect_cudaq']
 
-# %% ../nbs/runner.ipynb 1
+# %% ../nbs/runner.ipynb 3
 import os, re, random, psutil, cudaq
 from time import time, localtime
 from pprint import pprint
@@ -22,7 +22,7 @@ from .toolbox.Util_Qiskit import pack_counts_to_numpy, circ_depth_aziz
 from .datacircuits import qcrank
 os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
-# %% ../nbs/runner.ipynb 2
+# %% ../nbs/runner.ipynb 4
 def run_qiskit_aer(qcL, shots):
     "Run Qiskit Aer simulation"
     backend = AerSimulator()
@@ -30,7 +30,7 @@ def run_qiskit_aer(qcL, shots):
     result = job.result()
     return result.get_counts()
 
-# %% ../nbs/runner.ipynb 3
+# %% ../nbs/runner.ipynb 5
 def run_cudaqft(shots, num_gpus, num_qubit, nc=1, target="nvidia", verb=1):
     "Run CUDA-Q QFT circuits"
     resL = [0] * nc
@@ -41,7 +41,7 @@ def run_cudaqft(shots, num_gpus, num_qubit, nc=1, target="nvidia", verb=1):
     print('RCQ: done', len(resL[0]), target)
     return resL, target
 
-# %% ../nbs/runner.ipynb 4
+# %% ../nbs/runner.ipynb 6
 def input_shard(bigD, myRank, numRank, verb=1):
     "Shard dataset across MPI ranks"
     if verb > 0: 
@@ -56,7 +56,7 @@ def input_shard(bigD, myRank, numRank, verb=1):
         bigD[xx] = bigD[xx][iOff:iOff+shardSize]
     return shardSize
 
-# %% ../nbs/runner.ipynb 5
+# %% ../nbs/runner.ipynb 7
 def run_gate_job(
     exp: str,
     backend: str = "nvidia",
@@ -157,7 +157,7 @@ def run_gate_job(
 
     return MD
 
-# %% ../nbs/runner.ipynb 6
+# %% ../nbs/runner.ipynb 8
 """
 QCrank GPU Simulator Runner (nbdev version, no MPI)
 
@@ -338,7 +338,7 @@ def run_qcrank(
 
     return expMD, expD
 
-# %% ../nbs/runner.ipynb 7
+# %% ../nbs/runner.ipynb 9
 def expect_cudaq(gateD, hamiltonian, verb=1, backend="qpp-cpu"):
     """
     Run CUDA-Q simulation for all circuits in gateD and compute expectation values.
