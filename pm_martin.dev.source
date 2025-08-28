@@ -22,4 +22,6 @@ podman-hpc run --gpu --privileged -it \
    $IMG 
 
 # sudo ln -sf /usr/bin/python3 /usr/bin/python
+# pip install twine
+# nbdev_pypi
 # jupyter lab --ip 0.0.0.0 --no-browser --allow-root --port 9800
