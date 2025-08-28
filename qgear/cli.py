@@ -19,7 +19,7 @@ def welcome():
     message = (
         f"[bold cyan]{ascii_art}[/bold cyan]\n"
         "[bold green]Installation successful![/bold green]\n\n"
-        "Welcome to QGEAR. Run 'qgear.run_cudaq() to speed up"
+        "Welcome to QGEAR. Run 'qgear.run_cudaq() to speed up\n"
         "[italic grey50]Fun fact: We love to use Emacs! 🐧[/italic grey50]"
     
     )

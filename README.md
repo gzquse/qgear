@@ -40,6 +40,28 @@ pip install -u ipykernel
 python -m ipykernel install --user --name qgear --display-name qgear
 ```
 
+test qgear install successfully
+
+``` bash
+qgear
+```
+
+<p align="center">
+
+<pre>
+   ___     ____ _____    _    ____                                                      
+  / _ \   / ___| ____|  / \  |  _ \                                                     
+ | | | | | |  _|  _|   / _ \ | |_) |                                                    
+ | |_| | | |_| | |___ / ___ \|  _ <                                                     
+  \__\_\  \____|_____/_/   \_\_| \_\                                                    
+&#10;
+Installation successful!
+&#10;Welcome to QGEAR. Run 'qgear.run_cudaq()' to speed up.
+Fun fact: We love to use Emacs! 🐧
+</pre>
+
+</p>
+
 ## 2. Open Jupyter Notebook
 
 ### NERSC jupyter
@@ -81,6 +103,61 @@ pip3 install qgear
 # compile to have changes apply to qgear
 nbdev_prepare
 ```
+
+### Supported Quantum Gates
+
+This is the list of quantum gates currently supported by the
+implementation, based on the `gateId` mapping.
+
+| Gate ID | Gate Name | Description | Parameters | Example Usage |
+|----|----|----|----|----|
+| **1** | **H** (Hadamard) | Creates superposition by mapping ( | 0) and ( | 1). |
+| **2** | **RY** rotation | Rotation around the Y-axis by a given angle. | `angle` (in radians), target qubit `q0` | `ry(angles[j], q0)` |
+| **3** | **RZ** rotation | Rotation around the Z-axis by a given angle. | `angle` (in radians), target qubit `q0` | `rz(angles[j], q0)` |
+| **4** | **CX** (CNOT) | Controlled-X gate; flips target qubit if control qubit is ( | 1). | Control qubit `q0`, target qubit `q1` |
+| **5** | **Measure** | Measures the qubit in the computational basis. | Target qubit `q0` | `mz(q0)` *(example)* |
+| **6** | **CP** (Controlled-Phase) | Applies a phase shift to the target qubit if control qubit is ( | 1). | `angle` (phase in radians), control qubit `q0`, target qubit `q1` |
+| **7** | **SWAP** | Swaps the quantum states of two qubits. | Qubit `q0`, qubit `q1` | `swap(q0, q1)` |
+| **8** | **U** (U3 gate) | General single-qubit rotation parameterized by three Euler angles. | `theta`, `phi`, `lambda_` (all in radians), target qubit `q0` | `u3(theta, phi, lambda_, q0)` |
+
+------------------------------------------------------------------------
+
+## Notes
+
+- `q0` is the **primary target qubit**.
+- `q1` is an **additional target or control qubit** (depending on the
+  gate).
+- `angles` is an array of rotation parameters in **radians**.
+- `gate_type` and `qvector` are used to determine qubit mapping for
+  multi-qubit gates.
+- The **U3 gate** is the most general single-qubit gate and can
+  represent any rotation.
+
+------------------------------------------------------------------------
+
+## Example Gate Sequence
+
+\`\`\`python \# Apply Hadamard to qubit 0 h(q0)
+
+# Rotate qubit 0 around Y-axis by pi/4
+
+ry(math.pi/4, q0)
+
+# Apply CNOT from qubit 0 to qubit 1
+
+x.ctrl(q0, q1)
+
+# Apply a controlled-phase gate
+
+r1.ctrl(math.pi/2, q0, q1)
+
+# Swap qubits 0 and 1
+
+swap(q0, q1)
+
+# Apply a general U3 rotation
+
+u3(theta, phi, lambda\_, q0)
 
 ### Goal
 
