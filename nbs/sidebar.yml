@@ -8,3 +8,5 @@ website:
       - image.ipynb
       - plotter.ipynb
       - runner.ipynb
+      - vqe.ipynb
+      - chem.ipynb
